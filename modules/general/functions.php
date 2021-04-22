@@ -286,26 +286,51 @@ function productList($url, $filter) {
     global $db;
 
     $xtpl = new XTemplate("list.tpl", PATH);
-    $sql = 'select count(a.id) as count from `'. PREFIX .'product` a inner join `'. PREFIX .'catalog` b on a.itemid = b.id where '. (strlen($filter['tag']) ? 'a.tag like \'%"'. $filter['tag'] .'"%\' and' : '') .' (b.code like "%'. $filter['keyword'] .'%" or b.name like "%'. $filter['keyword'] .'%")';
+    $sql = 'select count(a.id) as count from `pet_daklak_item_floor` a inner join `pet_daklak_item` b on a.itemid = b.id where (b.code like "%'. $filter['keyword'] .'%" or b.name like "%'. $filter['keyword'] .'%")';
     $query = $db->query($sql);
     $number = $query->fetch()['count'];
 
-    $sql = 'select b.*, a.id, a.itemid, a.low, a.pos from `'. PREFIX .'product` a inner join `'. PREFIX .'catalog` b on a.itemid = b.id where '. (strlen($filter['tag']) ? 'a.tag like \'%"'. $filter['tag'] .'"%\' and' : '') .' (b.code like "%'. $filter['keyword'] .'%" or b.name like "%'. $filter['keyword'] .'%") order by a.id desc limit ' . $filter['limit'] . ' offset ' . ($filter['page'] - 1) * $filter['limit'];
+    $sql = 'select * from `pet_daklak_item_floor` a inner join `pet_daklak_item` b on a.itemid = b.id where (b.code like "%'. $filter['keyword'] .'%" or b.name like "%'. $filter['keyword'] .'%") order by a.id desc limit ' . $filter['limit'] . ' offset ' . ($filter['page'] - 1) * $filter['limit'];
 
     $query = $db->query($sql);
     $index = ($filter['page'] - 1) * $filter['limit'] + 1;
    
     while ($row = $query->fetch()) {
-        $xtpl->assign('index', $index++);
-        $xtpl->assign('id', $row['itemid']);
-        $xtpl->assign('name', $row['name']);
-        $xtpl->assign('pos', $row['pos']);
-        $xtpl->assign('low', $row['low']);
-        $xtpl->parse('main.row');
+      $sql = 'select * from pet_daklak_item where id = '. $row['parentid'];
+      $parent_query = $db->query($sql);
+      $parent = $parent_query->fetch();
+      $value = 0;
+      if (!empty($parent)) {
+        $value = ($parent['storaup'] + $parent['storadown']) * $row['value'];
+      }
+
+      $xtpl->assign('index', $index++);
+      $xtpl->assign('id', $row['itemid']);
+      $xtpl->assign('code', $row['code']);
+      $xtpl->assign('name', $row['name']);
+      $xtpl->assign('position', $row['pos']);
+      $xtpl->assign('number', $row['storaup'] + $row['storadown'] + $value);
+      $xtpl->parse('main.row');
     }
     $xtpl->assign('nav', nav_generater($url, $number, $filter['page'], $filter['limit']));
     $xtpl->parse('main');
     return $xtpl->text();
+}
+
+function parentSuggest($keyword) {
+  global $db;
+
+  $xtpl = new XTemplate("parent-suggest.tpl", PATH);
+  $sql = 'select * from `pet_daklak_item` where lower(name) like "%'. $keyword .'%" and id not in (select itemid from pet_daklak_item_floor) order by name desc limit 20';
+  $query = $db->query($sql);
+
+  while ($row = $query->fetch()) {
+    $xtpl->assign('id', $row['id']);
+    $xtpl->assign('code', $row['code']);
+    $xtpl->assign('name', $row['name']);
+    $xtpl->parse('main');
+  }
+  return $xtpl->text();
 }
 
 function productSuggest($keyword) {

@@ -54,19 +54,33 @@
 
 {modal}
 
-<div class="form-group">
+<!-- <div class="form-group">
   <ul class="nav nav-tabs">
     <li class="active"><a href="/{nv}/product"> Quản lý sản phẩm </a></li>
     <li><a href="/{nv}/product?sub=tag"> Quản lý tag </a></li>
     <li><a href="/{nv}/product?sub=expire"> Quản lý hạn sử dụng </a></li>
     <li><a href="/{nv}/product?sub=location"> Tìm kiếm vị trí </a></li>
   </ul>
+</div> -->
+
+<div style="float: right">
+  <button class="btn btn-danger" onclick="removeItem()">
+    Xóa hàng loạt
+  </button>
+  <button class="btn btn-info" onclick="$('#update-modal').modal('show')">
+    Cập nhật
+  </button>
+  <button class="btn btn-success" onclick="insertNewItem()">
+    Thêm
+  </button>
 </div>
 
 <a href="/general/product-floor" class="btn btn-info"> Danh sách tầng </a>
 <div style="clear: right;" class="form-group"></div>
 
-<div class="form-group">
+<div style="clear: both;"></div>
+
+<!-- <div class="form-group">
   <form class="form-inline">
     <input type="hidden" name="nv" value="{nv}">
     <input type="hidden" name="op" value="{op}">
@@ -94,14 +108,9 @@
       </button>
     </div>
   </form>
-</div>
-<!-- <div class="col-3" style="text-align: right;">
-    <button class="btn btn-success" onclick="insertItem()">
-      Thêm hàng hóa
-    </button>
-  </div> -->
+</div> -->
 
-<div class="form-group rows">
+<!-- <div class="form-group rows">
   <div class="relative col-4">
     <input type="text" class="form-control" id="product-insert-input" placeholder="Thêm mặt hàng">
     <input type="hidden" id="product-insert-input-val">
@@ -117,15 +126,7 @@
       </div>
     </div>
   </div>
-  <div class="col-6" style="text-align: right;">
-    <button class="btn btn-danger" onclick="removeItem()">
-      Xóa
-    </button>
-    <button class="btn btn-info" onclick="$('#insert-modal').modal('show')">
-      Cập nhật
-    </button>
-  </div>
-</div>
+</div> -->
 
 <div id="content">
   {content}
@@ -133,22 +134,30 @@
 
 <script src="/modules/core/js/vremind-6.js"></script>
 <script src="/modules/core/js/vhttp.js"></script>
+<script src="/modules/core/js/vimage.js"></script>
 <script>
   var global = {
+    parent: 0,
+    image: '',
     page: 1,
     limit: 100,
     file: {},
-    tag: {},
     statistic: {},
-    list: JSON.parse('{list}'),
-    tags: JSON.parse('{tags}'),
     data: [],
-    // allow: ['SHOP', 'SHOP>>Balo, giỏ xách', 'SHOP>>Bình xịt', 'SHOP>>Cát vệ sinh', 'SHOP>>Dầu tắm', 'SHOP>>Đồ chơi', 'SHOP>>Đồ chơi - vật dụng', 'SHOP>>Giỏ-nệm-ổ', 'SHOP>>Khay vệ sinh', 'SHOP>>Nhà, chuồng', 'SHOP>>Thuốc bán', 'SHOP>>Thuốc bán>>thuốc sát trung', 'SHOP>>Tô - chén', 'SHOP>>Vòng-cổ-khớp', 'SHOP>>Xích-dắt-yếm']
-    allow: ["SHOP", "SHOP>>Balo, giỏ xách", "SHOP>>Bình xịt", "SHOP>>Cát vệ sinh", "SHOP>>Dầu tắm", "SHOP>>Đồ chơi", "SHOP>>Đồ chơi - vật dụng", "SHOP>>Giỏ-nệm-ổ", "SHOP>>Khay vệ sinh", "SHOP>>Nhà, chuồng", "SHOP>>Thức ăn", "SHOP>>Thuốc bán", "SHOP>>Thuốc bán>>thuốc sát trung", "SHOP>>Tô - chén", "SHOP>>Vòng-cổ-khớp", "SHOP>>Xích-dắt-yếm"]
+    item: JSON.parse('{item}')
   }
 
   $(document).ready(() => {
     $("#insert-box-content").hide()
+    vremind.install('#item-parent', '#item-parent-suggest', (input) => {
+      return new Promise(resolve => {
+        vhttp.checkelse('', { action: 'parent-suggest', keyword: input }).then(data => {
+          resolve(data['html'])
+        })
+        // resolve('Không có kết quả')
+      })
+    }, 300, 300)
+
     vremind.install('#product-insert-input', '#product-insert-input-suggest', (input) => {
       return new Promise((resolve) => {
         vhttp.checkelse('', { action: 'product-suggest', keyword: input }).then(data => {
@@ -185,6 +194,160 @@
     installFile('insert')
     installCheckbox('product')
   })
+
+  function insertNewItem() {
+    $('#item-modal').modal('show')
+    $("#item-code").val(''),
+    $("#item-name").val(''),
+    $("#item-price").val(0),
+    $("#item-value").val(0),
+    $("#item-down").val(0),
+    $("#item-up").val(0),
+    $("#item-position").val(''),
+    $('#item-image-file').val(null)
+    $('#item-image').attr('src', '')
+    $('#item-image').hide()
+    global.parent = 0
+    global.image = ''
+  }
+
+  function selectParent(name, id) {
+    $('#item-parent').val(name)
+    global.parent = id
+  }
+
+  function selectImage(id) {
+    files = $('#'+id+'-file')
+    file = files[0].files[0]
+    if (file) {
+      global.image = file
+      var reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (e) => {
+        $('#'+ id).attr('src', e.target["result"])
+        $('#'+ id).show()
+      }
+    }
+  }
+
+  function insertItemSubmit() {
+    data = {
+      code: $("#item-code").val(),
+      name: $("#item-name").val(),
+      price: $("#item-price").val(),
+      parent: global.parent,
+      value: $("#item-value").val(),
+      down: $("#item-down").val(),
+      up: $("#item-up").val(),
+      position: $("#item-position").val(),
+      image: global.image
+    }
+    if (!data['name'].length) return 0
+    if (!data['price'].length) data['price'] = 0
+    if (!data['value'].length) data['value'] = 0
+    if (!data['down'].length) data['down'] = 0
+    if (!data['up'].length) data['up'] = 0
+
+    var fd = new FormData();    
+    fd.append('code', $("#item-code").val());
+    fd.append('name', $("#item-name").val());
+    fd.append('price', $("#item-price").val());
+    fd.append('parent', global.parent);
+    fd.append('value', $("#item-value").val());
+    fd.append('down', $("#item-down").val());
+    fd.append('up', $("#item-up").val());
+    fd.append('position', $("#item-position").val());
+    fd.append('action', 'insert-item')
+    fd.append('image', $('#item-image-file')[0].files[0])
+
+    $.ajax({
+      url: '',
+      data: fd,
+      processData: false,
+      contentType: false,
+      type: 'POST',
+      success: function(data){
+        $('#content').html(response.html)
+        $('#insert-item').modal('hide')
+      }
+    });
+
+    // vhttp.checkelse('', {
+    //   action: 'insert-item',
+    //   data: data
+    // }).then(response => {
+    //   $('#content').html(response.html)
+    //   $('#insert-item').modal('hide')
+    // })
+  }
+
+  function updateItem(id) {
+    vhttp.checkelse('', {
+      action: 'get-item',
+      id: id 
+    }).then(data => {
+      $("#item-code").val(data['code']),
+      $("#item-name").val(data['name']),
+      $("#item-price").val(data['price']),
+      $("#item-value").val(data['value']),
+      $("#item-down").val(data['down']),
+      $("#item-up").val(data['up']),
+      $("#item-position").val(data['position']),
+      $('#item-image').attr('src', data['image'])
+      if (!data['image'].length) $('#item-image').hide()
+      $('#item-image-file').val(null)
+      global.parent = 0
+      global.image = ''
+      $("#item-update-modal").modal('show')
+    })
+  }
+
+  function updateItemSubmit() {
+    data = {
+      code: $("#item-update-code").val(),
+      name: $("#item-update-name").val(),
+      price: $("#item-update-price").val(),
+      parent: global.parent,
+      value: $("#item-update-value").val(),
+      down: $("#item-update-down").val(),
+      up: $("#item-update-up").val(),
+      position: $("#item-update-position").val(),
+      image: global.image
+    }
+    if (!data['name'].length) return 0
+    if (!data['price'].length) data['price'] = 0
+    if (!data['value'].length) data['value'] = 0
+    if (!data['down'].length) data['down'] = 0
+    if (!data['up'].length) data['up'] = 0
+
+    var fd = new FormData();    
+    fd.append('code', $("#item-update-code").val());
+    fd.append('name', $("#item-update-name").val());
+    fd.append('price', $("#item-update-price").val());
+    fd.append('parent', global.parent);
+    fd.append('value', $("#item-update-value").val());
+    fd.append('down', $("#item-update-down").val());
+    fd.append('up', $("#item-update-up").val());
+    fd.append('position', $("#item-update-position").val());
+    if ($('#item-update-image').attr('src').length < 100) image = $('#item-update-image').attr('src') 
+    else if ($('#item-update-image-file')[0].files[0]) image = $('#item-update-image-file')[0].files[0]
+    else image = ''
+    fd.append('image', image)
+    fd.append('id', global.id)
+    fd.append('action', 'update-item')
+
+    $.ajax({
+      url: '',
+      data: fd,
+      processData: false,
+      contentType: false,
+      type: 'POST',
+      success: function(data){
+        $('#content').html(response.html)
+        $('#item-update-modal').modal('hide')
+      }
+    });
+  }
 
   function selectTag(tag, selector) {
     $(selector).val(tag)
@@ -224,13 +387,13 @@
     $("#item-modal").modal('show')
   }
 
-  function insertItemSubmit() {
-    vhttp.checkelse('', { action: 'insert-item', name: $("#item-name").val(), code: $("#item-code").val() }).then(data => {
-      $('#content').html(data['html'])
-      $("#item-modal").modal('show')
-      installCheckbox('product')
-    })
-  }
+  // function insertItemSubmit() {
+  //   vhttp.checkelse('', { action: 'insert-item', name: $("#item-name").val(), code: $("#item-code").val() }).then(data => {
+  //     $('#content').html(data['html'])
+  //     $("#item-modal").modal('show')
+  //     installCheckbox('product')
+  //   })
+  // }
 
   function installFile(name) {
     global['file'][name] = {
@@ -250,7 +413,7 @@
   }
 
   function excel() {
-    window.open('{excelurl}')
+    window.open('/general/excel')
   }
 
   function processExcel(name) {
@@ -324,20 +487,6 @@
 
       goPage2('insert', global['page'])
       installCheckbox('insert')
-    })
-  }
-
-  function editProduct(id) {
-    vhttp.checkelse('', { action: 'get-product', id: id }).then(data => {
-      global['id'] = id
-      $("#product-code").val(data['code'])
-      $("#product-name").val(data['name'])
-      $("#product-low").val(data['low'])
-      $("#product-pos").val(data['pos'])
-      if (!data['tag'].length) global['tag'] = []
-      else global['tag'] = data['tag']
-      parseTag()
-      $("#product-modal").modal('show')
     })
   }
 
