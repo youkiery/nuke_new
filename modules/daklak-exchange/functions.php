@@ -52,6 +52,57 @@ function productContent() {
   return $xtpl->text();
 }
 
+function importContent() {
+  global $db, $filter;
+  // $list = array('code', 'name', 'unit', 'number', 'sell_price', 'buy_price');
+  // $filter['type'] = mb_strtolower($filter['type']);
+  // $xtra = '';
+  // if ($filter['type'] != 'asc') $filter['type'] = 'desc';
+  // if (in_array($filter['order'], $list)) $xtra []= "order by $filter[order] $filter[type]"; 
+
+  $sql = "select count(*) as count from pet_daklak_import";
+  $query = $db->query($sql);
+  $data = $query->fetch();
+  $number = $data['count'];
+
+  $sql = "select * from pet_daklak_import limit $filter[limit] offset ". ($filter['page'] - 1) * $filter['limit'];
+  $query = $db->query($sql);
+  $list = array();
+
+  $xtpl = new XTemplate('import-list.tpl', PATH);
+
+  while ($import = $query->fetch()) {
+    $source = getSource($import['source']);
+    $user = getUser($import['userid']);
+    $xtpl->assign('id', $import['id']);
+    $xtpl->assign('time', date('d/m/Y', $import['time']));
+    $xtpl->assign('source', $source['name']);
+    $xtpl->assign('total', $import['total']);
+    $xtpl->assign('user', $user['name']);
+    $xtpl->parse('main.row');
+  }
+  $link = "/daklak-exchange/?op=import&";
+  $xtpl->assign('nav', navBar($link, $numnber, $filter['page'], $filter['limit']));
+  $xtpl->parse('main');
+  return $xtpl->text();
+}
+
+function getSource($id) {
+  global $db;
+
+  $sql = 'select * from pet_daklak_source where id = '. $id;
+  $query = $db->query($sql);
+  return $query->fetch();
+}
+
+function getUser($id) {
+  global $db;
+
+  $sql = 'select userid, concat(last_name, "", first_name) as name, username from pet_users where userid = '. $id;
+  $query = $db->query($sql);
+  return $query->fetch();
+}
+
 function navBar($url, $number, $page, $limit) {
   $html = '';
   $total = floor($number / $limit) + ($number % $limit ? 1 : 0);

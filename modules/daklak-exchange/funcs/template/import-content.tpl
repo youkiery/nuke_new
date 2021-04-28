@@ -6,42 +6,30 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal">&times;</button>
-        <h4 class="modal-title"> Thêm hàng hóa </h4>
+        <h4 class="modal-title"> Thêm phiếu nhập </h4>
       </div>
 
       <div class="modal-body">
-        <div class="rows form-group">
-          <div class="col-3"> <label> Mã hàng </label> </div>
-          <div class="col-9"> <input type="text" class="form-control" id="insert-code"> </div>
-        </div>
-        <div class="rows form-group">
-          <div class="col-3"> <label> Tên hàng </label> </div>
-          <div class="col-9"> <input type="text" class="form-control" id="insert-name"> </div>
-        </div>
-        <div class="rows form-group">
-          <div class="col-3"> <label> Đơn vị </label> </div>
-          <div class="col-9"> <input type="text" class="form-control" id="insert-unit"> </div>
-        </div>
-        <div class="rows form-group">
-          <div class="col-3"> <label> Giá vốn </label> </div>
-          <div class="col-9"> <input type="number" class="form-control" id="insert-buy-price"> </div>
-        </div>
-        <div class="rows form-group">
-          <div class="col-3"> <label> Giá bán </label> </div>
-          <div class="col-9"> <input type="number" class="form-control" id="insert-sell-price"> </div>
+        <div class="form-group">
+          <div class="relative">
+            <input type="text" class="form-control" id="insert-item">
+            <div class="suggest" id="insert-item-suggest"> </div>
+          </div>
         </div>
 
         <div class="error" id="insert-error"></div>
 
+        <div id="insert-content" style="width: 500px; overflow-y: scroll;"></div>
+
         <button class="btn btn-success btn-block" onclick="insertSubmit()">
-          Thêm hàng hóa
+          Thêm phiếu nhập
         </button>
       </div>
     </div>
   </div>
 </div>
 
-<div id="update-modal" class="modal fade" role="dialog">
+<!-- <div id="update-modal" class="modal fade" role="dialog">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
@@ -79,20 +67,10 @@
       </div>
     </div>
   </div>
-</div>
-
-<a href="/daklak-exchange/export" class="btn btn-default"> 
-  Phiếu xuất
-</a>
-<a href="/daklak-exchange/import" class="btn btn-default"> 
-  Phiếu nhập
-</a>
-<a href="/daklak-exchange/statistic" class="btn btn-default"> 
-  Thống kê
-</a>
+</div> -->
 
 <button class="btn btn-success" style="float: right;" onclick="insertModal()">
-  Thêm sản phẩm
+  Thêm phiếu
 </button>
 
 <div class="form-group" style="clear: right;"> </div>
@@ -103,10 +81,18 @@
 {nav}
 
 <script src="/modules/core/js/vhttp.js"></script>
+<script src="/modules/core/js/vremind-8.js"></script>
 <script>
   var global = {
-    id: 0
+    id: 0,
+    product: JSON.parse('{product}')
   }
+
+  $(document).ready(() => {
+    vremind.install('#insert-item', '#insert-item-suggest', (input) => {
+      
+    })
+  })
 
   function insertModal() {
     $('#insert-code').val('')

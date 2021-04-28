@@ -14,8 +14,8 @@ if (!defined('NV_ADMIN') or !defined('NV_MAINFILE')) {
 
 $module_version = array(
     'name' => 'Xuất nhập hàng hóa',
-    'modfuncs' => 'main',
-    'submenu' => 'main',
+    'modfuncs' => 'main, import, export, source, statistic, setting',
+    'submenu' => 'main, import, export, source, statistic, setting',
     'is_sysmod' => 1,
     'virtual' => 1,
     'version' => '4.4.02',
