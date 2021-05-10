@@ -57,12 +57,10 @@ if (!empty($action)) {
         else {
           $sql = "insert into pet_daklak_product (code, name, unit, number, buy_price, sell_price) values('$data[code]', '$data[name]', '$data[unit]', 0, $data[buy_price], $data[sell_price])";
           $db->query($sql);
+          $result['status'] = 1;
+          $result['data'] = productContent();
         }
-  
-        $result['status'] = 1;
-        $result['data'] = productContent();
       }
-
       break;
     case 'update-product':
       $id = $nv_Request->get_string('id', 'post');

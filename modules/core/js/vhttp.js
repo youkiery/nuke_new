@@ -11,11 +11,11 @@ var vhttp = {
                     if (status == 'success' && response['status']) {
                         resolve(response)
                     }
-                    reject()
+                    reject(response)
                 }
                 catch (exception) {
                     // giá trị không thuộc dạng json, báo lỗi hệ thống
-                    reject()
+                    reject({})
                 }
             })
         })

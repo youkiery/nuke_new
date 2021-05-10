@@ -54,25 +54,42 @@ function productContent() {
 
 function importContent() {
   global $db, $filter;
-  // $list = array('code', 'name', 'unit', 'number', 'sell_price', 'buy_price');
-  // $filter['type'] = mb_strtolower($filter['type']);
-  // $xtra = '';
-  // if ($filter['type'] != 'asc') $filter['type'] = 'desc';
-  // if (in_array($filter['order'], $list)) $xtra []= "order by $filter[order] $filter[type]"; 
 
-  $sql = "select count(*) as count from pet_daklak_import";
+  $xtra = array();
+  if (!empty($filter['keyword'])) $xtra []= 'c.name like "%'. $filter['keyword'] .'%" or code like "%'. $filter['keyword'] .'%"';
+  $tick = 0;
+  if (!empty($filter['from'])) $tick += 1;
+  if (!empty($filter['end'])) $tick += 2;
+  switch ($tick) {
+    case 1:
+      $filter['from'] = totime($filter['from']);
+      $xtra []= 'a.time > '. $filter['from'];
+      break;
+    case 2:
+      $filter['end'] = totime($filter['end']) + 60 * 60 * 24 - 1;
+      $xtra []= 'a.time < '. $filter['end'];
+      break;
+    case 3:
+      $filter['from'] = totime($filter['from']);
+      $filter['end'] = totime($filter['end']) + 60 * 60 * 24 - 1;
+      $xtra []= '(a.time between '. $filter['from'] .' and '. $filter['end'] .')';
+      break;
+  }
+  $xtra = (count($xtra) ? ' where '. implode(' and ', $xtra) : '');
+
+  $sql = "select count(*) as count from pet_daklak_import a inner join pet_daklak_import_row b on a.id = b.importid inner join pet_daklak_product c on b.itemid = c.id $xtra";
   $query = $db->query($sql);
   $data = $query->fetch();
   $number = $data['count'];
 
-  $sql = "select * from pet_daklak_import limit $filter[limit] offset ". ($filter['page'] - 1) * $filter['limit'];
+  $sql = "select a.* from pet_daklak_import a inner join pet_daklak_import_row b on a.id = b.importid inner join pet_daklak_product c on b.itemid = c.id $xtra order by id desc limit $filter[limit] offset ". ($filter['page'] - 1) * $filter['limit'];
   $query = $db->query($sql);
   $list = array();
 
   $xtpl = new XTemplate('import-list.tpl', PATH);
 
   while ($import = $query->fetch()) {
-    $source = getSource($import['source']);
+    $source = getSource($import['sourceid']);
     $user = getUser($import['userid']);
     $xtpl->assign('id', $import['id']);
     $xtpl->assign('time', date('d/m/Y', $import['time']));
@@ -82,7 +99,7 @@ function importContent() {
     $xtpl->parse('main.row');
   }
   $link = "/daklak-exchange/?op=import&";
-  $xtpl->assign('nav', navBar($link, $numnber, $filter['page'], $filter['limit']));
+  $xtpl->assign('nav', navBar($link, $number, $filter['page'], $filter['limit']));
   $xtpl->parse('main');
   return $xtpl->text();
 }
@@ -108,13 +125,36 @@ function navBar($url, $number, $page, $limit) {
   $total = floor($number / $limit) + ($number % $limit ? 1 : 0);
   for ($i = 1; $i <= $total; $i++) {
     if ($page == $i) {
-      $html .= '<li><a class="active">' . $i . '</a></li>';
+      $html .= '<li class="active"><a>' . $i . '</a></li>';
     } 
     else {
-      $html .= '<a href="'. $url .'&page='. $i .'&limit='. $limit .'">' . $i . '</a>';
+      $html .= '<li><a href="'. $url .'&page='. $i .'&limit='. $limit .'">' . $i . '</a></li>';
     }
   }
   return "<ul class='pagination'>$html</ul>";
 }
 
+function totime($time) {
+  if (preg_match("/^([0-9]{1,2})\/([0-9]{1,2})\/([0-9]{4})$/", $time, $m)) {
+    $time = mktime(0, 0, 0, $m[2], $m[1], $m[3]);
+    if (!$time) {
+      $time = time();
+    }
+  }
+  else {
+    $time = time();
+  }
+  return $time;
+}
 
+function alias($str) {
+  $str = mb_strtolower($str);
+  $str = preg_replace("/(à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ)/", "a", $str);
+  $str = preg_replace("/(è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ)/", "e", $str);
+  $str = preg_replace("/(ì|í|ị|ỉ|ĩ)/", "i", $str);
+  $str = preg_replace("/(ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ)/", "o", $str);
+  $str = preg_replace("/(ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ)/", "u", $str);
+  $str = preg_replace("/(ỳ|ý|ỵ|ỷ|ỹ)/", "y", $str);
+  $str = preg_replace("/(đ)/", "d", $str);
+  return $str;
+}
