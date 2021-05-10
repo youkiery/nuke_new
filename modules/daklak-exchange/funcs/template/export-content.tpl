@@ -9,11 +9,11 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal">&times;</button>
-        <h4 class="modal-title"> Xóa phiếu nhập </h4>
+        <h4 class="modal-title"> Xóa phiếu xuất </h4>
       </div>
 
       <div class="modal-body text-center">
-        <p> Xóa phiếu nhập sẽ không thể khôi phục </p>
+        <p> Xóa phiếu xuất sẽ không thể khôi phục </p>
         <button class="btn btn-danger" onclick="removeSubmit()">
           Xác nhận
         </button>
@@ -27,7 +27,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal">&times;</button>
-        <h4 class="modal-title"> Thêm phiếu nhập </h4>
+        <h4 class="modal-title"> Thêm phiếu xuất </h4>
       </div>
 
       <div class="modal-body">
@@ -67,7 +67,7 @@
             <div class="form-group">
               <div class="relative">
                 <div class="input-group">
-                  <input type="text" class="form-control" id="insert-source" placeholder="Nhập nguồn cung cấp">
+                  <input type="text" class="form-control" id="insert-source" placeholder="xuất nguồn cung cấp">
                   <div class="input-group-btn">
                     <button class="btn btn-success" onclick="insertSourceModal()">
                       thêm
@@ -83,10 +83,10 @@
           </div>
         </div>
         <button class="btn btn-success btn-block" id="insert-button" onclick="insertSubmit()">
-          Thêm phiếu nhập
+          Thêm phiếu xuất
         </button>
         <button class="btn btn-info btn-block" id="update-button" onclick="updateSubmit()" style="display: none;">
-          Sửa phiếu nhập
+          Sửa phiếu xuất
         </button>
       </div>
     </div>
@@ -186,7 +186,7 @@
             <input type="text" class="form-control" name="keyword" value="{keyword}" placeholder="Từ khóa">
           </div>
           <input type="hidden" name="nv" value="daklak-exchange">
-          <input type="hidden" name="op" value="import">
+          <input type="hidden" name="op" value="export">
 
           <button class="btn btn-success">
             Lọc phiếu
@@ -200,10 +200,10 @@
 <a href="/daklak-exchange/" class="btn btn-default"> 
   Hàng hóa
 </a>
-<a href="/daklak-exchange/import" class="btn btn-primary"> 
+<a href="/daklak-exchange/import" class="btn btn-default"> 
   Phiếu nhập
 </a>
-<a href="/daklak-exchange/export" class="btn btn-default"> 
+<a href="/daklak-exchange/export" class="btn btn-primary"> 
   Phiếu xuất
 </a>
 <a href="/daklak-exchange/statistic" class="btn btn-default"> 
@@ -407,7 +407,6 @@
       putin(response.data.id, response.data.code, response.data.name, response.data.price)
       $('#insert-item-modal').modal('hide')
     }, (error) => {
-      console.log(error);
       alert('insert-item-error', error.msg)
     })
   }
@@ -419,7 +418,7 @@
 
   function removeSubmit() {
     vhttp.checkelse('', {
-      action: 'remove-import',
+      action: 'remove-export',
       id: global.id
     }).then(response => {
       $('#content').html(response.html)
@@ -430,7 +429,7 @@
   function updateModal(id) {
     global.id = id
     vhttp.checkelse('', {
-      action: 'get-import',
+      action: 'get-export',
       id: id
     }).then(response => {
       global.list = response.list
@@ -446,11 +445,11 @@
 
   function updateSubmit() {
     reloadValue()
-    if (!Object.keys(global.list).length) alert('insert-error', 'Phiếu nhập không có sản phẩm')
+    if (!Object.keys(global.list).length) alert('insert-error', 'Phiếu xuất không có sản phẩm')
     else if (global.source < 0) alert('insert-error', 'Chưa chọn nguồn cung cấp')
     else {
       vhttp.check('', {
-        action: 'update-import',
+        action: 'update-export',
         data: global.list,
         source: global.source,
         id: global.id
@@ -476,11 +475,11 @@
 
   function insertSubmit() {
     reloadValue()
-    if (!Object.keys(global.list).length) alert('insert-error', 'Phiếu nhập không có sản phẩm')
+    if (!Object.keys(global.list).length) alert('insert-error', 'Phiếu xuất không có sản phẩm')
     else if (global.source < 0) alert('insert-error', 'Chưa chọn nguồn cung cấp')
     else {
       vhttp.check('', {
-        action: 'insert-import',
+        action: 'insert-export',
         data: global.list,
         source: global.source
       }).then(response => {

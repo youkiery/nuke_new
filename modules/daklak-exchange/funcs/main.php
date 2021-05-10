@@ -37,8 +37,8 @@ if (!empty($action)) {
       $data['name'] = mb_strtolower($data['name']);
       $data['code'] = mb_strtolower($data['code']);
 
-      if (empty($data['code'])) $result['code'] = 'Mã hàng trống';
-      if (empty($data['name'])) $result['name'] = 'Tên hàng trống';
+      if (empty($data['code'])) $result['msg'] = 'Mã hàng trống';
+      if (empty($data['name'])) $result['msg'] = 'Tên hàng trống';
       else {
         $sql = "select * from pet_daklak_product where name = '$data[name]' limit 1";
         $query = $db->query($sql);
@@ -66,8 +66,8 @@ if (!empty($action)) {
       $id = $nv_Request->get_string('id', 'post');
       $data = $nv_Request->get_array('data', 'post');
       
-      if (empty($data['code'])) $result['code'] = 'Mã hàng trống';
-      if (empty($data['name'])) $result['name'] = 'Tên hàng trống';
+      if (empty($data['code'])) $result['msg'] = 'Mã hàng trống';
+      if (empty($data['name'])) $result['msg'] = 'Tên hàng trống';
       else {
         $sql = "select * from pet_daklak_product where name = '$data[name]' and id <> $id limit 1";
         $query = $db->query($sql);

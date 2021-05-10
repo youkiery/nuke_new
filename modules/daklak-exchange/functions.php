@@ -104,6 +104,58 @@ function importContent() {
   return $xtpl->text();
 }
 
+function exportContent() {
+  global $db, $filter;
+
+  $xtra = array();
+  if (!empty($filter['keyword'])) $xtra []= 'c.name like "%'. $filter['keyword'] .'%" or code like "%'. $filter['keyword'] .'%"';
+  $tick = 0;
+  if (!empty($filter['from'])) $tick += 1;
+  if (!empty($filter['end'])) $tick += 2;
+  switch ($tick) {
+    case 1:
+      $filter['from'] = totime($filter['from']);
+      $xtra []= 'a.time > '. $filter['from'];
+      break;
+    case 2:
+      $filter['end'] = totime($filter['end']) + 60 * 60 * 24 - 1;
+      $xtra []= 'a.time < '. $filter['end'];
+      break;
+    case 3:
+      $filter['from'] = totime($filter['from']);
+      $filter['end'] = totime($filter['end']) + 60 * 60 * 24 - 1;
+      $xtra []= '(a.time between '. $filter['from'] .' and '. $filter['end'] .')';
+      break;
+  }
+  $xtra = (count($xtra) ? ' where '. implode(' and ', $xtra) : '');
+
+  $sql = "select count(*) as count from pet_daklak_export a inner join pet_daklak_export_row b on a.id = b.exportid inner join pet_daklak_product c on b.itemid = c.id $xtra";
+  $query = $db->query($sql);
+  $data = $query->fetch();
+  $number = $data['count'];
+
+  $sql = "select a.* from pet_daklak_export a inner join pet_daklak_export_row b on a.id = b.exportid inner join pet_daklak_product c on b.itemid = c.id $xtra order by id desc limit $filter[limit] offset ". ($filter['page'] - 1) * $filter['limit'];
+  $query = $db->query($sql);
+  $list = array();
+
+  $xtpl = new XTemplate('export-list.tpl', PATH);
+
+  while ($export = $query->fetch()) {
+    $source = getSource($export['sourceid']);
+    $user = getUser($export['userid']);
+    $xtpl->assign('id', $export['id']);
+    $xtpl->assign('time', date('d/m/Y', $export['time']));
+    $xtpl->assign('source', $source['name']);
+    $xtpl->assign('total', $export['total']);
+    $xtpl->assign('user', $user['name']);
+    $xtpl->parse('main.row');
+  }
+  $link = "/daklak-exchange/?op=export&";
+  $xtpl->assign('nav', navBar($link, $number, $filter['page'], $filter['limit']));
+  $xtpl->parse('main');
+  return $xtpl->text();
+}
+
 function getSource($id) {
   global $db;
 

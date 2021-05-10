@@ -84,11 +84,11 @@
 <a href="/daklak-exchange/" class="btn btn-primary"> 
   Hàng hóa
 </a>
-<a href="/daklak-exchange/export" class="btn btn-default"> 
-  Phiếu xuất
-</a>
 <a href="/daklak-exchange/import" class="btn btn-default"> 
   Phiếu nhập
+</a>
+<a href="/daklak-exchange/export" class="btn btn-default"> 
+  Phiếu xuất
 </a>
 <a href="/daklak-exchange/statistic" class="btn btn-default"> 
   Thống kê
