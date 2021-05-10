@@ -77,12 +77,12 @@ function importContent() {
   }
   $xtra = (count($xtra) ? ' where '. implode(' and ', $xtra) : '');
 
-  $sql = "select count(*) as count from pet_daklak_import a inner join pet_daklak_import_row b on a.id = b.importid inner join pet_daklak_product c on b.itemid = c.id $xtra";
+  $sql = "select count(*) as count from pet_daklak_import a inner join pet_daklak_import_row b on a.id = b.importid inner join pet_daklak_product c on b.itemid = c.id $xtra group by a.id";
   $query = $db->query($sql);
   $data = $query->fetch();
   $number = $data['count'];
 
-  $sql = "select a.* from pet_daklak_import a inner join pet_daklak_import_row b on a.id = b.importid inner join pet_daklak_product c on b.itemid = c.id $xtra order by id desc limit $filter[limit] offset ". ($filter['page'] - 1) * $filter['limit'];
+  $sql = "select a.* from pet_daklak_import a inner join pet_daklak_import_row b on a.id = b.importid inner join pet_daklak_product c on b.itemid = c.id $xtra group by a.id order by id desc limit $filter[limit] offset ". ($filter['page'] - 1) * $filter['limit'];
   $query = $db->query($sql);
   $list = array();
 
@@ -129,12 +129,12 @@ function exportContent() {
   }
   $xtra = (count($xtra) ? ' where '. implode(' and ', $xtra) : '');
 
-  $sql = "select count(*) as count from pet_daklak_export a inner join pet_daklak_export_row b on a.id = b.exportid inner join pet_daklak_product c on b.itemid = c.id $xtra";
+  $sql = "select count(*) as count from pet_daklak_export a inner join pet_daklak_export_row b on a.id = b.exportid inner join pet_daklak_product c on b.itemid = c.id $xtra group by a.id";
   $query = $db->query($sql);
   $data = $query->fetch();
   $number = $data['count'];
 
-  $sql = "select a.* from pet_daklak_export a inner join pet_daklak_export_row b on a.id = b.exportid inner join pet_daklak_product c on b.itemid = c.id $xtra order by id desc limit $filter[limit] offset ". ($filter['page'] - 1) * $filter['limit'];
+  $sql = "select a.* from pet_daklak_export a inner join pet_daklak_export_row b on a.id = b.exportid inner join pet_daklak_product c on b.itemid = c.id $xtra group by a.id order by id desc limit $filter[limit] offset ". ($filter['page'] - 1) * $filter['limit'];
   $query = $db->query($sql);
   $list = array();
 
