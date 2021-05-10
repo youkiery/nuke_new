@@ -22,6 +22,23 @@ $action = $nv_Request->get_string('action', 'post');
 if (!empty($action)) {
   $result = array('status' => 0);
   switch ($action) {
+    case 'remove-import':
+      $id = $nv_Request->get_string('id', 'post');
+
+      $sql = 'select * from pet_daklak_import_row where importid = '. $id;
+      $query = $db->query($sql);
+
+      while ($row = $query->fetch()) {
+        $sql = 'update pet_daklak_product set number = number - '. $row['number'] .' where id = '. $row['itemid'];
+        $db->query($sql);
+      }
+      $sql = 'delete from pet_daklak_import_row where importid = '. $id;
+      $db->query($sql);
+      $sql = 'delete from pet_daklak_import where id = '. $id;
+      $db->query($sql);
+      $result['status'] = 1;
+      $result['html'] = importContent();
+      break;
     case 'get-import':
       $id = $nv_Request->get_string('id', 'post');
 

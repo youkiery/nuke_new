@@ -4,6 +4,24 @@
 <script type="text/javascript" src="/assets/js/jquery-ui/jquery-ui.min.js"></script>
 <script type="text/javascript" src="/assets/js/language/jquery.ui.datepicker-vi.js"></script>
 
+<div id="remove-modal" class="modal fade" role="dialog">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title"> Xóa phiếu nhập </h4>
+      </div>
+
+      <div class="modal-body text-center">
+        <p> Xóa phiếu nhập sẽ không thể khôi phục </p>
+        <button class="btn btn-danger" onclick="removeSubmit()">
+          Xác nhận
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="insert-modal" class="modal fade" role="dialog">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
@@ -178,6 +196,19 @@
     </div>
   </div>
 </div>
+
+<a href="/daklak-exchange/" class="btn btn-default"> 
+  Hàng hóa
+</a>
+<a href="/daklak-exchange/export" class="btn btn-default"> 
+  Phiếu xuất
+</a>
+<a href="/daklak-exchange/import" class="btn btn-primary"> 
+  Phiếu nhập
+</a>
+<a href="/daklak-exchange/statistic" class="btn btn-default"> 
+  Thống kê
+</a>
 
 <button class="btn btn-info" style="float: right;" onclick="sortModal()">
   Lọc phiếu
@@ -377,6 +408,21 @@
     }, (error) => {
       console.log(error);
       alert('insert-item-error', error.msg)
+    })
+  }
+
+  function removeModal(id) {
+    global.id = id
+    $('#remove-modal').modal('show')
+  }
+
+  function removeSubmit() {
+    vhttp.checkelse('', {
+      action: 'remove-import',
+      id: global.id
+    }).then(response => {
+      $('#content').html(response.html)
+      $('#remove-modal').modal('hide')
     })
   }
 

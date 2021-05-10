@@ -20,6 +20,9 @@
         <button class="btn btn-info btn-xs" onclick="updateModal({id})">
           cập nhật
         </button>  
+        <button class="btn btn-danger btn-xs" onclick="removeModal({id})">
+          xóa
+        </button>  
       </td>
     </tr>
     <!-- END: row -->
