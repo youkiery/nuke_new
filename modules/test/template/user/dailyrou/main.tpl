@@ -555,7 +555,7 @@
               if (thisValue.search(username) > 0) {
                 that.setAttribute("class", "purple")
               }
-              else if (except.join('').search(username) >= 0) {
+              else if (checkExcepter()) {
                 that.setAttribute("class", "blue")
               }
               else {
@@ -602,6 +602,12 @@
         }
       }
     })
+  }
+
+  function checkExcepter() {
+      return except.filter(item => {
+          if (username == item) return true
+      }).length
   }
 
   function checkExcept(listText) {
