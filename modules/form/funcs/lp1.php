@@ -195,7 +195,7 @@ if (!empty($action)) {
     case 'print-x':
       $list = $nv_Request->get_array('list', 'post');
 
-  		$xtpl = new XTemplate('lp1-print.tpl', PATH);
+  		$xtpl = new XTemplate('lp1-print.tpl', PATH2);
       $sql = 'select * from `'. PREFIX .'_notires` where rid not in ('. implode(', ', $list) .')';
       $query = $db->query($sql);
 
@@ -235,7 +235,7 @@ if (!empty($action)) {
       $list = $nv_Request->get_array('list', 'post');
       rsort($list);
 
-  		$xtpl = new XTemplate('lp1-form.tpl', PATH);
+  		$xtpl = new XTemplate('lp1-form.tpl', PATH2);
       $xtpl->assign('select', $select);
 
       $gindex = 1;
@@ -476,7 +476,7 @@ if (!empty($action)) {
 				$sql = 'select * from `'. PREFIX .'_secretary` where rid = ' . $id;
         // die($sql);
 				$query = $db->query($sql);
-				$xtpl = new XTemplate('secretary.tpl', PATH);
+				$xtpl = new XTemplate('secretary.tpl', PATH2);
 				if (!empty($row = $query->fetch())) {
 					$xtpl->assign('date', date('d/m/Y', $row['date']));
 					$xtpl->assign('org', $row['org']);
@@ -620,7 +620,7 @@ if (!empty($action)) {
 	die();
 }
 
-$xtpl = new XTemplate("lp1.tpl", PATH);
+$xtpl = new XTemplate("lp1.tpl", PATH2);
 $xtpl->assign('select', json_encode($select_data));
 
 $today = time();

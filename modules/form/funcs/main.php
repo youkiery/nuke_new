@@ -219,7 +219,7 @@ if (!empty($action)) {
     // case 'catch-form':
     //   $formid = $nv_Request->get_string('formid', 'get/post', '');
     
-    //   $xtpl = XTemplate('edit/form-1.tpl', PATH);
+    //   $xtpl = XTemplate('edit/form-1.tpl', PATH2);
     //   $xtpl->parse('main');
     //   $result['status'] = 1;
     //   $result['html'] = $xtpl->text();
@@ -229,7 +229,7 @@ if (!empty($action)) {
       $page = $nv_Request->get_int('page', 'post');
       $filter = $nv_Request->get_array('filter', 'post');
 
-      $xtpl = new XTemplate("print-x-list.tpl", PATH);
+      $xtpl = new XTemplate("print-x-list.tpl", PATH2);
 
       foreach ($list as $id) {
         $sql = 'select * from `'. PREFIX .'_print` where rid = ' . $id;
@@ -284,7 +284,7 @@ if (!empty($action)) {
     case 'print-x':
       $list = $nv_Request->get_array('list', 'post');
 
-      $xtpl = new XTemplate("print-x.tpl", PATH);
+      $xtpl = new XTemplate("print-x.tpl", PATH2);
 
       foreach ($list as $id) {
         $sql = 'select * from `'. PREFIX .'_print` where rid = ' . $id;
@@ -383,7 +383,7 @@ if (!empty($action)) {
       if (!empty($id)) {
         $sql = 'select * from `'. PREFIX .'_secretary` where rid = ' . $id;
         $query = $db->query($sql);
-        $xtpl = new XTemplate('secretary.tpl', PATH);
+        $xtpl = new XTemplate('secretary.tpl', PATH2);
         if (!empty($row = $query->fetch())) {
           $xtpl->assign('date', date('d/m/Y', $row['date']));
           $xtpl->assign('org', $row['org']);
@@ -1013,7 +1013,7 @@ if (!empty($action)) {
   die();
 }
 
-$xtpl = new XTemplate("main.tpl", PATH);
+$xtpl = new XTemplate("main.tpl", PATH2);
 $xtpl->assign('module_name', $module_name);
 
 $today = time();
@@ -1078,12 +1078,12 @@ switch ($permission) {
 
     $permist = getUserPermission($user_info['userid']);
     $permist = explode(',', $permist);
-    $top = 10;
+    $top = 1;
     foreach ($permist as $key) {
-      $xtpl->assign('top', $top += 35);  
+      $xtpl->assign('top', $top += 1);  
       $xtpl->parse('main.super_user3.p' . ($key + 1));
     }
-    $xtpl->assign('top', $top += 35);  
+    $xtpl->assign('top', $top += 1);  
 
     $xtpl->assign('content', formList());
     $xtpl->parse('main.user');
@@ -1116,12 +1116,12 @@ switch ($permission) {
 
     $permist = getUserPermission($user_info['userid']);
     $permist = explode(',', $permist);
-    $top = 10;
+    $top = 1;
     foreach ($permist as $key) {
-      $xtpl->assign('top', $top += 35);  
+      $xtpl->assign('top', $top += 1);  
       $xtpl->parse('main.super_user3.p' . ($key + 1));
     }
-    $xtpl->assign('top', $top += 35);  
+    $xtpl->assign('top', $top += 1);  
 
     $xtpl->assign('content', formList());
     $xtpl->parse('main.user');
@@ -1161,12 +1161,12 @@ switch ($permission) {
       }
     }
 
-    $top = 10;
+    $top = 1;
     foreach ($permist as $key) {
-      $xtpl->assign('top', $top += 35);  
+      $xtpl->assign('top', $top += 1);  
       $xtpl->parse('main.super_user3.p' . ($key + 1));
     }
-    $xtpl->assign('top', $top += 35);  
+    $xtpl->assign('top', $top += 1);  
 
     $xtpl->assign('content', formList());
     $xtpl->parse('main.user');
