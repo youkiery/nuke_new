@@ -1,0 +1,120 @@
+<!-- BEGIN: main -->
+<style>
+  * {
+    font-size: 13pt;
+  }
+  @page {
+    size: A4 portrait;
+    margin: 15mm 10mm 5mm 15mm;
+  }
+</style>
+<table border="1" class="table-bordered">
+  <tr>
+    <td class="text-center"> <b>Biểu mẫu số: BM.STTT.22.01</b> </td> 
+    <td class="text-center"> <b>Số soát xét: 05.161220</b> </td>
+  </tr>
+  <tr>
+    <td colspan="2"> 
+      <div class="text-center"> <b>CHI CỤC THÚ Y VÙNG V</b> </div>
+      <div class="text-center"> <b>TRẠM CHẨN ĐOÁN XÉT NGHIỆM BỆNH ĐỘNG VẬT</b> </div> 
+      <div> 
+        <b> Địa chỉ: </b> 
+        Số 36 Phạm Hùng, Phường Tân An, Thành phố Buôn Ma Thuột, Tỉnh Đắk Lắk.
+      </div> 
+      <div> 
+        <b> Điện thoại: </b>
+        0262 3877793 
+      </div>
+    </td> 
+  </tr>
+</table> 
+<div class="text-center p16" style="margin: 10px;"> 
+  <b>PHIẾU KẾT QUẢ XÉT NGHIỆM</b>
+</div> 
+<div style="margin: 4px;">
+  <div style="float: left"> 
+    <b> Số phiếu kết quả xét nghiệm: xcode-0/xcode-1/xcode-2.CĐXN </b>
+  </div> 
+  <div style="float: right"> 
+    <i> Trang (page) </i>
+  </div> 
+</div> 
+<table border="1" class="table-bordered"> 
+  <tr>
+    <td colspan="2">
+      <b>Tên khách hàng:</b> (customer) 
+    </td>
+    <td style="width: 30%">
+      <b>Số ĐKXN: xcode-0/xcode-1/xcode-2</b>
+    </td> 
+  </tr> 
+  <tr> 
+    <td colspan="3"> 
+      <div> 
+        <b>Địa chỉ khách hàng:</b> (address) 
+      </div> 
+      <div style="float: left; width: 400px;"> 
+        <b>Số điện thoại:</b>
+        (phone) 
+      </div> 
+      <div style="float: left; "> <b>Fax: </b>  (fax) </div> 
+    </td> 
+  </tr>
+  <tr>
+    <td colspan="3"> 
+      <b>Loài động vật lấy mẫu: </b>
+      (sample) 
+    </td>
+  </tr>
+  <tr>
+    <td colspan="3">
+      <b>Loại mẫu: </b>
+      (type) 
+    </td>
+  </tr>
+  <tr>
+    <td colspan="3"> 
+      <b>Số lượng mẫu:</b>  
+      (number) 
+      (numberword) 
+    </td>
+  </tr>
+  <tr>
+    <td colspan="3"> <b>Ký hiệu mẫu:</b>  (sampleCode) </td>
+  </tr>
+  <tr> <td colspan="3"> <b>Tình trạng khi nhận mẫu:</b>  (status) </td> </tr>
+  <tr>
+    <td style="width: 50%"> <b>Ngày lấy mẫu: </b>  (sampleReceive) </td>
+    <td colspan="2"> <b>Người lấy mẫu: </b>  (sampleReceiver) </td>
+  </tr>
+  <tr> 
+    <td style="width: 50%"> <b>Ngày, giờ nhận mẫu:</b> (receiveHour)<sup>h</sup>(receiveMinute)<sup>p</sup> (ireceive)</td>
+    <td colspan="2"> <b>Người nhận mẫu:</b> (ireceiver) </td>
+  </tr> 
+  <tr>
+    <td colspan="3">  <b><u>Chỉ tiêu xét nghiệm</u></b> <br> (exam) (index) (exam-content) <div> &nbsp;&nbsp; Phương pháp xét nghiệm: (method); Ký hiệu phương pháp: (symbol). </div> (/exam) (note) </td> 
+  </tr>
+  <tr>
+    <td colspan="3"> <b>Ngày phân tích:</b> (examDate) </td>
+  </tr>
+  <tr> 
+    <td colspan="3"> <b> Kết quả: </b> <br> (result) </td>
+  </tr>
+</table> 
+<table style="width: 100%"> 
+  <tr> 
+    <td class="text-center"> 
+      <i> Ngày examdate-0 tháng examdate-1 năm examdate-2 </i> <br>
+      <b>BỘ PHẬN XÉT NGHIỆM</b> <br> <br>
+       (xexam-signer) <br> 
+      <b>(xexam)</b> 
+    </td> 
+    <td class="text-center"> 
+      <i> Ngày examdate-0 tháng examdate-1 năm examdate-2 </i> <br>
+      <b>TRƯỞNG TRẠM</b> <br> <br>
+      (xresender-signer) <br>
+      <b>(xresender)</b> 
+    </td> 
+  </tr> 
+</table>
+<!-- END: main -->

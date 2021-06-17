@@ -1,0 +1,54 @@
+<!-- BEGIN: main -->
+<table class="table-bordered" border="1">
+  <tr>
+    <td style="width: 60%;" class="cell-center">CHI CỤC THÚ Y VÙNG V <br> <b> TRẠM CHẨN ĐOÁN XÉT NGHIỆM BỆNH ĐỘNG VẬT </b></td>
+    <td><div class="c20"></div><div class="c80"><b>Biểu mẫu số: BM.STTT.20.01 <br>Số soát xét: 05.161220</b></div></td>
+  </tr>
+</table>
+<br>
+<div class="text-center"> <b>PHIẾU GIAO NHẬN MẪU VÀ KẾT QUẢ XÉT NGHIỆM</b> </div>
+<div style="float: right; width: 160pt; margin-right: 10pt; border: 1px solid black; padding: 5pt;">
+  Số ĐKXN: xcode-0/xcode-1/xcode-2 <br> Số trang: (page) <br> Liên: 01/02 
+</div>
+<br><br>
+<p><b>Bên giao mẫu: </b> isenderunit</p>
+<p><b>Bên nhận mẫu: </b> ireceiverunit </p>
+<div> xtable </div> 
+<div style="display: inline-block; width: 60px;"><b>Ghi chú:</b> </div>
+<div style="margin-left: 1pt; display: inline-table; width: calc(100% - 65px);">
+  <pre style="margin: 0px; font-family: unset;">(note)</pre>
+  - Bộ phận xét nghiệm trả kết quả trên chỉ tiêu xét nghiệm. <br>
+  - Ngày xét nghiệm: examdate <br>
+  - Ngày hẹn trả kết quả xét nghiệm: <i>ngày resend-0 tháng resend-1 năm resend-2</i>
+  (result)
+</div>
+<table>
+  <tr>
+    <td style="width: 5%"></td>
+    <td class="c30 text-center">
+      <b>Người/Ngày giao mẫu <br></b>
+      <i>
+        Ngày xsend-0 tháng xsend-1 năm xsend-2
+        <br> (xsender-signer) <br>
+      </i>
+      <div><b>xsender</b></div>
+    </td>
+    <td class="c30 text-center">
+      <b>Người/Ngày nhận mẫu <br></b>
+      <i>
+        Ngày xreceive-0 tháng xreceive-1 năm xreceive-2 
+        <br> (xreceiver-signer) <br>
+      </i> 
+      <div><b>xreceiver</b></div> 
+    </td>
+    <td class="c30 text-center">
+      <b>Phụ trách bộ phận xét nghiệm <br></b>
+      <i>
+        Ngày xresend-0 tháng xresend-1 năm xresend-2
+        <br> (xresender-signer) <br>
+      </i>
+      <div><b>xresender</b></div>
+    </td>
+  </tr>
+</table>
+<!-- END: main -->

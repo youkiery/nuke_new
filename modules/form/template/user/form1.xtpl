@@ -1,0 +1,47 @@
+<!-- BEGIN: main -->
+<table class="table-bordered" border="1">
+  <tr>
+    <td rowspan="2" class="cell-center" style="width: 20%; padding: 10pt 21pt;"> CHI CỤC THÚ Y VÙNG V </td>
+    <td class="cell-center p15" style="height: 30pt;"> <b>PHIẾU GIẢI QUYẾT HỒ SƠ</b></td>
+  </tr>
+  <tr>
+    <td class="no-bordertop">Số: code/TYV5-TH</td>
+  </tr>
+</table>
+<p>&emsp; Tên đơn vị: senderemploy</p>
+<div class="inline c50">&emsp; Ngày nhận: receive </div>
+<div class="inline c50">Ngày hẹn trả kết quả: resend </div>
+<div class="inline c30">&emsp; Hình thức nhận: </div>
+<div class="inline c20">status-0 Trực tiếp</div>
+<div class="inline c20"> status-1 Bưu điện</div>
+<div class="inline c30">Khác: status-2</div>
+<p>&emsp; Người nhận hồ sơ: receiveremploy</p>
+<p>
+<div class="inline c30">&emsp; Phòng chuyên môn:</div>
+<div class="inline c40">Ngày nhận: ireceive </div>
+<div class="inline c30">Ngày trả: iresend </div>
+<table class="table-bordered" border="1">
+  <tr>
+    <td class="text-center" style="height: 240px; vertical-align: baseline;">
+      <p class="text-center"> <u>Hồ sơ gồm:</u> </p> 
+      <div style="text-align: left;"> formcontent </div>
+    </td>
+  </tr>
+</table>
+<br>
+<table class="table-bordered" border="1">
+  <tr>
+    <th class="p13"> <b>Ý kiến của phòng, Bộ phận chịu trách nhiệm giải quyết</b> </th>
+    <th class="p13"> <b>Ý kiến của ban lãnh đạo</b> </th>
+  </tr>
+  <tr>
+    <td style="height: 220px;"></td>
+    <td></td>
+  </tr>
+</table>
+<p>&emsp;&emsp;Ghi chú: Hồ sơ có ý kiến của thủ trưởng (hoặc người được ủy quyền) phải giao lại cho Bộ phận một cửa trước 01 ngày so với ngày hẹn trả </p>
+<br><br><br>
+<div class="inline c40">Mã số: BM-02/TYV5-06</div>
+<div class="inline c40">Mã số: Ngày ban hành: 02/11/2017</div>
+<div class="inline c20">Lần sửa đổi: 02</div>
+<!-- END: main -->

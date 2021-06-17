@@ -191,6 +191,19 @@
     )
   }
 
+
+  function salary(userid, type) {
+    $.post(
+      '',
+      {action: 'salary', userid: userid, type: type, key: formKeyword.val()},
+      (response, status) => {
+        checkResult(response, status).then(data => {
+          content.html(data['html'])
+        }, () => {  })
+      }
+    )
+  }
+
   function upUser(userid) {
     $.post(
       strHref,
