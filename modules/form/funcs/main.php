@@ -631,6 +631,8 @@ if (!empty($action)) {
         $result['form']['xsend'] = date('d/m/Y', $result['form']['xsend']);
 
         $result['form']['examdate'] = date('d/m/Y', $result['form']['examdate']);
+        $result['form']['result'] = explode('@@', $result['form']['result']);
+        if (count($result['form']['result']) == 1) $result['form']['result'] = $result['form']['result'][0];
         
         if (!empty($result['form']['examdate2'])) $result['form']['examdate2'] = date('d/m/Y', $result['form']['examdate2']);
         else $result['form']['examdate2'] = '';
@@ -693,7 +695,6 @@ if (!empty($action)) {
       }
       else {
         if ($clone) {
-          
           if ($key = precheck($data)) {
             $result['notify'] = 'Nhập thiếu thông tin: ' . $teriorname[$key];
           }
@@ -704,7 +705,9 @@ if (!empty($action)) {
             
             if (!empty($_POST['data']) && !empty($_POST['data']['vnote'])) {
               $vnote = $_POST['data']['vnote'];
-            }        
+            }
+
+            $data['result'] = implode('@@', $data['result']);
   
             $iresend = totime($data['iresend']);
             $xreceive = totime($data['xreceive']);
@@ -855,6 +858,8 @@ if (!empty($action)) {
                 checkRemindv2($data['xsender'], 'xsender');
                 checkRemindv2($data['page2'], 'page2');
   
+                $data['result'] = implode('@@', $data['result']);
+
                 $iresend = totime($data['iresend']);
                 $xreceive = totime($data['xreceive']);
                 $xresend = totime($data['xresend']);
@@ -929,6 +934,7 @@ if (!empty($action)) {
                 if (!empty($data['examdate2'])) $examdate2 = totime($data['examdate2']);
             
                 $note = nl2br($data['note']);
+                $data['result'] = implode('@@', $data['result']);
   
                 checkRemindv2($data['address'], 'address');
                 checkRemindv2($data['samplereceiver'], 'sample-receiver');
@@ -989,6 +995,7 @@ if (!empty($action)) {
                 }
                 $exam = json_encode($data['exam'], JSON_UNESCAPED_UNICODE);
                 $signer = json_encode($signer, JSON_UNESCAPED_UNICODE);
+                $data['result'] = implode('@@', $data['result']);
       
                 $sql = 'update `'. PREFIX .'_row` set xaddress = "'.$data['xaddress'].'", number = '. $data['number'] .', samplecode5 = "'. $data['samplecode5'] .'", examsample = "'. $data['examsample'] .'", note = "'. $note .'", noticetime = '. $resend .', target = "'. $data['target'].'", exam = \''. $exam .'\', receiveDis = "'. $data['receivedis'] .'", receiveLeader = "'. $data['receiveleader'] .'", sampleplace = "'. $data['sampleplace'] .'", owner = "'. $data['owner'] .'", xcode = "'. implode(',', $data['xcode']) .'", receive = "'. $receive .'", result = "'. $data['result'] .'", typeIndex = '. $data['type']['index'] .', typeValue = "'. $data['type']['value'] .'", sender = "'. $data["sender"] .'", numberword = "'. $data['numberword'] .'", ownermail = "'. $data['ownermail'] .'", ownerphone = "'. $data['ownerphone'] .'", mcode = "'. $data['mcode'] .'", samplereceive = '. $samplereceive .', signer = \''. $signer .'\', xsign = '. $data['xsign'] .', locker = '. (empty($data['locker']) ? 0 : 1) .' where id = ' . $id;
                 $query = $db->query($sql);

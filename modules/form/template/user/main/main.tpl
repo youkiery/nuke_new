@@ -649,19 +649,21 @@
       </div>
     </div>
 
-    <div class="row form-group boxed box-2 box-2-8 box-5 box-5-20 box-4 box-4-22">
-      <label class="col-sm-6">
-        Kết quả
-      </label>
-      <div class="col-sm-12 input-group">
-        <input class="form-control" id="form-insert-result"></input>
-        <div class="input-group-btn">
-          <button class="btn btn-info" onclick="toggleResult()">
-            <span class="glyphicon glyphicon-plus"></span>
-          </button>
-          <div id="results"></div>
+    <div class="boxed box-2 box-2-8 box-5 box-5-20 box-4 box-4-22">
+      <div class="row form-group">
+        <label class="col-sm-6">
+          Kết quả
+        </label>
+        <div class="col-sm-12 input-group">
+          <textarea class="form-control" id="form-insert-result"></textarea>
+          <div class="input-group-btn">
+            <button class="btn btn-info" onclick="toggleResult()">
+              <span class="glyphicon glyphicon-plus"></span>
+            </button>
+          </div>
         </div>
       </div>
+      <div id="results"></div>      
     </div>
 
     <div class="row form-group boxed box-5 box-5-19 box-4 box-4-20">
@@ -2905,12 +2907,41 @@
     infoData[id].push(html)
   }
 
-  function toggleResult() {
+  function toggleResult(result = []) {
     var disabled = $('#form-insert-result').attr('disabled')
     if (disabled) {
+      $('#results').fadeOut()
       $('#form-insert-result').attr('disabled', false)
     }
     else {
+      var html = ''
+      if (result.length) {
+        result.forEach((item, index) => {
+        html += `
+          <div class="row form-group">
+            <label class="col-sm-1">  </label>
+            <label class="col-sm-5">  </label>
+            <div class="col-sm-12">
+              <input type="text" class="form-control results" id="results-`+index+`" autocomplete="off" value="`+ item +`">
+            </div>
+          </div>`
+        })
+      }
+      else {
+        var ig = getIgField()
+        ig.forEach((item, index) => {
+        html += `
+          <div class="row form-group">
+            <label class="col-sm-1">  </label>
+            <label class="col-sm-5"> `+ item.code +` </label>
+            <div class="col-sm-12">
+              <input type="text" class="form-control results" id="results-`+index+`" autocomplete="off">
+            </div>
+          </div>`
+        })
+      } 
+      $('#results').html(html)
+      $('#results').fadeIn()
       $('#form-insert-result').attr('disabled', true)
     }
   }
@@ -2985,6 +3016,7 @@
   function checkAllForm() {
     var data = {}
     var sampleCode = checkSamplecode(formInsertSampleCode.val(), formInsertNumber.val())
+
     if (sampleCode['result']) {
       data = {
         code: formInsertCode.val(),
@@ -3012,7 +3044,7 @@
         examdate: formInsertExamDate.val(),
         xreceive: formInsertXreceive.val(),
         xsend: formInsertXsend.val(),
-        result: formInsertResult.val(),
+        result: res,
         xresend: formInsertXresend.val(),
         note: formInsertCnote.val(),
         page2: formInsertPage2.val(),
@@ -3077,6 +3109,16 @@
       case 2: 
         var sampleCode = checkSamplecode(formInsertSampleCode.val(), formInsertNumber.val())
         if (sampleCode['result']) {
+          var disabled = $('#form-insert-result').attr('disabled')
+          if (disabled) {
+            var res = []
+            $('.results').each((index, item) => {
+              res.push(item.value) 
+            })
+          }
+          else {
+            var res = formInsertResult.val()
+          }
           data = {
             xcode: getInputs('xcode'),
             isenderunit: formInsertIsenderUnit.val(),
@@ -3089,7 +3131,7 @@
             iresend: formInsertIresend.val(),
             xreceive: formInsertXreceive.val(),
             xsend: formInsertXsend.val(),
-            result: formInsertResult.val(),
+            result: res,
             xresend: formInsertXresend.val(),
             note: formInsertCnote.val(),
             page2: formInsertPage2.val(),
@@ -3114,6 +3156,17 @@
       break;            
       case 4:
         var sampleCode = checkSamplecode(formInsertSampleCode.val(), formInsertNumber.val())
+        var disabled = $('#form-insert-result').attr('disabled')
+        if (disabled) {
+          var res = []
+          $('.results').each((index, item) => {
+            res.push(item.value) 
+          })
+        }
+        else {
+          var res = formInsertResult.val()
+        }
+
         if (sampleCode['result']) {
           data = {
             receive: formInsertReceive.val(),
@@ -3132,7 +3185,7 @@
             samplereceiver: formInsertSampleReceiver.val(),
             examdate: formInsertExamDate.val(),
             examdate2: $("#form-insert-exam-date-2").val(),
-            result: formInsertResult.val(),
+            result: res,
             sample: formInsertSample.val(),
             note: formInsertNote.val(),
             ireceiveremploy: formInsertIreceiverEmploy.val(),
@@ -3266,6 +3319,22 @@
     }
 
     if (data['form']['printer'] >= 2) {
+      $(".status").prop('checked', false)
+      $(".status-" + data['form']['status']['index']).prop('checked', true)
+      if (typeof(data['form']['result']) == 'object') {
+        toggleResult(data['form']['result'])
+        // var length = data['form']['result'].length
+        // for (let i = 0; i < length; i++) {
+        //   var selector = $('#results-'+ i) 
+        //   if (selector.length) {
+        //     selector.val(data['form']['result'][i])
+        //   }
+        // }
+      }
+      else {
+        formInsertResult.val(data['form']['result'])
+      }
+
       var xcode = data['form']['xcode'].split(',')
       formInsertCnote.val(data['form']['note'])
       formInsertPage2.val(data['form']['page2'])
@@ -3284,7 +3353,6 @@
       formInsertXresender.val(data['form']['xresender'])
       formInsertXsend.val(data['form']['xsend'])
       formInsertXsender.val(data['form']['xsender'])
-      formInsertResult.val(data['form']['result'])
     }
 
     if (data['form']['printer'] >= 3) {
@@ -3294,9 +3362,6 @@
     }
 
     if (data['form']['printer'] >= 4) {
-      $(".status").prop('checked', false)
-      $(".status-" + data['form']['status']['index']).prop('checked', true)
-
       formInsertPage4.val(data['form']['page4'])
       formInsertNote.val(data['form']['note'])
       formInsertIreceiverEmploy.val(data['form']['ireceiveremploy'])
@@ -3738,7 +3803,17 @@
             html = html.replace(/examdate-0/g, examdate[0])
             html = html.replace(/examdate-1/g, examdate[1])
             html = html.replace(/examdate-2/g, examdate[2])
-            html = html.replace('(result)', data['result'].replace(/\n/g, '<br>'))
+            var disabled = $('#form-insert-result').attr('disabled')
+            if (disabled) {
+              var res = ''
+              $('.results').each((index, item) => {
+                if (item.value) res += '<p> '+ item.value +' </p>'
+              })
+              html = html.replace('(result)', res)
+            }
+            else {
+              html = html.replace('(result)', data['result'].replace(/\n/g, '<br>'))
+            }
             var noteString = ''
             if (trim(data['note'])) {
               // (note)
@@ -3853,7 +3928,19 @@
             
             html = html.replace('(exam)', parse)
             html = html.replace('(mcode)', data['mcode'])
-            html = html.replace('result', tabbed + data['result'].replace(/\n/g, '<br>' + tabbed))
+            var disabled = $('#form-insert-result').attr('disabled')
+            if (disabled) {
+              var res = ''
+              $('.results').each((index, item) => {
+                if (item.value) res += '<p> '+ tabbed + ''+ item.value +' </p>'
+              })
+              html = html.replace('result', res)
+            }
+            else {
+              html = html.replace('result', tabbed + data['result'].replace(/\n/g, '<br>' + tabbed))
+            }
+
+            // html = html.replace('result', tabbed + data['result'].replace(/\n/g, '<br>' + tabbed))
             var owner = ''
             if (trim(data['ownermail']) || trim(data['ownerphone'])) {
               owner += '<p class="p14"> &emsp;&emsp; Số điện thoại: '+data['ownerphone']+'</p><p class="p14"> &emsp;&emsp; Email: '+data['ownermail']+'</p>'
