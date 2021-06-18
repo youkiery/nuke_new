@@ -657,11 +657,11 @@
         <div class="col-sm-12 input-group">
           <textarea class="form-control" id="form-insert-result"></textarea>
           <div class="input-group-btn">
-            <button class="btn btn-info" onclick="toggleResult()">
-              <span class="glyphicon glyphicon-plus"></span>
-            </button>
           </div>
         </div>
+        <button class="btn btn-info" onclick="toggleResult()">
+          <span class="glyphicon glyphicon-plus"></span>
+        </button>
       </div>
       <div id="results"></div>      
     </div>
