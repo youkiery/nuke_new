@@ -28,8 +28,8 @@
 <p class="p14"> &emsp;&emsp; Tên khách hàng: senderemploy  </p> 
 <p class="p14"> &emsp;&emsp; Địa chỉ: xaddress </p>
 (info) owner 
-<p style="width: 60%; float: left;" class="p14"> &emsp;&emsp; Loài động vật được lấy mẫu: (sample)</p>
-<p style="width: 35%; float: left; " class="p14">Loại mẫu: (sampletype)</p> 
+<p class="p14"> &emsp;&emsp; Loài động vật được lấy mẫu: (sample)</p>
+<p class="p14"> &emsp;&emsp; Loại mẫu: (sampletype)</p> 
 <p style="clear: left; width: 60%; float: left;" class="p14"> &emsp;&emsp; Số lượng mẫu: number (numberword) </p> 
 <p style="width: 35%; float: left;" class="p14">Số mẫu xét nghiệm: (examsample)</p>
 <p class="p14" style="clear: left;"> &emsp;&emsp; Ký hiệu mẫu: samplecode </p>
