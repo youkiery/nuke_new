@@ -341,7 +341,7 @@ function checkPrinter($id, $form) {
 
 function precheck($data) {
 	$check = '';
-	$except = array('note', 'other', 'xnote', 'fax', 'owner', 'sampleplace', 'resend', 'iresend', 'xreceive', 'xreceiver', 'xsender', 'xsend', 'vnote', 'target', 'examdate', 'examdate2', 'ownerphone', 'ownermail', 'result', 'xresend', 'phone', 'mail', 'content', 'reformer', 'ownphone', 'ownaddress');
+	$except = array('note', 'other', 'xnote', 'fax', 'owner', 'sampleplace', 'resend', 'iresend', 'xreceive', 'xreceiver', 'xsender', 'xsend', 'vnote', 'target', 'examdate', 'examdate2', 'ownerphone', 'result', 'ownermail', 'xresend', 'phone', 'mail', 'content', 'reformer', 'ownphone', 'ownaddress');
 	foreach ($data as $key => $row) {
 		// if ($key == 'page') {
 		// 	die("$row");

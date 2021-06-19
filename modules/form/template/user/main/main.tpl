@@ -654,16 +654,13 @@
         <label class="col-sm-6">
           Kết quả
         </label>
-        <div class="col-sm-12 input-group">
-          <textarea class="form-control" id="form-insert-result"></textarea>
-          <div class="input-group-btn">
-          </div>
+        <div class="col-sm-12">
+          <div id="insert-result"></div>
+          <button class="btn btn-info" onclick="insertResult()">
+            <span class="glyphicon glyphicon-plus"></span>
+          </button>
         </div>
-        <button class="btn btn-info" onclick="toggleResult()">
-          <span class="glyphicon glyphicon-plus"></span>
-        </button>
       </div>
-      <div id="results"></div>      
     </div>
 
     <div class="row form-group boxed box-5 box-5-19 box-4 box-4-20">
@@ -1329,6 +1326,7 @@
     exam: ['']
   }]
   var global = {
+    result: [],
     select: false,
     signer: JSON.parse('{signer}'),
     secretary: {
@@ -2907,44 +2905,81 @@
     infoData[id].push(html)
   }
 
-  function toggleResult(result = []) {
-    var disabled = $('#form-insert-result').attr('disabled')
-    if (disabled) {
-      $('#results').fadeOut()
-      $('#form-insert-result').attr('disabled', false)
-    }
-    else {
-      var html = ''
-      if (result.length) {
-        result.forEach((item, index) => {
-        html += `
-          <div class="row form-group">
-            <label class="col-sm-1">  </label>
-            <label class="col-sm-5">  </label>
-            <div class="col-sm-12">
-              <input type="text" class="form-control results" id="results-`+index+`" autocomplete="off" value="`+ item +`">
-            </div>
-          </div>`
-        })
-      }
-      else {
-        var ig = getIgField()
-        ig.forEach((item, index) => {
-        html += `
-          <div class="row form-group">
-            <label class="col-sm-1">  </label>
-            <label class="col-sm-5"> `+ item.code +` </label>
-            <div class="col-sm-12">
-              <input type="text" class="form-control results" id="results-`+index+`" autocomplete="off">
-            </div>
-          </div>`
-        })
-      } 
-      $('#results').html(html)
-      $('#results').fadeIn()
-      $('#form-insert-result').attr('disabled', true)
-    }
+  function insertResult() {
+    global.result = []
+    $('.results').each((index, item) => {
+      global.result.push(item.value)
+    })
+    global.result.push('')
+    reloadResult()
   }
+
+  function reloadResult() {
+    var html = ''
+    global.result.forEach((item, index) => {
+      html += `
+        <div class="row form-group">
+          <div class="input-group">
+            <input type="text" class="form-control input-box results" id="results-` + index + `" autocomplete="off" value="`+ item +`">
+            <div class="input-group-btn">
+              <button class="btn btn-danger" onclick="removeResult(` + index + `)">
+                <span class="glyphicon glyphicon-remove"> </span>
+              </button>
+            </div>
+          </div>
+        </div>`
+    })
+    $('#insert-result').html(html)
+  }
+
+  function removeResult(remove_index) {
+    global.result = []
+    $('.results').each((index, item) => {
+      if (remove_index != index) global.result.push(item.value)
+    })
+
+    if (!global.result.length) global.result = ['']
+    reloadResult()
+  }
+
+  // function toggleResult(result = []) {
+  //   var disabled = $('#form-insert-result').attr('disabled')
+  //   if (disabled) {
+  //     $('#results').fadeOut()
+  //     $('#form-insert-result').attr('disabled', false)
+  //   }
+  //   else {
+  //     var html = ''
+  //     if (result.length) {
+  //       result.forEach((item, index) => {
+  //       html += `
+  //         <div class="row form-group">
+  //           <label class="col-sm-1">  </label>
+  //           <label class="col-sm-5">  </label>
+  //           <div class="col-sm-12">
+  //             <input type="text" class="form-control results" id="results-`+index+`" autocomplete="off" value="`+ item +`">
+  //           </div>
+  //         </div>`
+  //       })
+  //     }
+  //     else {
+  //       var ig = getIgField()
+  //       ig.forEach((item, index) => {
+  //       html += `
+  //         <div class="row form-group">
+  //           <label class="col-sm-1">  </label>
+  //           <label class="col-sm-5"> `+ item.code +` </label>
+  //           <div class="col-sm-12">
+  //             <input type="text" class="form-control results" id="results-`+index+`" autocomplete="off">
+  //           </div>
+  //         </div>`
+  //       })
+  //     } 
+  //     $('#results').html(html)
+  //     $('#results').fadeIn()
+  //     $('#form-insert-result').attr('disabled', true)
+  //   }
+  // }
 
   function removeInfo(id, index) {
     switch (id) {
@@ -3017,6 +3052,11 @@
     var data = {}
     var sampleCode = checkSamplecode(formInsertSampleCode.val(), formInsertNumber.val())
 
+    global.result = []
+    $('.results').each((index, item) => {
+      global.result.push(item.value)
+    })
+
     if (sampleCode['result']) {
       data = {
         code: formInsertCode.val(),
@@ -3044,7 +3084,7 @@
         examdate: formInsertExamDate.val(),
         xreceive: formInsertXreceive.val(),
         xsend: formInsertXsend.val(),
-        result: res,
+        result: global.result.join('@@'),
         xresend: formInsertXresend.val(),
         note: formInsertCnote.val(),
         page2: formInsertPage2.val(),
@@ -3109,16 +3149,11 @@
       case 2: 
         var sampleCode = checkSamplecode(formInsertSampleCode.val(), formInsertNumber.val())
         if (sampleCode['result']) {
-          var disabled = $('#form-insert-result').attr('disabled')
-          if (disabled) {
-            var res = []
-            $('.results').each((index, item) => {
-              res.push(item.value) 
-            })
-          }
-          else {
-            var res = formInsertResult.val()
-          }
+          global.result = []
+          $('.results').each((index, item) => {
+            global.result.push(item.value)
+          })
+
           data = {
             xcode: getInputs('xcode'),
             isenderunit: formInsertIsenderUnit.val(),
@@ -3131,7 +3166,7 @@
             iresend: formInsertIresend.val(),
             xreceive: formInsertXreceive.val(),
             xsend: formInsertXsend.val(),
-            result: res,
+            result: global.result,
             xresend: formInsertXresend.val(),
             note: formInsertCnote.val(),
             page2: formInsertPage2.val(),
@@ -3156,18 +3191,11 @@
       break;            
       case 4:
         var sampleCode = checkSamplecode(formInsertSampleCode.val(), formInsertNumber.val())
-        var disabled = $('#form-insert-result').attr('disabled')
-        if (disabled) {
-          var res = []
-          $('.results').each((index, item) => {
-            res.push(item.value) 
-          })
-        }
-        else {
-          var res = formInsertResult.val()
-        }
-
         if (sampleCode['result']) {
+          global.result = []
+          $('.results').each((index, item) => {
+            global.result.push(item.value)
+          })
           data = {
             receive: formInsertReceive.val(),
             xcode: getInputs('xcode'),
@@ -3185,7 +3213,7 @@
             samplereceiver: formInsertSampleReceiver.val(),
             examdate: formInsertExamDate.val(),
             examdate2: $("#form-insert-exam-date-2").val(),
-            result: res,
+            result: global.result,
             sample: formInsertSample.val(),
             note: formInsertNote.val(),
             ireceiveremploy: formInsertIreceiverEmploy.val(),
@@ -3201,6 +3229,11 @@
       case 5:
         var sampleCode = checkSamplecode(formInsertSampleCode.val(), formInsertNumber.val())
         if (sampleCode['result']) {
+          global.result = []
+          $('.results').each((index, item) => {
+            global.result.push(item.value)
+          })
+
           data = {
             xcode: getInputs('xcode'),
             sender: formInsertSenderEmploy.val(),
@@ -3219,7 +3252,7 @@
             sample: formInsertSample.val(),
             owner: formInsertOwner.val(),
             exam: getExam(),
-            result: formInsertResult.val(),
+            result: global.result,
             receive: formInsertReceive.val(),
             ownerphone: formInsertOwnerPhone.val(),
             ownermail: formInsertOwnerMail.val(),
@@ -3321,19 +3354,8 @@
     if (data['form']['printer'] >= 2) {
       $(".status").prop('checked', false)
       $(".status-" + data['form']['status']['index']).prop('checked', true)
-      if (typeof(data['form']['result']) == 'object') {
-        toggleResult(data['form']['result'])
-        // var length = data['form']['result'].length
-        // for (let i = 0; i < length; i++) {
-        //   var selector = $('#results-'+ i) 
-        //   if (selector.length) {
-        //     selector.val(data['form']['result'][i])
-        //   }
-        // }
-      }
-      else {
-        formInsertResult.val(data['form']['result'])
-      }
+      global.result = data['form']['result']
+      reloadResult()
 
       var xcode = data['form']['xcode'].split(',')
       formInsertCnote.val(data['form']['note'])
@@ -3650,6 +3672,7 @@
       }
       
       if (Object.keys(data).length) {
+        var tabbed = '&emsp;&emsp;'
         var html = former[id]
         id = Number(id)
         var prop = 0
@@ -3719,8 +3742,13 @@
             html = html.replace('xreceiver', data['xreceiver'])
             html = html.replace('xresender', data['xresender'])
 
+            global.result = []
+            $('.results').each((index, item) => {
+              global.result.push(item.value)
+            })
+
             if (trim(data['result'])) {
-              html = html.replace('(result)', '<br>- Kết quả: ' + data['result'].replace(/\n/g, '; '))
+              html = html.replace('(result)', '<br>- Kết quả: <br>' + global.result.join('<br>'))
             }
             else {
               html = html.replace('(result)', '<br>- Kết quả: .........................................................................................................................................................................................................................<br>..........................................................................................................................................................................................................................................')
@@ -3803,17 +3831,13 @@
             html = html.replace(/examdate-0/g, examdate[0])
             html = html.replace(/examdate-1/g, examdate[1])
             html = html.replace(/examdate-2/g, examdate[2])
-            var disabled = $('#form-insert-result').attr('disabled')
-            if (disabled) {
-              var res = ''
-              $('.results').each((index, item) => {
-                if (item.value) res += '<p> '+ item.value +' </p>'
-              })
-              html = html.replace('(result)', res)
-            }
-            else {
-              html = html.replace('(result)', data['result'].replace(/\n/g, '<br>'))
-            }
+
+            var res = ''
+            $('.results').each((index, item) => {
+              if (item.value) res += '<p> '+ tabbed + item.value +' </p>'
+            })
+            html = html.replace('(result)', res)
+
             var noteString = ''
             if (trim(data['note'])) {
               // (note)
@@ -3854,7 +3878,6 @@
               data['xcode'] = data['xcode'].split(',')
             }
             var iresend = data['noticetime'].split('/')
-            var tabbed = '&emsp;&emsp;'
             
             html = html.replace('(receiveleader-signer)', Number(data['signer']['receiveleader']) ? '<img src="'+ global['signer'][data['signer']['receiveleader']]['url'] +'">' : '<br><br><br>')
             
@@ -3928,17 +3951,12 @@
             
             html = html.replace('(exam)', parse)
             html = html.replace('(mcode)', data['mcode'])
-            var disabled = $('#form-insert-result').attr('disabled')
-            if (disabled) {
-              var res = ''
-              $('.results').each((index, item) => {
-                if (item.value) res += '<p> '+ tabbed + ''+ item.value +' </p>'
-              })
-              html = html.replace('result', res)
-            }
-            else {
-              html = html.replace('result', tabbed + data['result'].replace(/\n/g, '<br>' + tabbed))
-            }
+
+            var res = ''
+            $('.results').each((index, item) => {
+              if (item.value) res += '<p> '+ tabbed + item.value +' </p>'
+            })
+            html = html.replace('result', res)
 
             // html = html.replace('result', tabbed + data['result'].replace(/\n/g, '<br>' + tabbed))
             var owner = ''

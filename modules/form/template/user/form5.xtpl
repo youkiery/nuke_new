@@ -40,7 +40,7 @@ target
 <p class="p14"> &emsp;&emsp; <b> <u> Chỉ tiêu xét nghiệm: </u> </b> </p>
 <div class="p14">(exam)</div>
 note
-<p class="p14" style="clear: both;"> &emsp;&emsp; <b> <u> Kết quả: </u> </b> </p>
+<p class="p14" style="clear: both;"> &emsp;&emsp;<b><u>Kết quả: </u> </b> </p>
 <div class="p14">result</div>
 <p class="p14"> <i> &emsp;&emsp;(Chi tiết xem phiếu kết quả xét nghiệm số: xcode-0/xcode-1/xcode-2.CĐXN của trạm chẩn đoán xét nghiệm bệnh động vật)./. </i></p>
 <div style="width: 60%; float: left;"><b class="p12"> <b> <i> Nơi nhận: </i> </b> </b> <p class="p11"> receivedis </p></div>
