@@ -2916,10 +2916,12 @@
 
   function reloadResult() {
     var html = ''
+    var code = checkSamplecode($('#form-insert-sample-code').val(), $('#form-insert-number').val())
     global.result.forEach((item, index) => {
       html += `
         <div class="row form-group">
           <div class="input-group">
+            <span class="input-group-addon"> `+ (code.list[index] ? code.list[index] : '') +` </span>
             <input type="text" class="form-control input-box results" id="results-` + index + `" autocomplete="off" value="`+ item +`">
             <div class="input-group-btn">
               <button class="btn btn-danger" onclick="removeResult(` + index + `)">
