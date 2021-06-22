@@ -262,6 +262,28 @@ if (!empty($action)) {
       $result['html'] = $xtpl->text();
       $result['status'] = 1;
     break;
+    // break;
+    case 'print-x2-list':
+      $list = $nv_Request->get_array('list', 'post');
+
+      $xtpl = new XTemplate("print-x2-list.tpl", PATH2);
+
+      $index = 1;
+      $date = date('d/m/Y');
+      foreach ($list as $id) {
+        $sql = 'select * from `'. PREFIX .'_row` where id = ' . $id;
+        $query = $db->query($sql);
+        $print = $query->fetch();
+        $xtpl->assign('index', $index ++);
+        $xtpl->assign('date', $date);
+        $xtpl->assign('unit', $print['sender']);
+        $xtpl->assign('number', $print['number']);
+        $xtpl->parse('main.row');
+      }      
+      $xtpl->parse('main');
+      $result['html'] = $xtpl->text();
+      $result['status'] = 1;
+    break;
     case 'get-remind':
       $name = $nv_Request->get_string('name', 'post');
       $type = $nv_Request->get_string('type', 'post');

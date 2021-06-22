@@ -3,6 +3,7 @@
   <table class="table table-bordered">
     <thead>
       <tr>
+        <th> <input type="checkbox" id="checkall" onchange="change()"> </th>
         <th> Số thông báo </th>
         <th> Ngày thông báo </th>
         <th> Số ĐKXN </th>
@@ -11,8 +12,9 @@
       </tr>
     </thead>
     <!-- BEGIN: row -->
-    <tbody id="{id}">
+    <tbody>
       <tr>
+        <td> <input class="check" type="checkbox" id="{id}"> </td>
         <td> {notice} </td>
         <td> {noticetime} </td>
         <td> {xcode} </td>

@@ -92,6 +92,21 @@
   </div>
 </div>
 
+<div id="modal-print2" class="modal fade" role="dialog">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-body">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <button class="btn btn-info" onclick="printX2Submit()">
+          <span class="glyphicon glyphicon-print"></span>
+        </button>
+        <div class="form-group"></div>
+        <div id="print2-content"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="form-summary" class="modal fade" role="dialog">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
@@ -1103,9 +1118,10 @@
       </div>
     </form>
 
-    <button class="btn btn-info" style="float: right;" onclick="selectRow(this)">
-      <span class="glyphicon glyphicon-unchecked"></span>
-    </button>
+    <button class="btn btn-info" style="float: right;" onclick="printX2()">
+      <img src="/assets/images/letter.png" style="width: 15px; height: 15px;">
+      <!-- <span class="glyphicon glyphicon-file"></span> -->
+    </button>  
     <button class="btn btn-info" style="float: right;" onclick="printX()">
       <span class="glyphicon glyphicon-print"></span>
     </button>  
@@ -1369,8 +1385,7 @@
     htmlInfo = formInsertInfo.html()
     var x = strHref.split("#")[1]
     if (x) {
-      $(".xmenu").removeClass('active')
-      $("#x" + x).addClass('active')
+      $('[href="#'+ x +'"]').tab('show');
     }
 
     addInfo(1)
@@ -1467,14 +1482,15 @@
   }
 
   function printX() {
-    if (global['select'].length) {
-      var list = []
-      global['select'].forEach((item, index) => {
-        list.push(item.getAttribute('id'))
-      })
+    var list = []
+    $('.check').each((index, item) => {
+      list.push(item.getAttribute('id'))
+    })
+
+    if (list.length) {
       freeze()
       $.post(
-        global['url'],
+        '',
         {action: 'print-x-list', list: list},
         (response, status) => {
           checkResult(response, status).then(data => {  
@@ -1484,6 +1500,37 @@
         }
       )
     }    
+  }
+
+  function printX2() {
+    var list = []
+    $('.check').each((index, item) => {
+      list.push(item.getAttribute('id'))
+    })
+
+    if (list.length) {
+      freeze()
+      $.post(
+        '',
+        {action: 'print-x2-list', list: list},
+        (response, status) => {
+          checkResult(response, status).then(data => {  
+            $("#print2-content").html(data['html'])
+            $("#modal-print2").modal('show')
+          }, () => {})
+        }
+      )
+    }    
+  }
+
+  function printX2Submit() {
+    var winPrint = window.open(origin, '_blank', 'left=0,top=0,width=800,height=600');
+    winPrint.focus()
+    winPrint.document.write($("#print2-content").html());
+    setTimeout(() => {
+      winPrint.print()
+      winPrint.close()
+    }, 300)
   }
 
   function printXSubmit() {
@@ -2812,6 +2859,11 @@
     formInsertTypeOther.val('')
   }
 
+  function change() {
+    var check = $('#checkall').prop('checked')
+    $('.check').prop('checked', check)
+  }
+
   function summary() {
     formSummary.modal('show')
   }
@@ -3512,9 +3564,9 @@
     return data
   }
 
-  function getSecretaryFilter2() {
+  function getSecretaryFilter2(page) {
     var data = {
-      page: global['secretary2']['page'],
+      page: page,
       keyword: sfilter2Keyword.val(),
       xcode: sfilter2Xcode.val(),
       limit: sfilter2Limit.val(),
@@ -3573,7 +3625,7 @@
     else if (secret_tab == 'văn thư') {
       $.post(
         strHref,
-        {action: 'secretaryfilter2', filter: getSecretaryFilter2()},
+        {action: 'secretaryfilter2', filter: getSecretaryFilter2(page)},
         (response, status) => {
           checkResult(response, status).then(data => {
             global['secretary2']['page'] = page

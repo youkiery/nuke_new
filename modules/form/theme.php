@@ -209,7 +209,7 @@ function secretaryList($filter = array('page' => 1, 'keyword' => '', 'sample' =>
 
 function secretaryList2($filter = array('page' => 1, 'keyword' => '', 'sample' => '', 'unit' => '', 'exam' => '', 'xcode' => '', 'pay' => '0', 'limit' => 10, 'owner' => '')) {
   global $db, $user_info;
-  $xtpl = new XTemplate("secretary2-list.tpl", PATH);
+  $xtpl = new XTemplate("secretary2-list.tpl", PATH2);
 
   $today = time();
   if (empty($filter['end'])) {
