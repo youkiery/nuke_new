@@ -188,6 +188,7 @@
   <!-- BEGIN: printx -->
   <li class="xmenu" id="xmenu4"><a data-toggle="tab" href="#menu4"> Văn thư </a></li>
   <!-- END: printx -->
+  <li><a href="/form/statistic"> Thống kê </a></li>
 </ul>
 
 <div class="tab-content">

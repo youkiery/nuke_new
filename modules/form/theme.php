@@ -124,7 +124,7 @@ function summaryContent($from, $end, $exam = '', $unit = '', $sample = '') {
 
 function secretaryList($filter = array('page' => 1, 'keyword' => '', 'sample' => '', 'unit' => '', 'exam' => '', 'xcode' => '', 'pay' => '0', 'limit' => 10, 'owner' => '')) {
   global $db, $user_info;
-  $xtpl = new XTemplate("secretary-list.tpl", PATH);
+  $xtpl = new XTemplate("secretary-list.tpl", PATH2);
 
   $today = time();
   if (empty($filter['end'])) {

@@ -116,6 +116,7 @@
   <!-- BEGIN: printx -->
   <li><a href="/{module_name}/#menu4"> Văn thư </a></li>
   <!-- END: printx -->
+  <li><a href="/form/statistic"> Thống kê </a></li>
 </ul>
   <!-- BEGIN: secretary2 -->
   <div class="tab-pane active">
