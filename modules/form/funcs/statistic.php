@@ -54,8 +54,10 @@ if (!empty($action)) {
         }
         if (empty($data[$check])) $data[$check] = array(
           'name' => $check,
+          'unit' => array(),
           'list' => array()
         );
+        if (array_search($row['sender'], $data[$check]['unit']) === false) $data[$check]['unit'] []= $row['sender'];
         // parse bệnh, đưa vào thống kê
         $ig = json_decode($row['ig']);
         foreach ($ig as $main) {
@@ -75,6 +77,7 @@ if (!empty($action)) {
       // list = [
       //   {
       //     name: '',
+      //     unit: '',
       //     list: [
       //       {
       //         disease: {
@@ -87,30 +90,35 @@ if (!empty($action)) {
       // ]
 
       $dd = 1;
-
+      $html = '';
       foreach ($data as $i => $province) {
         // if ($dd++ == 1) continue;
         $length = count($province['list']);
         $disease = array_keys($province['list']);
         if ($length) {
-          $xtpl->assign('index', $index ++);
-          $xtpl->assign('province', $province['name']);
-          $xtpl->assign('pro_cord', $length);
-          $xtpl->assign('disease', $disease[0]);
-          $xtpl->assign('stat', "Âm: " .$province['list'][$disease[0]][0] .", Dương: ". $province['list'][$disease[0]][1]);
-          $xtpl->parse('main.row');
+          $xtpl2 = new XTemplate('bick.tpl', PATH2);
+          $xtpl2->assign('index', $index ++);
+          $xtpl2->assign('province', (empty($province['name']) ? 'Không có tên' : $province['name']));
+          $xtpl2->assign('unit', implode('<br>', $province['unit']));
+          $xtpl2->assign('pro_cord', $length);
+          $xtpl2->assign('disease', $disease[0]);
+          $xtpl2->assign('stat', "Âm: " .$province['list'][$disease[0]][0] .", Dương: ". $province['list'][$disease[0]][1]);
+          $xtpl2->parse('main.row');
   
           for ($j = 1; $j < $length; $j++) {
-            $xtpl->assign('disease', $disease[$j]);
-            $xtpl->assign('stat', "Âm: " .$province['list'][$disease[$j]][0] .", Dương: ". $province['list'][$disease[$j]][1]);
-            $xtpl->parse('main.row2');
+            $xtpl2->assign('disease', $disease[$j]);
+            $xtpl2->assign('stat', "Âm: " .$province['list'][$disease[$j]][0] .", Dương: ". $province['list'][$disease[$j]][1]);
+            $xtpl2->parse('main.row2');
           }
           // $dd ++;
           // if ($dd == 3) 
-          break;
+          // break;
+          $xtpl2->parse('main');
+          $html .= $xtpl2->text();
         }
       }
 
+      $xtpl->assign('html', $html);
       $xtpl->parse('main');
       $result['status'] = 1;
       $result['html'] = $xtpl->text();

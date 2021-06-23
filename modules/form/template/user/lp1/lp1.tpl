@@ -864,7 +864,7 @@
       <p>
         <i> Nội dung thu: </i>
       </p>
-      <p> 4.1. Dịch vụ (theo TT.283-Bộ Tài chính và QĐ số 29 của Cơ quan) </p>
+      <p> 4.1. Dịch vụ (theo TT.283-Bộ Tài chính và QĐ số 16 của Cơ quan) </p>
       <p> a) Lấy mẫu: <span style="width: 100pt;"> (type) </span>; &nbsp; - Loài động vật: (sample)</p>
       <p> b) Xét nghiệm: Số phiếu kết quả xét nghiệm: (xcode) </p>
       (xcontent)

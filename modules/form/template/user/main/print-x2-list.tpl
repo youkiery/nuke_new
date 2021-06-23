@@ -11,13 +11,18 @@
   .text-center {
     text-align: center;
   }
+  .big {
+    font-size: 1.5em;
+  }
 </style>
+
+<p class="big text-center"> <b> DANH SÁCH GỬI BƯU PHẨM ĐẾN CÁC ĐƠN VỊ </b> </p>
+
 <table>
   <tr>
     <th> STT </th>
     <th> Ngày tháng </th>
     <th> Tên đơn vị </th>
-    <th> Số lượng </th>
     <th> Ký nhận </th>
   </tr>
   <!-- BEGIN: row -->
@@ -25,7 +30,6 @@
     <td class="text-center"> {index} </td>
     <td> {date} </td>
     <td> {unit} </td>
-    <td class="text-center"> {number} </td>
     <td>  </td>
   </tr>
   <!-- END: row -->

@@ -3,6 +3,7 @@
 <tr>
   <td rowspan="{pro_cord}"> {index} </td>
   <td rowspan="{pro_cord}"> {province} </td>
+  <td rowspan="{pro_cord}"> {unit} </td>
   <td> {disease} </td>
   <td> {stat} </td>
   <td> {link} </td>
