@@ -207,17 +207,17 @@ function secretaryList($filter = array('page' => 1, 'keyword' => '', 'sample' =>
   return $xtpl->text();
 }
 
-function secretaryList2($filter = array('page' => 1, 'keyword' => '', 'sample' => '', 'unit' => '', 'exam' => '', 'xcode' => '', 'pay' => '0', 'limit' => 10, 'owner' => '')) {
+function secretaryList2($filter = array('page' => 1, 'keyword' => '', 'sample' => '', 'unit' => '', 'exam' => '', 'xcode' => '', 'pay' => '0', 'limit' => 100, 'owner' => '')) {
   global $db, $user_info;
   $xtpl = new XTemplate("secretary2-list.tpl", PATH2);
 
   $today = time();
   if (empty($filter['end'])) {
-    $filter['end'] = date('d/m/Y', $today);
+    $filter['end'] = date('d/m/Y');
   }
 
   if (empty($filter['from'])) {
-    $filter['from'] = date('d/m/Y', $today - 60 * 60 * 24 * 30);
+    $filter['from'] = date('d/m/Y');
   }
 
   $filter['from'] = totime($filter['from']);

@@ -1072,7 +1072,7 @@
             <option value="20">20</option>
             <option value="50">50</option>
             <option value="75">75</option>
-            <option value="100">100</option>
+            <option value="100" selected>100</option>
           </select>
         </div>
         <div class="col-sm-4">
@@ -1105,7 +1105,7 @@
         </div>
 
         <div class="col-sm-4">
-          <input type="text" class="form-control" id="sfilter2-from" value="{last_week}">
+          <input type="text" class="form-control" id="sfilter2-from" value="{today}">
         </div>
 
         <div class="col-sm-4">
@@ -1483,7 +1483,7 @@
 
   function printX() {
     var list = []
-    $('.check').each((index, item) => {
+    $('.check:checked').each((index, item) => {
       list.push(item.getAttribute('id'))
     })
 
@@ -1504,7 +1504,7 @@
 
   function printX2() {
     var list = []
-    $('.check').each((index, item) => {
+    $('.check:checked').each((index, item) => {
       list.push(item.getAttribute('id'))
     })
 

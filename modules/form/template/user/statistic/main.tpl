@@ -19,6 +19,65 @@
   .col-6 {
     width: 50%;
   }
+
+  .dropdown-check-list {
+    display: inline-block;
+  }
+
+  .dropdown-check-list .anchor {
+    position: relative;
+    cursor: pointer;
+    display: inline-block;
+    padding: 5px 50px 5px 10px;
+    width: 100%;
+  }
+
+  .dropdown-check-list .anchor:after {
+    position: absolute;
+    content: "";
+    border-left: 2px solid black;
+    border-top: 2px solid black;
+    padding: 5px;
+    right: 10px;
+    top: 20%;
+    -moz-transform: rotate(-135deg);
+    -ms-transform: rotate(-135deg);
+    -o-transform: rotate(-135deg);
+    -webkit-transform: rotate(-135deg);
+    transform: rotate(-135deg);
+  }
+
+  .dropdown-check-list .anchor:active:after {
+    right: 8px;
+    top: 21%;
+  }
+
+  .dropdown-check-list ul.items {
+    padding: 2px;
+    display: none;
+    margin: 0;
+    border: 1px solid #ccc;
+    border-top: none;
+  }
+
+  .dropdown-check-list ul.items li {
+    list-style: none;
+  }
+
+  .dropdown-check-list.visible .anchor {
+    color: #0094ff;
+  }
+
+  .dropdown-check-list.visible .items {
+    display: block;
+    max-height: 200px;
+    background: white;
+    overflow: scroll;
+  }
+  .items label {
+    width: 100%;
+    border-top: 1px solid lightgray;
+  }
 </style>
 <link rel="stylesheet" type="text/css" href="/assets/js/jquery-ui/jquery-ui.min.css">
 <script type="text/javascript" src="/assets/js/jquery-ui/jquery-ui.min.js"></script>
@@ -61,13 +120,14 @@
       <label> Theo loại bệnh </label>
       <input class="form-control" id="disease">
     </div>
-    <div class="col-4">
-      <label> Loại động vật </label>
-      <select class="form-control" id="species">
+    <label> Loại động vật </label>
+    <div id="list1" class="form-control dropdown-check-list col-4" tabindex="100">
+      <span class="anchor"> Chọn loại động vật </span>
+      <ul class="items">
         <!-- BEGIN: species -->
-        <option value="{name}"> {name} </option>
+        <li> <label> <input class="spc" type="checkbox" value="{name}" /> {name}</label> </li>
         <!-- END: species -->
-      </select>
+      </ul>
     </div>
   </div>
   <button class="btn btn-info btn-block">
@@ -75,20 +135,34 @@
   </button>
 </form>
 
-<div id="content">
+<div id="content" style="min-height: 200px;">
 
 </div>
 
 <script src="/modules/core/js/vhttp.js"></script>
 <script>
-  $('.date').datepicker({
-    format: 'dd/mm/yyyy',
-    changeMonth: true,
-    changeYear: true
-  });
+  var checkList = document.getElementById('list1');
+
+  $(document).ready(() => {
+    checkList.getElementsByClassName('anchor')[0].onclick = function (evt) {
+      if (checkList.classList.contains('visible'))
+        checkList.classList.remove('visible');
+      else
+        checkList.classList.add('visible');
+    }
+    $('.date').datepicker({
+      format: 'dd/mm/yyyy',
+      changeMonth: true,
+      changeYear: true
+    });
+  })
 
   function filter(e) {
     e.preventDefault()
+    var species = []
+    $('.spc:checked').each((index, item) => {
+      species.push(item.value)
+    })
 
     vhttp.checkelse('', {
       action: 'filter',
@@ -96,7 +170,7 @@
       end: $('#end').val(),
       province: $('#province').val(),
       disease: $('#disease').val(),
-      species: $('#species').val(),
+      species: species,
     }).then(resp => {
       $('#content').html(resp.html)
     })

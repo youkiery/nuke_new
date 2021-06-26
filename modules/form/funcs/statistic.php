@@ -17,7 +17,7 @@ $filter = array(
   'end' => $nv_Request->get_string('end', 'post', ""),
   'province' => $nv_Request->get_string('province', 'post', ""),
   'disease' => $nv_Request->get_string('disease', 'post', ""),
-  'species' => $nv_Request->get_string('species', 'post', ""),
+  'species' => $nv_Request->get_array('species', 'post', ""),
 );
 
 $province = array('Đắk Lắk', 'An Giang', 'Bà Rịa Vũng Tàu', 'Bình Dương', 'Bình Phước', 'Bình Thuận', 'Bình Định', 'Bạc Liêu', 'Bắc Giang', 'Bắc Kạn', 'Bắc Ninh', 'Bến Tre', 'Cao Bằng', 'Cà Mau', 'Cần Thơ', 'Gia Lai', 'Hà Nội', 'Hà Giang', 'Hà Nam', 'Hà Tĩnh', 'Hòa Bình', 'Hưng Yên', 'Hải Dương', 'Hải Phòng', 'Hậu Giang', 'Hồ Chí Minh', 'Khánh Hòa', 'Kiên Giang', 'Kon Tum', 'Lai Châu', 'Long An', 'Lào Cai', 'Lâm Đồng', 'Lạng Sơn', 'Nam Định', 'Nghệ An', 'Ninh Bình', 'Ninh Thuận', 'Phú Thọ', 'Phú Yên', 'Quảng Bình', 'Quảng Nam', 'Quảng Ngãi', 'Quảng Ninh', 'Quảng Trị', 'Sóc Trăng', 'Sơn La', 'Thanh Hóa', 'Thái Bình', 'Thái Nguyên', 'Thừa Thiên Huế', 'Tiền Giang', 'Trà Vinh', 'Tuyên Quang', 'Tây Ninh', 'Vĩnh Long', 'Vĩnh Phúc', 'Yên Bái', 'Điện Biên', 'Đà Nẵng', 'Đắk Nông', 'Đồng Nai', 'Đồng Tháp');
@@ -36,8 +36,12 @@ if (!empty($action)) {
       if (!empty($filter['disease'])) {
         $xtra []= 'exam like "%'. $filter['disease'] .'%"';
       }
-      if (!empty($filter['species'])) {
-        $xtra []= 'sample like "%'. $filter['species'] .'%"';
+      if (count($filter['species'])) {
+        $temp = [];
+        foreach ($filter['species'] as $species) {
+          $temp []= 'sample like "%'. $species .'%"';
+        }
+        $xtra []= '(' . implode(' or ', $temp) . ')';
       }
 
       $sql = 'select id, sender, ig from pet_form_row where (time between '. $filter['from'] .' and '. $filter['end'] .')'. (count($xtra) ? ' and '. implode(' and ', $xtra) : '');
