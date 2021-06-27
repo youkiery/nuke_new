@@ -18,6 +18,13 @@ define("MODAL_PATH", NV_ROOTDIR . "/modules/" . $module_file . '/modal/');
 
 require NV_ROOTDIR . '/modules/' . $module_file . '/global.functions.php';
 
+function searchObject($key, $list, $collumn){
+  foreach ($list as $index => $row) {
+    if ($row[$collumn] == $key) return $index;
+  }
+  return false;
+}
+
 if (empty($user_info) || !checkIsViewer($user_info['userid'])) {
   include ( NV_ROOTDIR . "/includes/header.php" );
   echo nv_site_theme('Chưa đăng nhập hoặc tài khoản không có quyền truy cập');

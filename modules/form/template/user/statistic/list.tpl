@@ -6,7 +6,6 @@
     <th> Đơn vị </th>
     <th> Bệnh </th>
     <th> Thống kê </th>
-    <th> Link </th>
   </tr>
   {html}
 </table>

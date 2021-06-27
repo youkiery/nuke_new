@@ -16,7 +16,7 @@ $filter = array(
   'from' => $nv_Request->get_string('from', 'post', ""),
   'end' => $nv_Request->get_string('end', 'post', ""),
   'province' => $nv_Request->get_string('province', 'post', ""),
-  'disease' => $nv_Request->get_string('disease', 'post', ""),
+  'disease' => $nv_Request->get_array('disease', 'post', ""),
   'species' => $nv_Request->get_array('species', 'post', ""),
 );
 
@@ -32,9 +32,13 @@ if (!empty($action)) {
       $filter['end'] = totime($filter['end']);
 
       $xtra = array();
-      if (!empty($filter['province'])) $xtra []= 'sender like "%'. $filter['province'] .'%"';
-      if (!empty($filter['disease'])) {
-        $xtra []= 'exam like "%'. $filter['disease'] .'%"';
+      if (!empty($filter['province'])) $xtra []= 'sampleplace like "%'. $filter['province'] .'%"';
+      if (count($filter['disease'])) {
+        $temp = [];
+        foreach ($filter['disease'] as $disease) {
+          $temp []= 'exam like "%'. $disease .'%"';
+        }
+        $xtra []= '(' . implode(' or ', $temp) . ')';
       }
       if (count($filter['species'])) {
         $temp = [];
@@ -44,14 +48,16 @@ if (!empty($action)) {
         $xtra []= '(' . implode(' or ', $temp) . ')';
       }
 
-      $sql = 'select id, sender, ig from pet_form_row where (time between '. $filter['from'] .' and '. $filter['end'] .')'. (count($xtra) ? ' and '. implode(' and ', $xtra) : '');
+      // ownder, sampleplace
+
+      $sql = 'select id, sampleplace, ig from pet_form_row where (time between '. $filter['from'] .' and '. $filter['end'] .')'. (count($xtra) ? ' and '. implode(' and ', $xtra) : '');
       $query = $db->query($sql);
       $data = array();
       $index = 1;
       while ($row = $query->fetch()) {
         $check = '';
         foreach ($province as $value) {
-          if (mb_strpos($row['sender'], $value) !== false) {
+          if (mb_strpos($row['sampleplace'], $value) !== false) {
             $check = $value;
             break;
           }
@@ -59,19 +65,25 @@ if (!empty($action)) {
         if (empty($data[$check])) $data[$check] = array(
           'name' => $check,
           'unit' => array(),
-          'list' => array()
         );
-        if (array_search($row['sender'], $data[$check]['unit']) === false) $data[$check]['unit'] []= $row['sender'];
+        if ($pos = searchObject($row['sampleplace'], $data[$check]['unit'], 'name') === false) {
+          $pos = count($data[$check]['unit']);
+          $data[$check]['unit'] []= array(
+            'name' => $row['sampleplace'],
+            'list' => array()
+          );
+        }
+
         // parse bệnh, đưa vào thống kê
         $ig = json_decode($row['ig']);
         foreach ($ig as $main) {
           foreach ($main->mainer as $mainer) {
             foreach ($mainer->note as $note) {
-              if (empty($data[$check]['list'][$note->note])) $data[$check]['list'][$note->note] = array(
+              if (empty($data[$check]['unit'][$pos]['list'][$note->note])) $data[$check]['unit'][$pos]['list'][$note->note] = array(
                 '0' => 0, '1' => 0 // 0: minus, 1: plus
               );
-              if (mb_strpos(mb_strtolower($note->result), 'dương') !== false) $data[$check]['list'][$note->note]['1'] ++;
-              else $data[$check]['list'][$note->note]['0'] ++;
+              if (mb_strpos(mb_strtolower($note->result), 'dương') !== false) $data[$check]['unit'][$pos]['list'][$note->note]['1'] ++;
+              else $data[$check]['unit'][$pos]['list'][$note->note]['0'] ++;
             }
           }
         }
@@ -81,44 +93,80 @@ if (!empty($action)) {
       // list = [
       //   {
       //     name: '',
-      //     unit: '',
-      //     list: [
-      //       {
-      //         disease: {
-      //           0: 0,
-      //           1: 0
-      //         }
-      //       }
-      //     ]
+      //     unit: [
+          //     name: '',
+          //     list: [
+          //       {
+          //         disease: {
+          //           0: 0,
+          //           1: 0
+          //         }
+          //       }
+          //     ]
+          //   }
+          // ]
       //   }
       // ]
 
       $dd = 1;
       $html = '';
       foreach ($data as $i => $province) {
-        // if ($dd++ == 1) continue;
-        $length = count($province['list']);
-        $disease = array_keys($province['list']);
-        if ($length) {
-          $xtpl2 = new XTemplate('bick.tpl', PATH2);
+        $total = 0;
+        foreach ($province['unit'] as $unit) {
+          $total += count($unit['list']);
+        }
+        if ($total) {
+          $xtpl2 = new XTemplate('pro.tpl', PATH2);
+          // echo json_encode($province['unit'][0]);die();
+
+          $length = count($province['unit'][0]['list']);
+          $unit = $province['unit'][0]['name'];
+          $disease = array_keys($province['unit'][0]['list']);
+
           $xtpl2->assign('index', $index ++);
           $xtpl2->assign('province', (empty($province['name']) ? 'Không có tên' : $province['name']));
-          $xtpl2->assign('unit', implode('<br>', $province['unit']));
-          $xtpl2->assign('pro_cord', $length);
+          $xtpl2->assign('pro_cord', $total);
+          $xtpl2->assign('uni_cord', $length);
+          $xtpl2->assign('unit', $unit);
           $xtpl2->assign('disease', $disease[0]);
-          $xtpl2->assign('stat', "Âm: " .$province['list'][$disease[0]][0] .", Dương: ". $province['list'][$disease[0]][1]);
+          $xtpl2->assign('stat', 'Âm: '. $province['unit'][0]['list'][$disease[0]][0] .', Dương: '. $province['unit'][0]['list'][$disease[0]][1]);
           $xtpl2->parse('main.row');
-  
-          for ($j = 1; $j < $length; $j++) {
+
+          $left = count($disease);
+          for ($j = 1; $j < $left; $j++) {
             $xtpl2->assign('disease', $disease[$j]);
-            $xtpl2->assign('stat', "Âm: " .$province['list'][$disease[$j]][0] .", Dương: ". $province['list'][$disease[$j]][1]);
-            $xtpl2->parse('main.row2');
+            $xtpl2->assign('stat', 'Âm: '. $province['unit'][0]['list'][$disease[$j]][0] .', Dương: '. $province['unit'][0]['list'][$disease[$j]][1]);
+            $xtpl2->parse('main.row3');
           }
-          // $dd ++;
-          // if ($dd == 3) 
-          // break;
+
           $xtpl2->parse('main');
           $html .= $xtpl2->text();
+
+          $length = count($province['unit']);
+          for ($j = 1; $j < $length; $j++) {
+            $xtpl2 = new XTemplate('pro.tpl', PATH2);
+            $current = $province['unit'][$j];
+
+            $length2 = count($current['list']);
+            $disease = array_keys($unit = $current['list']);
+
+            $xtpl2->assign('uni_cord', $length2);
+            $xtpl2->assign('unit', $unit = $current['name']);
+            $xtpl2->assign('disease', $disease[0]);
+            $xtpl2->assign('stat', 'Âm: '. $current['list'][$disease[0]][0] .', Dương: '. $current['list'][$disease[0]][1]);
+            $xtpl2->parse('main.row2');
+
+            $left = count($disease);
+            for ($k = 1; $k < $left; $k++) {
+              $disease = array_keys($current['list']);
+  
+              $xtpl2->assign('disease', $disease[$k]);
+              $xtpl2->assign('stat', 'Âm: '. $current['list'][$disease[$k]][0] .', Dương: '. $province['unit'][0]['list'][$disease[$k]][1]);
+              $xtpl2->parse('main.row3');
+            }
+            $xtpl2->parse('main');
+            $html .= $xtpl2->text();
+          }
         }
       }
 
@@ -173,6 +221,15 @@ while ($row = $query->fetch()) {
   $xtpl->assign('name', $row['name']);
   $xtpl->assign('value', $row['id']);
   $xtpl->parse("main.species");
+}
+
+$sql = 'select * from pet_form_remindv2 where type = "exam" order by rate desc';
+$query = $db->query($sql);
+
+while ($row = $query->fetch()) {
+  $xtpl->assign('name', $row['name']);
+  $xtpl->assign('value', $row['id']);
+  $xtpl->parse("main.disease");
 }
 
 $time = time();

@@ -22,13 +22,14 @@
 
   .dropdown-check-list {
     display: inline-block;
+    position: relative;
   }
 
   .dropdown-check-list .anchor {
     position: relative;
     cursor: pointer;
     display: inline-block;
-    padding: 5px 50px 5px 10px;
+    padding: 0px 50px 5px 10px;
     width: 100%;
   }
 
@@ -72,11 +73,17 @@
     display: block;
     max-height: 200px;
     background: white;
-    overflow: scroll;
+    overflow-y: scroll;
+    width: inherit;
+    position: absolute;
   }
+
   .items label {
     width: 100%;
     border-top: 1px solid lightgray;
+    white-space: nowrap;
+    overflow: hidden;
+    font-size: 0.8em;
   }
 </style>
 <link rel="stylesheet" type="text/css" href="/assets/js/jquery-ui/jquery-ui.min.css">
@@ -102,32 +109,41 @@
 
 <form class="form-group" onsubmit="return filter(event)">
   <div class="rows form-group">
-    <div class="col-6">
+    <div class="col-4">
       <label> Từ ngày </label>
       <input class="form-control date" id="from" value="{from}">
     </div>
-    <div class="col-6">
+    <div class="col-4">
       <label> Đến ngày </label>
       <input class="form-control date" id="end" value="{end}">
     </div>
-  </div>
-  <div class="row form-group">
     <div class="col-4">
       <label> Theo đơn vị </label>
       <input class="form-control" id="province">
     </div>
-    <div class="col-4">
+  </div>
+  <div class="row form-group">
+    <div class="col-6">
       <label> Theo loại bệnh </label>
-      <input class="form-control" id="disease">
+      <div class="form-control dropdown-check-list" tabindex="100" style="padding: 6px 0px;">
+        <span class="anchor"> Chọn loại bệnh </span>
+        <ul class="items">
+          <!-- BEGIN: disease -->
+          <li> <label> <input class="dis" type="checkbox" value="{name}" /> {name}</label> </li>
+          <!-- END: disease -->
+        </ul>
+      </div>
     </div>
-    <label> Loại động vật </label>
-    <div id="list1" class="form-control dropdown-check-list col-4" tabindex="100">
-      <span class="anchor"> Chọn loại động vật </span>
-      <ul class="items">
-        <!-- BEGIN: species -->
-        <li> <label> <input class="spc" type="checkbox" value="{name}" /> {name}</label> </li>
-        <!-- END: species -->
-      </ul>
+    <div class="col-6">
+      <label> Loại động vật </label>
+      <div class="form-control dropdown-check-list" tabindex="100" style="padding: 6px 0px;">
+        <span class="anchor"> Chọn loại động vật </span>
+        <ul class="items">
+          <!-- BEGIN: species -->
+          <li> <label> <input class="spc" type="checkbox" value="{name}" /> {name}</label> </li>
+          <!-- END: species -->
+        </ul>
+      </div>
     </div>
   </div>
   <button class="btn btn-info btn-block">
@@ -144,12 +160,17 @@
   var checkList = document.getElementById('list1');
 
   $(document).ready(() => {
-    checkList.getElementsByClassName('anchor')[0].onclick = function (evt) {
-      if (checkList.classList.contains('visible'))
-        checkList.classList.remove('visible');
-      else
-        checkList.classList.add('visible');
-    }
+    $(document).mouseup(function(e) {
+      var container = $(".dropdown-check-list")
+      if (!container.is(e.target) && container.has(e.target).length === 0) {
+        container.removeClass('visible')
+      }
+    })
+
+    $('.dropdown-check-list').click((e) => {
+      if (e.currentTarget.classList.contains('visible')) e.currentTarget.classList.remove('visible');
+      else e.currentTarget.classList.add('visible');
+    })
     $('.date').datepicker({
       format: 'dd/mm/yyyy',
       changeMonth: true,
@@ -163,13 +184,17 @@
     $('.spc:checked').each((index, item) => {
       species.push(item.value)
     })
+    var disease = []
+    $('.dis:checked').each((index, item) => {
+      disease.push(item.value)
+    })
 
     vhttp.checkelse('', {
       action: 'filter',
       from: $('#from').val(),
       end: $('#end').val(),
       province: $('#province').val(),
-      disease: $('#disease').val(),
+      disease: disease,
       species: species,
     }).then(resp => {
       $('#content').html(resp.html)
