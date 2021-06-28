@@ -341,16 +341,16 @@ if (!empty($action)) {
     case 'save-print':
       $data = $nv_Request->get_array('data', 'post');
 
-      foreach ($data as $id => $row) {
-        $sql = 'select * from `'. PREFIX .'_print` where rid = ' . $id;
+      foreach ($data as $row) {
+        $sql = 'select * from `'. PREFIX .'_print` where rid = ' . $row['id'];
         $query = $db->query($sql);
 
         if (empty($query->fetch())) {
-          $sql = 'insert into `'. PREFIX .'_print` (rid, customer, address, mobile, fax, mail) values('. $id .', "'. $row['customer'] .'", "'. $row['address'] .'", "'. $row['mobile'] .'", "'. $row['fax'] .'", "'. $row['mail'] .'")';
+          $sql = 'insert into `'. PREFIX .'_print` (rid, customer, address, mobile, fax, mail) values('. $row['id'] .', "'. $row['customer'] .'", "'. $row['address'] .'", "'. $row['mobile'] .'", "'. $row['fax'] .'", "'. $row['mail'] .'")';
           $db->query($sql);
         }
         else {
-          $sql = 'update  `'. PREFIX .'_print` set customer = "'. $row['customer'] .'", address = "'. $row['address'] .'", mobile = "'. $row['mobile'] .'", fax = "'. $row['fax'] .'", mail = "'. $row['mail'] .'" where rid = ' . $id;
+          $sql = 'update  `'. PREFIX .'_print` set customer = "'. $row['customer'] .'", address = "'. $row['address'] .'", mobile = "'. $row['mobile'] .'", fax = "'. $row['fax'] .'", mail = "'. $row['mail'] .'" where rid = ' . $row['id'];
           $db->query($sql);
         }
       }

@@ -1534,11 +1534,12 @@
   }
 
   function printXSubmit() {
-    if (global['select'].length) {
-      var list = []
-      global['select'].forEach((item, index) => {
-        list.push(item.getAttribute('id'))
-      })
+    var list = []
+    $('.check:checked').each((index, item) => {
+      list.push(item.getAttribute('id'))
+    })
+
+    if (list.length) {
       freeze()
       $.post(
         global['url'],
@@ -1559,16 +1560,22 @@
   }
 
   function savePrint() {
-    if (global['select'].length) {
-      var list = []
-      var data = {}
-      global['select'].forEach((item, index) => {
-        data[item.getAttribute('id')] = getSavePrintData(item.getAttribute('id'))
+    var list = []
+    $('.check:checked').each((index, item) => {
+      var id = item.getAttribute('id')
+      list.push({
+        id: id,
+        customer: $('#print-customer-'+ id).val(),
+        address: $('#print-address-'+ id).val(),
+        mobile: $('#print-mobile-'+ id).val(),
       })
+    })
+
+    if (list.length) {
       freeze()
       $.post(
         global['url'],
-        {action: 'save-print', data: data},
+        {action: 'save-print', data: list},
         (response, status) => {
           checkResult(response, status).then(data => {  
             alert_msg('Đã lưu')

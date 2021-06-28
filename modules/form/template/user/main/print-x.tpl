@@ -2,15 +2,16 @@
 <style>
   @page {
     size: A4 portrait;
-    margin: 5mm;
+    margin: 10mm;
   }
-  p {
-    width: 120mm;
+  div {
+    border: 2px solid black; padding: 0mm 5mm; width: 100%;
+    box-sizing: border-box;
   }
 </style>
 
 <!-- BEGIN: block -->
-<div style="border: 2px solid black; margin: 5mm 60mm 5mm 5mm; padding: 0mm 5mm;">
+<div>
   <p>
     Tên khách hàng: {customer}
   </p>

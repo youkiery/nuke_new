@@ -25,57 +25,14 @@
     position: relative;
   }
 
-  .dropdown-check-list .anchor {
-    position: relative;
-    cursor: pointer;
-    display: inline-block;
-    padding: 0px 50px 5px 10px;
-    width: 100%;
-  }
-
-  .dropdown-check-list .anchor:after {
-    position: absolute;
-    content: "";
-    border-left: 2px solid black;
-    border-top: 2px solid black;
-    padding: 5px;
-    right: 10px;
-    top: 20%;
-    -moz-transform: rotate(-135deg);
-    -ms-transform: rotate(-135deg);
-    -o-transform: rotate(-135deg);
-    -webkit-transform: rotate(-135deg);
-    transform: rotate(-135deg);
-  }
-
-  .dropdown-check-list .anchor:active:after {
-    right: 8px;
-    top: 21%;
-  }
-
-  .dropdown-check-list ul.items {
-    padding: 2px;
+  ul.items {
     display: none;
-    margin: 0;
-    border: 1px solid #ccc;
-    border-top: none;
-  }
-
-  .dropdown-check-list ul.items li {
-    list-style: none;
-  }
-
-  .dropdown-check-list.visible .anchor {
-    color: #0094ff;
-  }
-
-  .dropdown-check-list.visible .items {
-    display: block;
+    position: absolute;
+    width: inherit;
     max-height: 200px;
     background: white;
     overflow-y: scroll;
-    width: inherit;
-    position: absolute;
+    padding: 0px;
   }
 
   .items label {
@@ -125,25 +82,21 @@
   <div class="row form-group">
     <div class="col-6">
       <label> Theo loại bệnh </label>
-      <div class="form-control dropdown-check-list" tabindex="100" style="padding: 6px 0px;">
-        <span class="anchor"> Chọn loại bệnh </span>
-        <ul class="items">
-          <!-- BEGIN: disease -->
-          <li> <label> <input class="dis" type="checkbox" value="{name}" /> {name}</label> </li>
-          <!-- END: disease -->
-        </ul>
-      </div>
+      <input class="form-control dropdown-check-list" ref="disease" tabindex="100">
+      <ul class="items" id="disease">
+        <!-- BEGIN: disease -->
+        <li> <label> <input class="dis" type="checkbox" value="{name}" /> {name}</label> </li>
+        <!-- END: disease -->
+      </ul>
     </div>
     <div class="col-6">
       <label> Loại động vật </label>
-      <div class="form-control dropdown-check-list" tabindex="100" style="padding: 6px 0px;">
-        <span class="anchor"> Chọn loại động vật </span>
-        <ul class="items">
-          <!-- BEGIN: species -->
-          <li> <label> <input class="spc" type="checkbox" value="{name}" /> {name}</label> </li>
-          <!-- END: species -->
-        </ul>
-      </div>
+      <input class="form-control dropdown-check-list" ref="species" tabindex="100">
+      <ul class="items" id="species">
+        <!-- BEGIN: species -->
+        <li> <label> <input class="spc" type="checkbox" value="{name}" /> {name}</label> </li>
+        <!-- END: species -->
+      </ul>
     </div>
   </div>
   <button class="btn btn-info btn-block">
@@ -160,16 +113,21 @@
   var checkList = document.getElementById('list1');
 
   $(document).ready(() => {
-    $(document).mouseup(function(e) {
-      var container = $(".dropdown-check-list")
+    $(document).mouseup(function (e) {
+      var container = $(".items")
       if (!container.is(e.target) && container.has(e.target).length === 0) {
-        container.removeClass('visible')
+        $('.items').hide()
       }
     })
 
+    $('.dropdown-check-list').keyup((e) => {
+      var ref = e.currentTarget.getAttribute('ref')
+    })
+
     $('.dropdown-check-list').click((e) => {
-      if (e.currentTarget.classList.contains('visible')) e.currentTarget.classList.remove('visible');
-      else e.currentTarget.classList.add('visible');
+      var ref = e.currentTarget.getAttribute('ref')
+      if ($('#'+ ref).css('display') == 'block') $('#'+ ref).hide()
+      else $('#'+ ref).show()
     })
     $('.date').datepicker({
       format: 'dd/mm/yyyy',
