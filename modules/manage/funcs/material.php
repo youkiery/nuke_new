@@ -672,9 +672,8 @@ if (!empty($action)) {
             );
             $ce--;
           }
-          // echo json_encode($data);
 
-          if (!empty($source[$data['source']])) $source = $source[$data['source']];
+          if (!empty($source[$piece['source']])) $source = $source[$piece['source']];
           else $source = '';
           $xtpl->assign('source', $source);
           $xtpl->assign('type', $piece['type']);
@@ -696,7 +695,7 @@ if (!empty($action)) {
       $data = $nv_Request->get_array('data', 'post');
 
       $xtpl = new XTemplate("report-limit-list.tpl", PATH);
-      $sql = 'select * from `pet_manage_material` where name like "%' . $data['keyword'] . '%" order by name';
+      $sql = 'select * from `pet_manage_material` where active = 1 and name like "%' . $data['keyword'] . '%" order by name';
       $query = $db->query($sql);
       $index = 1;
 
