@@ -65,6 +65,7 @@ function importList() {
   $number = $query->fetch()['number'];
 
   $sql = 'select * from pet_manage_material_import order by id desc limit '. $filter['limit'] .' offset '. ($filter['page'] - 1) * $filter['limit'];
+  // $sql = 'select c.* from pet_manage_material_import a inner join pet_manage_material_import_detail b on a.id = b.importid inner join pet_manage_material_detail c on b.detailid = c.id order by id desc limit '. $filter['limit'] .' offset '. ($filter['page'] - 1) * $filter['limit'];
   $query = $db->query($sql);
   $list = array();
 
@@ -72,6 +73,7 @@ function importList() {
 
   $index = 1;
   while ($row = $query->fetch()) {
+    // echo json_encode($row);die();
     $count = countImport($row['id']);
     $xtpl->assign('index', $index++);
     $xtpl->assign('id', $row['id']);
@@ -102,6 +104,38 @@ function countImport($id) {
     $data['total'] += $row['number'];
   }
 
+  return $data;
+}
+
+function getImportId($id) {
+  global $db;
+
+  $sql = 'select a.number, a.date, b.expire, a.note, b.materialid as id, b.source from pet_manage_material_import_detail a inner join pet_manage_material_detail b on a.detailid = b.id where a.importid = '. $id;
+  $query = $db->query($sql);
+  $data = array();
+
+  while ($row = $query->fetch()) {
+    $row['note'] = $row['note'];
+    $row['date'] = date('d/m/Y', $row['date']);
+    $row['expire'] = date('d/m/Y', $row['expire']);
+    $data []= $row;
+  }
+  return $data;
+}
+
+function getExportId($id) {
+  global $db;
+
+  $sql = 'select a.number, a.date, b.expire, a.note, b.materialid as id, b.source from pet_manage_material_export_detail a inner join pet_manage_material_detail b on a.detailid = b.id where a.exportid = '. $id;
+  $query = $db->query($sql);
+  $data = array();
+
+  while ($row = $query->fetch()) {
+    $row['note'] = $row['note'];
+    $row['date'] = date('d/m/Y', $row['date']);
+    $row['expire'] = date('d/m/Y', $row['expire']);
+    $data []= $row;
+  }
   return $data;
 }
 
@@ -187,12 +221,12 @@ function deviceList() {
   $xtpl = new XTemplate("device-list.tpl", PATH);
   if (empty($user_info)) $xtpl->parse('main.no');
   else {
-    $sql = 'select * from `'. PREFIX .'device` where id in (select itemid from `'. PREFIX .'device_employ` where userid = '. $user_info['userid'] .')';
+    $sql = 'select * from `pet_manage_device` where id in (select itemid from `pet_manage_device_employ` where userid = '. $user_info['userid'] .')';
     $query = $db->query($sql);
     $index = 1;
   
     while ($row = $query->fetch()) {
-      $sql = 'select * from `'. PREFIX .'device_detail` where itemid = ' . $row['id'] . ' and time >= '. $start .' order by id desc limit 1';
+      $sql = 'select * from `pet_manage_device_detail` where itemid = ' . $row['id'] . ' and time >= '. $start .' order by id desc limit 1';
       $detail_query = $db->query($sql);
       $detail = $detail_query->fetch();
       $xtpl->assign('check', '');
@@ -221,7 +255,7 @@ function checkMember() {
     $content = 'Xin hãy đăng nhập trước khi sử dụng chức năng này';
   }
   else {
-    $query = $db->query('select * from `'. PREFIX .'member` where userid = '. $user_info['userid']);
+    $query = $db->query('select * from `pet_manage_member` where userid = '. $user_info['userid']);
     $user = $query->fetch();
     $authors = json_decode($user['author']);
     if ($op == 'device' && $authors->{'device'}) {
@@ -250,7 +284,7 @@ function checkMaterialPermit() {
 
   if (empty($user_info)) return false;
   if (empty($user_info['userid'])) return false;
-  $sql = 'select * from `'. PREFIX .'permit` where userid = '. $user_info['userid'];
+  $sql = 'select * from `pet_manage_permit` where userid = '. $user_info['userid'];
   $query = $db->query($sql);
   $permit = $query->fetch();
   if (empty($permit)) return false;
@@ -262,18 +296,18 @@ function materialList() {
 
   $xtpl = new XTemplate("material-list.tpl", PATH);
 
-  $sql = 'select count(*) as count from `'. PREFIX .'material`';
+  $sql = 'select count(*) as count from `pet_manage_material`';
   $query = $db->query($sql);
   $count = $query->fetch()['count'];
 
-  $sql = 'select * from `'. PREFIX .'material` where active = 1 order by id desc limit ' . $filter['limit'] . ' offset ' . ($filter['page'] - 1) * $filter['limit'];
+  $sql = 'select * from `pet_manage_material` where active = 1 order by id desc limit ' . $filter['limit'] . ' offset ' . ($filter['page'] - 1) * $filter['limit'];
   $query = $db->query($sql);
   $index = ($filter['page'] - 1) * $filter['limit'] + 1;
   $today = time();
 
   while($row = $query->fetch()) {
     $number = 0;
-    $sql = 'select * from `'. PREFIX .'material_detail` where number > 0 and materialid = '. $row['id'];
+    $sql = 'select * from `pet_manage_material_detail` where number > 0 and materialid = '. $row['id'];
     $detail_query = $db->query($sql);
     $expire = 9999999999;
     while ($detail = $detail_query->fetch()) {
@@ -317,7 +351,7 @@ function materialModal() {
 function sourceDataList() {
   global $db;
 
-  $sql = 'select * from `'. PREFIX .'material_source` where active = 1 order by name';
+  $sql = 'select * from `pet_manage_material_source` where active = 1 order by name';
   $query = $db->query($sql);
   $list = array();
 
@@ -334,7 +368,7 @@ function sourceDataList() {
 function sourceDataList2() {
   global $db;
 
-  $sql = 'select * from `'. PREFIX .'material_source` where active = 1 order by name';
+  $sql = 'select * from `pet_manage_material_source` where active = 1 order by name';
   $query = $db->query($sql);
   $list = array();
 

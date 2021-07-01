@@ -23,7 +23,7 @@
         <button type="button" class="close" data-dismiss="modal">&times;</button> <br>
 
         <div class="form-group">
-          Nguồn gốc
+          Nguồn cung
           <input type="text" class="form-control" id="source-name">
         </div>
         <div class="form-group">
@@ -31,8 +31,11 @@
           <textarea class="form-control" id="source-note" rows="3"></textarea>
         </div>
         <div class="text-center">
-          <button class="btn btn-success" onclick="insertSourceSubmit()">
-            Thêm nguồn gốc
+          <button class="btn btn-success" id="source-insert" onclick="insertSourceSubmit()">
+            Thêm nguồn cung
+          </button>
+          <button class="btn btn-success" id="source-update" onclick="updateSourceSubmit()">
+            Sửa nguồn cung
           </button>
         </div>
       </div>
@@ -197,13 +200,13 @@
           </table>
         </div>
         <div class="form-group">
-          <button class="btn btn-success" onclick="insertLine['import']()">
+          <button class="btn btn-success btn-edit" onclick="insertLine['import']()">
             <span class="glyphicon glyphicon-plus"></span>
           </button>
         </div>
         <div class="text-center">
           <button class="btn btn-info" id="import-button" onclick="importSubmit()"> Thêm phiếu nhập </button>
-          <!-- <button class="btn btn-info" id="edit-import-button" onclick="editImportSubmit()"> Sửa phiếu nhập </button> -->
+          <button class="btn btn-info" id="edit-import-button" onclick="updateImportSubmit()"> Sửa phiếu nhập </button>
         </div>
       </div>
     </div>
@@ -217,7 +220,7 @@
         <button type="button" class="close" data-dismiss="modal">&times;</button> <br>
 
         <div class="relative">
-          <input type="text" class="form-control" id="export-item-finder">
+          <input type="text" class="form-control btn-edit" id="export-item-finder">
           <div id="export-item-finder-suggest" class="suggest"></div>
         </div>
         <div style="margin-top: 10px;">
@@ -227,7 +230,8 @@
                 <th class="cell-center"> Hóa chất </th>
                 <th class="cell-center"> Ngày xuất </th>
                 <th class="cell-center" style="width: 20%;"> Nguồn </th>
-                <th class="cell-center"> SL </th>
+                <th class="cell-center"> Tồn </th>
+                <th class="cell-center"> SL xuất </th>
                 <th class="cell-center"> HSD </th>
                 <th class="cell-center"> Ghi chú </th>
                 <th></th>
@@ -238,7 +242,7 @@
         </div>
         <div class="text-center">
           <button class="btn btn-info" id="export-button" onclick="exportSubmit()"> Thêm phiếu xuất </button>
-          <!-- <button class="btn btn-info" id="edit-export-button" onclick="editexportSubmit()"> Sửa phiếu xuất </button> -->
+          <button class="btn btn-info" id="edit-export-button" onclick="updateExportSubmit()"> Sửa phiếu xuất </button>
         </div>
       </div>
     </div>

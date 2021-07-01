@@ -3,7 +3,7 @@
   <thead>
     <tr>
       <th> STT </th>
-      <th> Ngày nhập </th>
+      <th> Ngày xuất </th>
       <th> Tổng loại </th>
       <th> Số lượng </th>
       <th></th>

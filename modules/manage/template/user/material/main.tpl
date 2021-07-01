@@ -63,9 +63,9 @@
 
 <ul class="nav nav-tabs">
   <li class="active"><a data-toggle="tab" href="#material"> Vật tư, hóa chất </a></li>
+  <li><a data-toggle="tab" href="#source"> Nguồn cung </a></li>
   <li><a data-toggle="tab" href="#import"> Phiếu nhập </a></li>
   <li><a data-toggle="tab" href="#export"> Phiếu xuất </a></li>
-  <li><a data-toggle="tab" href="#source"> Nguồn cung </a></li>
 </ul>
 
 <div class="tab-content">
@@ -114,89 +114,90 @@
   }
   var insertLine = {
     'import': () => {
-      global['ia']++
+      global.ia++
       $(`
-        <tbody class="import" ia="` + global['ia'] + `">
+        <tbody class="import" ia="` + global.ia + `">
           <tr>
             <td>
               <div class="relative">
                 <div class="input-group">
-                  <input type="text" class="form-control" id="import-type-`+ global['ia'] + `">
-                  <input type="hidden" class="form-control" id="import-type-val-`+ global['ia'] + `">
+                  <input type="text" class="form-control" id="import-type-`+ global.ia + `">
+                  <input type="hidden" class="form-control" id="import-type-val-`+ global.ia + `">
                   <div class="input-group-btn">
-                    <button class="btn btn-success" onclick="materialModal('import', `+ global['ia'] + `)">
+                    <button class="btn btn-success" onclick="materialModal('import', `+ global.ia + `)">
                       <span class="glyphicon glyphicon-plus"></span>
                     </button>
                   </div>
                 </div>
-                <div class="suggest" id="import-type-suggest-`+ global['ia'] + `"></div>
+                <div class="suggest" id="import-type-suggest-`+ global.ia + `"></div>
               </div>
             </td>
-            <td> <input class="form-control date-`+ global['ia'] + `" id="import-date-` + global['ia'] + `" value="` + global['today'] + `"> </td>
+            <td> <input class="form-control date-`+ global.ia + `" id="import-date-` + global.ia + `" value="` + global['today'] + `"> </td>
             <td> 
               <div class="relative">
                 <div class="input-group">
-                  <input type="text" class="form-control" id="import-source-`+ global['ia'] + `">
-                  <input type="hidden" class="form-control" id="import-source-val-`+ global['ia'] + `">
+                  <input type="text" class="form-control" id="import-source-`+ global.ia + `">
+                  <input type="hidden" class="form-control" id="import-source-val-`+ global.ia + `">
                   <div class="input-group-btn">
-                    <button class="btn btn-success" onclick="insertSource('import', `+ global['ia'] + `)">
+                    <button class="btn btn-success" onclick="insertSource('import', `+ global.ia + `)">
                       <span class="glyphicon glyphicon-plus"></span>
                     </button>
                   </div>
                 </div>
-                <div class="suggest" id="import-source-suggest-`+ global['ia'] + `"></div>
+                <div class="suggest" id="import-source-suggest-`+ global.ia + `"></div>
               </div>
             </td>
-            <td> <input class="form-control" id="import-number-`+ global['ia'] + `" value="0"> </td>
-            <td> <input class="form-control date-`+ global['ia'] + `" id="import-expire-` + global['ia'] + `" value="` + global['today'] + `"> </td>
-            <td> <input class="form-control" id="import-note-`+ global['ia'] + `"> </td>
+            <td> <input class="form-control" id="import-number-`+ global.ia + `" value="0"> </td>
+            <td> <input class="form-control date-`+ global.ia + `" id="import-expire-` + global.ia + `" value="` + global['today'] + `"> </td>
+            <td> <input class="form-control" id="import-note-`+ global.ia + `"> </td>
             <td>
-              <button class="btn btn-danger btn-xs" onclick="removeRow(`+ global['ia'] + `)">
+              <button class="btn btn-danger btn-xs btn-edit" onclick="removeRow(`+ global.ia + `)">
                 xóa
               </button>
             </td>
           </tr>
         </tbody>
       `).insertAfter('#import-insert-modal-content')
-      vremind.install('#import-type-' + global['ia'], '#import-type-suggest-' + global['ia'], ((input, ia) => {
+      vremind.install('#import-type-' + global.ia, '#import-type-suggest-' + global.ia, ((input, ia) => {
         return new Promise(resolve => {
           resolve(searchMaterial(input, 'import', ia))
         })
-      }), 300, 300, 0, global['ia'])
-      vremind.install('#import-source-' + global['ia'], '#import-source-suggest-' + global['ia'], ((input, ia) => {
+      }), 300, 300, 0, global.ia)
+      vremind.install('#import-source-' + global.ia, '#import-source-suggest-' + global.ia, ((input, ia) => {
         return new Promise(resolve => {
           resolve(searchSource(input, 'import', ia))
         })
-      }), 300, 300, 0, global['ia'])
-      $(".date-" + global['ia']).datepicker({
+      }), 300, 300, 0, global.ia)
+      $(".date-" + global.ia).datepicker({
         format: 'dd/mm/yyyy',
         changeMonth: true,
         changeYear: true
       });
     },
     'export': (index) => {
-      global['material'][index]['detail'].forEach((detail) => {
-        global['ia']++
+      global.material[index]['detail'].forEach((detail) => {
+        global.ia++
         $(`
-          <tbody class="export" index="`+ detail['id'] + `" ia="` + global['ia'] + `">
+          <tbody class="export" index="`+ detail['id'] + `" ia="` + global.ia + `">
             <tr>
               <td>
-                `+ global['material'][index]['name'] + `
+                `+ global.material[index]['name'] + `
               </td>
-              <td> <input class="form-control date-`+ global['ia'] + `" id="export-date-` + global['ia'] + `" value="` + global['today'] + `"> </td>
+              <td> <input class="form-control date-`+ global.ia + `" id="export-date-` + global.ia + `" value="` + global['today'] + `"> </td>
               <td> `+ parseSource(detail['source']) + ` </td>
-              <td> <input class="form-control" id="export-number-`+ global['ia'] + `" value="` + detail['number'] + `"> </td>
+              <td> <span id="export-remain-`+ global.ia + `"> ` + detail['number'] + ` </span> </td>
+              <td> <input class="form-control" id="export-number-`+ global.ia + `" value="` + 0 + `"> </td>
               <td> `+ parseTime(detail['expire']) + ` </td>
-              <td> <input class="form-control" id="export-note-`+ global['ia'] + `"> </td>
+              <td> <input class="form-control" id="export-note-`+ global.ia + `"> </td>
               <td>
-                <button class="btn btn-danger btn-xs" onclick="removeRow(`+ global['ia'] + `)">
+                <button class="btn btn-danger btn-xs btn-edit" onclick="removeRow(`+ global.ia + `)">
                   xóa
                 </button>
               </td>
             </tr>
           </tbody>
         `).insertAfter('#export-insert-modal-content')
-        $(".date-" + global['ia']).datepicker({
+        $(".date-" + global.ia).datepicker({
           format: 'dd/mm/yyyy',
           changeMonth: true,
           changeYear: true
@@ -212,7 +213,7 @@
       $(".import").each((index, item) => {
         ia = trim(item.getAttribute('ia'))
         temp = {
-          id: global['material'][$('#import-type-val-' + ia).val()]['id'],
+          id: global.material[$('#import-type-val-' + ia).val()]['id'],
           date: $('#import-date-' + ia).val(),
           source: $('#import-source-val-' + ia).val(),
           number: $('#import-number-' + ia).val(),
@@ -261,7 +262,7 @@
         html = ''
         count = 0
 
-        global['material'].forEach((item, index) => {
+        global.material.forEach((item, index) => {
           if (count < 30 && item['alias'].search(keyword) >= 0) {
             count++
             check = 0
@@ -327,7 +328,7 @@
     list = []
     for (const key in global['report']) {
       if (global['report'].hasOwnProperty(key)) {
-        list.push(global['material'][key]['name'])        
+        list.push(global.material[key]['name'])        
       }
     }
     $('#report-type-text').text(list.join(', '))
@@ -363,7 +364,7 @@
     html = ''
     count = 0
 
-    global['material'].forEach((item, index) => {
+    global.material.forEach((item, index) => {
       if (count < 30 && item['alias'].search(keyword) >= 0) {
         count++
         html += `
@@ -381,7 +382,7 @@
     html = ''
     count = 0
 
-    global['material'].forEach((item, index) => {
+    global.material.forEach((item, index) => {
       if (count < 30 && item['alias'].search(keyword) >= 0 && item['detail'].length > 0) {
         count++
         html += `
@@ -424,9 +425,22 @@
     })
   }
 
+  function updateSource(id) {
+    vhttp.checkelse('', {
+      action: 'get-source',
+      id: id
+    }).then(resp => {
+      $('#source-insert').hide()
+      $('#source-update').show()
+      $('#source-name').val(resp['name'])
+      $('#source-note').val(resp['note'])
+      $('#source-modal').modal('show')
+    })
+  }
+
   function materialModal(name, ia) {
     global['name'] = name
-    global['ia'] = ia
+    global.ia = ia
     $('.insert').show()
     $('.update').hide()
     $("#material-name").val('')
@@ -435,28 +449,96 @@
     $("#material-description").val('')
     $("#material-modal").modal('show')
   }
-  // function importModal() {
-  //   $("#import-modal").modal('show')
-  // }
+
   function importModal() {
-    // $("#import-button").show()
-    // $("#edit-import-button").hide()
-    // global['selected']['import'] = []
-    // parseFormLine('import')
-    global['ia'] = 0
+    $("#import-button").show()
+    $("#edit-import-button").hide()
+    global.ia = 0
     $('.import').remove()
+    $('.btn-edit').prop('disabled', false)
     insertLine['import']()
     $("#import-modal-insert").modal('show')
   }
 
+  function updateImport(id) {
+    vhttp.checkelse('', {
+      action: 'get-import',
+      id: id
+    }).then(resp => {
+      $("#import-button").hide()
+      $("#edit-import-button").show()
+
+      global.ia = 0
+      global.id = id
+      $('.import').remove()
+      resp.data.forEach(item => {        
+        insertLine['import']()
+        selectItem('import', getItemIndex(item.id), global.ia)
+        selectSource('import', getSourceIndex(item.source), global.ia)
+        $('#import-note-'+ global.ia).val(item.note)
+        $('#import-date-'+ global.ia).val(item.date)
+        $('#import-expire-'+ global.ia).val(item.expire)
+        $('#import-number-'+ global.ia).val(item.number)
+      })
+      $('.btn-edit').prop('disabled', true)
+      $("#import-modal-insert").modal('show')
+    })
+  }
+
+  function updateExport(id) {
+    vhttp.checkelse('', {
+      action: 'get-export',
+      id: id
+    }).then(resp => {
+      $("#export-button").hide()
+      $("#edit-export-button").show()
+
+      global.ia = 0
+      global.id = id
+      $('.export').remove()
+      resp.data.forEach(item => {
+        insertLine['export'](global.ia)
+        selectItem('export', getItemIndex(item.id), global.ia)
+        selectSource('export', getSourceIndex(item.source), global.ia)
+        $('#export-note-'+ global.ia).val(item.note)
+        $('#export-date-'+ global.ia).val(item.date)
+        $('#export-expire-'+ global.ia).val(item.expire)
+        $('#export-number-'+ global.ia).val(item.number)
+      })
+      $('.btn-edit').prop('disabled', true)
+      $("#export-modal-insert").modal('show')
+    })
+  }
+
+  function getItemIndex(id) {
+    var check = 0
+    global.material.forEach((item, index) => {
+      if (item.id == id) {
+        check = index
+        return
+      }
+    })
+    return check
+  }
+  function getSourceIndex(id) {
+    var check = 0
+    global.source.forEach((item, index) => {
+      if (item.id == id) {
+        check = index
+        return
+      }
+    })
+    return check
+  }
+
   function exportModal() {
-    global['ia'] = 0
+    global.ia = 0
+    $("#export-button").show()
+    $("#edit-export-button").hide()
     $('.export').remove()
+    $('.btn-edit').prop('disabled', false)
     $("#export-modal-insert").modal('show')
   }
-  // function exportModal() {
-  //   $("#export-modal").modal('show')
-  // }
 
   function checkMaterialData() {
     name = $("#material-name").val()
@@ -499,22 +581,22 @@
 
   function removeItemSubmit() {
     vhttp.checkelse('', {action: 'remove-item', id: global['id']}).then(data => {
-      global['material'] = data['material']
-      $('#content').html(data['html'])
+      global.material = data['material']
+      $('#material').html(data['html'])
       $('#remove-modal').modal('hide')
     })
   }
 
   function findMaterialIndex(id) {
     index = -1
-    global['material'].forEach((item, itemIndex) => {
+    global.material.forEach((item, itemIndex) => {
       if (item['id'] === id) return index = itemIndex
     })
     return index
   }
 
   function selectItem(name, index, ia) {
-    selected = global['material'][index]
+    selected = global.material[index]
     $("#" + name + "-type-val-" + ia).val(index)
     $("#" + name + "-type-" + ia).val(selected['name'])
   }
@@ -561,7 +643,7 @@
       list = []
       for (const key in global['report']) {
         if (global['report'].hasOwnProperty(key)) {
-          if (global['report'][key]) list.push(global['material'][key]['id'])
+          if (global['report'][key]) list.push(global.material[key]['id'])
         }
       }
 
@@ -626,12 +708,12 @@
       if (data['notify']) alert_msg(data['notify'])
       else {
         alert_msg('Đã thêm')
-        global['material'].push(data['json'])
-        last = global['material'].length - 1
-        selected = global['material'][last]
-        $("#" + global['name'] + "-type-val-" + global['ia']).val(last)
-        $("#" + global['name'] + "-type-" + global['ia']).val(selected['name'])
-        $("#content").html(data['html'])
+        global.material.push(data['json'])
+        last = global.material.length - 1
+        selected = global.material[last]
+        $("#" + global['name'] + "-type-val-" + global.ia).val(last)
+        $("#" + global['name'] + "-type-" + global.ia).val(selected['name'])
+        $("#material").html(data['html'])
         $("#material-modal").modal('hide')
       }
     })
@@ -644,9 +726,9 @@
       else {
         alert_msg('Đã cập nhật')
         itemIndex = findMaterialIndex(global['id'])
-        global['material'][itemIndex] = data['json']
-        selected = global['material'][index]
-        $("#content").html(data['html'])
+        global.material[itemIndex] = data['json']
+        selected = global.material[index]
+        $("#material").html(data['html'])
         $("#material-modal").modal('hide')
       }
     })
@@ -661,8 +743,8 @@
         { action: 'insert-export', data: sdata }
       ).then(data => {
         alert_msg('Đã thêm toa xuất')
-        global['material'] = JSON.parse(data['material'])
-        $("#content").html(data['html'])
+        global.material = JSON.parse(data['material'])
+        $("#material").html(data['html'])
         $('#export-modal-insert').modal('hide')
         $('.export').remove()
       })
@@ -678,10 +760,45 @@
         { action: 'insert-import', data: sdata }
       ).then(data => {
         alert_msg('Đã thêm toa nhập')
-        global['material'] = JSON.parse(data['material'])
-        $("#content").html(data['html'])
+        global.material = JSON.parse(data['material'])
+        $("#material").html(data['html'])
+        $("#import").html(data['html2'])
         $('#import-modal-insert').modal('hide')
         $('.import').remove()
+      })
+    }
+  }
+
+  function updateImportSubmit() {
+    sdata = getLine['import']()
+    if (typeof (sdata) !== 'object') alert_msg(sdata)
+    else {
+      vhttp.checkelse(
+        '',
+        { action: 'update-import', data: sdata, id: global.id }
+      ).then(data => {
+        alert_msg('Đã cập nhật toa nhập')
+        global.material = JSON.parse(data['material'])
+        $("#material").html(data['html'])
+        $("#import").html(data['html2'])
+        $('#import-modal-insert').modal('hide')
+      })
+    }
+  }
+
+  function updateExportSubmit() {
+    sdata = getLine['export']()
+    if (typeof (sdata) !== 'object') alert_msg(sdata)
+    else {
+      vhttp.checkelse(
+        '',
+        { action: 'update-export', data: sdata, id: global.id }
+      ).then(data => {
+        alert_msg('Đã cập nhật toa nhập')
+        global.material = JSON.parse(data['material'])
+        $("#material").html(data['html'])
+        $("#export").html(data['html2'])
+        $('#export-modal-insert').modal('hide')
       })
     }
   }
