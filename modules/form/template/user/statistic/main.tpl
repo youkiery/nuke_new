@@ -42,6 +42,10 @@
     overflow: hidden;
     font-size: 0.8em;
   }
+
+  .table-small, td {
+    font-size: 0.9em;
+  }
 </style>
 <link rel="stylesheet" type="text/css" href="/assets/js/jquery-ui/jquery-ui.min.css">
 <script type="text/javascript" src="/assets/js/jquery-ui/jquery-ui.min.js"></script>
@@ -82,20 +86,13 @@
   <div class="row form-group">
     <div class="col-6">
       <label> Theo loại bệnh </label>
-      <input class="form-control dropdown-check-list" ref="disease" tabindex="100">
-      <ul class="items" id="disease">
-        <!-- BEGIN: disease -->
-        <li> <label> <input class="dis" type="checkbox" value="{name}" /> {name}</label> </li>
-        <!-- END: disease -->
-      </ul>
+      <input class="form-control form-checkbox" id="disease">
+      <ul class="items suggest" id="disease-checkbox"> </ul>
     </div>
     <div class="col-6">
       <label> Loại động vật </label>
-      <input class="form-control dropdown-check-list" ref="species" tabindex="100">
-      <ul class="items" id="species">
-        <!-- BEGIN: species -->
-        <li> <label> <input class="spc" type="checkbox" value="{name}" /> {name}</label> </li>
-        <!-- END: species -->
+      <input class="form-control form-checkbox" id="species">
+      <ul class="items suggest" id="species-checkbox">
       </ul>
     </div>
   </div>
@@ -109,26 +106,19 @@
 </div>
 
 <script src="/modules/core/js/vhttp.js"></script>
+<script src="/modules/core/js/vcheck.js"></script>
 <script>
   var checkList = document.getElementById('list1');
+  var global = {
+    disease: JSON.parse('{disease}'),
+    species: JSON.parse('{species}'),
+    select: ''
+  }
 
   $(document).ready(() => {
-    $(document).mouseup(function (e) {
-      var container = $(".items")
-      if (!container.is(e.target) && container.has(e.target).length === 0) {
-        $('.items').hide()
-      }
-    })
+    vcheck.install('#species', '#species-checkbox', 'species', (input) => { return install(input, 'species')}, 300, 300, 1)
+    vcheck.install('#disease', '#disease-checkbox', 'disease', (input) => { return install(input, 'disease')}, 300, 300, 1)
 
-    $('.dropdown-check-list').keyup((e) => {
-      var ref = e.currentTarget.getAttribute('ref')
-    })
-
-    $('.dropdown-check-list').click((e) => {
-      var ref = e.currentTarget.getAttribute('ref')
-      if ($('#'+ ref).css('display') == 'block') $('#'+ ref).hide()
-      else $('#'+ ref).show()
-    })
     $('.date').datepicker({
       format: 'dd/mm/yyyy',
       changeMonth: true,
@@ -136,15 +126,28 @@
     });
   })
 
+  function install(key, name) {
+    return new Promise(resolve => {
+      var html = ''
+      key = xoa_dau(key)
+      global[name].forEach((item, index) => {
+        if (item.alias.search(key) >= 0)
+            html += '<li> <label> <input class="' + name + '-checkbox" type="checkbox" value="' + index + '" '+ ( item.checked ? 'checked' : '' ) +'> ' + item.name + '</label> </li>'
+      })
+      resolve(html)
+    })
+  }
+
   function filter(e) {
     e.preventDefault()
     var species = []
-    $('.spc:checked').each((index, item) => {
-      species.push(item.value)
+    global.species.forEach(item => {
+      if (item.checked) species.push(item.name)
     })
+    
     var disease = []
-    $('.dis:checked').each((index, item) => {
-      disease.push(item.value)
+    global.disease.forEach(item => {
+      if (item.checked) disease.push(item.name)
     })
 
     vhttp.checkelse('', {
@@ -158,6 +161,18 @@
       $('#content').html(resp.html)
     })
     return false
+  }
+
+  function xoa_dau(str) {
+    str = str.toLowerCase()
+    str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
+    str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, "e");
+    str = str.replace(/ì|í|ị|ỉ|ĩ/g, "i");
+    str = str.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, "o");
+    str = str.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, "u");
+    str = str.replace(/ỳ|ý|ỵ|ỷ|ỹ/g, "y");
+    str = str.replace(/đ/g, "d");
+    return str;
   }
 </script>
 <!-- END: main -->
