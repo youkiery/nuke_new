@@ -50,21 +50,37 @@
 <div id="msgshow"></div>
 
 <div class="form-group">
-  <button class="btn btn-info" onclick="reportModal()">
+  <button class="btn btn-info right" onclick="reportModal()">
     Thống kê
   </button>
-  <button class="btn btn-info" onclick="importModal()">
-    Phiếu nhập
+  <button class="btn btn-success right" onclick="importModal()">
+    Thêm phiếu nhập
   </button>
-  <button class="btn btn-info" onclick="exportModal()">
-    Phiếu xuất
+  <button class="btn btn-success right" onclick="exportModal()">
+    Thêm phiếu xuất
   </button>
 </div>
 
-<div style="clear: both;"></div>
+<ul class="nav nav-tabs">
+  <li class="active"><a data-toggle="tab" href="#material"> Vật tư, hóa chất </a></li>
+  <li><a data-toggle="tab" href="#import"> Phiếu nhập </a></li>
+  <li><a data-toggle="tab" href="#export"> Phiếu xuất </a></li>
+  <li><a data-toggle="tab" href="#source"> Nguồn cung </a></li>
+</ul>
 
-<div id="content">
-  {content}
+<div class="tab-content">
+  <div id="material" class="tab-pane fade in active">
+    {content}
+  </div>
+  <div id="import" class="tab-pane fade">
+    {import_content}
+  </div>
+  <div id="export" class="tab-pane fade">
+    {export_content}
+  </div>
+  <div id="source" class="tab-pane fade">
+    {source_content}
+  </div>
 </div>
 
 <script src="/modules/core/js/vremind-7.js"></script>
@@ -73,8 +89,11 @@
 <script>
   var global = {
     page: {
-      'main': 1,
-      'report': 1
+      report: 1,
+      material: 1,
+      import: 1,
+      export: 1,
+      source: 1
     },
     material: JSON.parse('{material}'),
     selected: {
@@ -284,6 +303,19 @@
       changeYear: true
     });
   })
+
+  function goPage(page = 1, func = 'material') {
+    vhttp.checkelse(
+      '', {
+        action: 'filter',
+        page: page,
+        func: func
+      }
+    ).then(resp => {
+      global[func] = page
+      $('#'+ func).html(resp['html'])
+    })
+  }
 
   function reloadReportSuggest() {
     $('.suggest_box').each((index, item) => {

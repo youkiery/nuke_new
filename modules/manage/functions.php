@@ -57,6 +57,129 @@ function removeAllModal() {
   return $xtpl->text();
 }
 
+function importList() {
+  global $db, $filter, $permit;
+  
+  $sql = 'select count(*) as number from pet_manage_material_import';
+  $query = $db->query($sql);
+  $number = $query->fetch()['number'];
+
+  $sql = 'select * from pet_manage_material_import order by id desc limit '. $filter['limit'] .' offset '. ($filter['page'] - 1) * $filter['limit'];
+  $query = $db->query($sql);
+  $list = array();
+
+  $xtpl = new XTemplate("import-list.tpl", PATH);
+
+  $index = 1;
+  while ($row = $query->fetch()) {
+    $count = countImport($row['id']);
+    $xtpl->assign('index', $index++);
+    $xtpl->assign('id', $row['id']);
+    $xtpl->assign('time', date('d/m/Y', $row['time']));
+    $xtpl->assign('number', $count['number']);
+    $xtpl->assign('total', $count['total']);
+    if ($permit) $xtpl->parse('main.row.manager');
+    $xtpl->parse('main.row');
+  }
+
+  $xtpl->assign('nav', navigator($number, $filter['page'], $filter['limit'], 'import'));
+  $xtpl->parse('main');
+  return $xtpl->text();
+}
+
+function countImport($id) {
+  global $db;
+
+  $sql = 'select * from pet_manage_material_import_detail where importid = '. $id;
+  $query = $db->query($sql);
+  $data = array(
+    'number' => 0,
+    'total' => 0
+  );
+
+  while ($row = $query->fetch()) {
+    $data['number'] ++;
+    $data['total'] += $row['number'];
+  }
+
+  return $data;
+}
+
+function exportList() {
+  global $db, $filter, $permit;
+  
+  $sql = 'select count(*) as number from pet_manage_material_export';
+  $query = $db->query($sql);
+  $number = $query->fetch()['number'];
+
+  $sql = 'select * from pet_manage_material_export order by id desc limit '. $filter['limit'] .' offset '. ($filter['page'] - 1) * $filter['limit'];
+  $query = $db->query($sql);
+  $list = array();
+
+  $xtpl = new XTemplate("export-list.tpl", PATH);
+
+  $index = 1;
+  while ($row = $query->fetch()) {
+    $count = countExport($row['id']);
+    $xtpl->assign('index', $index++);
+    $xtpl->assign('id', $row['id']);
+    $xtpl->assign('time', date('d/m/Y', $row['time']));
+    $xtpl->assign('number', $count['number']);
+    $xtpl->assign('total', $count['total']);
+    if ($permit) $xtpl->parse('main.row.manager');
+    $xtpl->parse('main.row');
+  }
+
+  $xtpl->assign('nav', navigator($number, $filter['page'], $filter['limit'], 'import'));
+  $xtpl->parse('main');
+  return $xtpl->text();
+}
+
+function countExport($id) {
+  global $db;
+
+  $sql = 'select * from pet_manage_material_export_detail where exportid = '. $id;
+  $query = $db->query($sql);
+  $data = array(
+    'number' => 0,
+    'total' => 0
+  );
+
+  while ($row = $query->fetch()) {
+    $data['number'] ++;
+    $data['total'] += $row['number'];
+  }
+
+  return $data;
+}
+
+function sourceList() {
+  global $db, $filter, $permit;
+  
+  $sql = 'select count(*) as number from pet_manage_material_source where active = 1';
+  $query = $db->query($sql);
+  $number = $query->fetch()['number'];
+
+  $sql = 'select * from pet_manage_material_source where active = 1 order by id desc limit '. $filter['limit'] .' offset '. ($filter['page'] - 1) * $filter['limit'];
+  $query = $db->query($sql);
+  $list = array();
+
+  $xtpl = new XTemplate("source-list.tpl", PATH);
+
+  $index = 1;
+  while ($row = $query->fetch()) {
+    $count = countExport($row['id']);
+    $xtpl->assign('index', $index++);
+    $xtpl->assign('id', $row['id']);
+    $xtpl->assign('name', $row['name']);
+    if ($permit) $xtpl->parse('main.row.manager');
+    $xtpl->parse('main.row');
+  }
+
+  $xtpl->assign('nav', navigator($number, $filter['page'], $filter['limit'], 'import'));
+  $xtpl->parse('main');
+  return $xtpl->text();
+}
 
 function deviceList() {
   global $db, $allow, $user_info, $start, $check_image;
@@ -174,7 +297,7 @@ function materialList() {
     if ($permit) $xtpl->parse('main.row.manager');
     $xtpl->parse('main.row');
   }
-  $xtpl->assign('nav', nav_generater($url, $count, $filter['page'], $filter['limit']));
+  $xtpl->assign('nav', navigator($count, $filter['page'], $filter['limit'], 'material'));
   // die();
   $xtpl->parse('main');
   return $xtpl->text();

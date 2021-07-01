@@ -3,27 +3,25 @@
   <thead>
     <tr>
       <th> STT </th>
-      <th> Vật tư, hóa chất </th>
+      <th> Ngày nhập </th>
+      <th> Tổng loại </th>
       <th> Số lượng </th>
-      <th> HSD </th>
-      <th> Mô tả </th>
-      <th>  </th>
+      <th></th>
     </tr>
   </thead>
   <!-- BEGIN: row -->
   <tbody>
-    <tr class="{color}">
+    <tr>
       <td> {index} </td>
-      <td> {name} {unit} </td>
+      <td> {time} </td>
       <td> {number} </td>
-      <td> {expire} </td>
-      <td> {description} </td>
+      <td> {total} </td>
       <td>
         <!-- BEGIN: manager -->
-        <button class="btn btn-info btn-xs" onclick="updateItem({id})">
+        <button class="btn btn-info btn-xs" onclick="updateExport({id})">
           sửa
         </button>  
-        <button class="btn btn-danger btn-xs" onclick="removeItem({id})">
+        <button class="btn btn-danger btn-xs" onclick="removeExport({id})">
           xóa
         </button>  
         <!-- xóa -->

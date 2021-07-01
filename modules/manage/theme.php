@@ -22,6 +22,23 @@ function nav_generater($url, $number, $page, $limit) {
   return $html;
 }
 
+function navigator($number, $page, $limit, $func) {
+  $html = '';
+  $total = floor($number / $limit) + ($number % $limit ? 1 : 0);
+  for ($i = 1; $i <= $total; $i++) {
+    if ($page == $i) {
+      $html .= '<li class="active"><a href="#">' . $i . '</a></li>';
+    } 
+    else {
+      $html .= '<li><a href="#" onclick="goPage('. $i .', \''. $func .'\')">' . $i . '</a></li>';
+    }
+  }
+  return '
+    <ul class="pagination">
+      '. $html .'
+    </ul>';
+}
+
 function navList ($number, $page, $limit, $type) {
   global $lang_global;
   $total_pages = ceil($number / $limit);

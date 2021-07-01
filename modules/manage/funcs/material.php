@@ -13,8 +13,9 @@ $page_title = "Quản lý vật tư, hóa chất";
 
 $url = "/$module_name/$op?";
 $filter = array(
-  'page' => $nv_Request->get_int('page', 'get', 1),
-  'limit' => $nv_Request->get_int('limit', 'get', 10)
+  'func' => $nv_Request->get_string('func', 'post', 'material'),
+  'page' => $nv_Request->get_int('page', 'post', 1),
+  'limit' => $nv_Request->get_int('limit', 'post', 10)
 );
 
 $permit = checkMaterialPermit();
@@ -352,6 +353,26 @@ if (!empty($action)) {
       //   unset($objWriter, $objPHPExcel);
       //   $result['status'] = 1;
       // break;
+    case 'filter':
+      switch ($filter['func']) {
+        case 'material':
+          $result['status'] = 1;
+          $result['html'] = materialList();
+          break;
+        case 'import':
+          $result['status'] = 1;
+          $result['html'] = importList();
+          break;
+        case 'export':
+          $result['status'] = 1;
+          $result['html'] = exportList();
+          break;
+        case 'source':
+          $result['status'] = 1;
+          $result['html'] = sourceList();
+          break;
+      }
+    break;
     case 'insert-material':
       $data = $nv_Request->get_array('data', 'post');
 
@@ -828,6 +849,9 @@ $xtpl->assign('today', date('d/m/Y', time()));
 $xtpl->assign('material', json_encode(getMaterialDataList(), JSON_UNESCAPED_UNICODE));
 $xtpl->assign('source', json_encode(sourceDataList()));
 $xtpl->assign('modal', materialModal());
+$xtpl->assign('import_content', importList());
+$xtpl->assign('export_content', exportList());
+$xtpl->assign('source_content', sourceList());
 $xtpl->assign('content', materialList());
 $xtpl->parse('main');
 $contents = $xtpl->text();
