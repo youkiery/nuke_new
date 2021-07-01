@@ -745,6 +745,7 @@
         alert_msg('Đã thêm toa xuất')
         global.material = JSON.parse(data['material'])
         $("#material").html(data['html'])
+        $("#export").html(data['html2'])
         $('#export-modal-insert').modal('hide')
         $('.export').remove()
       })
