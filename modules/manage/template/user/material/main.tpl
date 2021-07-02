@@ -95,10 +95,9 @@
       export: 1,
       source: 1
     },
-    material: JSON.parse('{material}'),
     selected: {
       'import': [],
-      'export': []
+      'export': [],
     },
     report_action: {
       'm1': 'report',
@@ -109,8 +108,8 @@
     'index': 0,
     'name': '',
     'today': '{today}',
-    'source': JSON.parse('{source}'),
-    'report': {}
+    report: {},
+    type: []
   }
   var insertLine = {
     'import': () => {
@@ -160,12 +159,24 @@
       `).insertAfter('#import-insert-modal-content')
       vremind.install('#import-type-' + global.ia, '#import-type-suggest-' + global.ia, ((input, ia) => {
         return new Promise(resolve => {
-          resolve(searchMaterial(input, 'import', ia))
+          vhttp.checkelse('', {
+            action: 'material-suggest',
+            keyword: input,
+            ia: ia
+          }).then((resp) => {
+            resolve(resp.html)
+          })
         })
       }), 300, 300, 0, global.ia)
       vremind.install('#import-source-' + global.ia, '#import-source-suggest-' + global.ia, ((input, ia) => {
         return new Promise(resolve => {
-          resolve(searchSource(input, 'import', ia))
+          vhttp.checkelse('', {
+            action: 'source-suggest',
+            keyword: input,
+            ia: ia
+          }).then((resp) => {
+            resolve(resp.html)
+          })
         })
       }), 300, 300, 0, global.ia)
       $(".date-" + global.ia).datepicker({
@@ -174,35 +185,42 @@
         changeYear: true
       });
     },
-    'export': (index) => {
-      global.material[index]['detail'].forEach((detail) => {
-        global.ia++
-        $(`
-          <tbody class="export" index="`+ detail['id'] + `" ia="` + global.ia + `">
-            <tr>
-              <td>
-                `+ global.material[index]['name'] + `
-              </td>
-              <td> <input class="form-control date-`+ global.ia + `" id="export-date-` + global.ia + `" value="` + global['today'] + `"> </td>
-              <td> `+ parseSource(detail['source']) + ` </td>
-              <td> <span id="export-remain-`+ global.ia + `"> ` + detail['number'] + ` </span> </td>
-              <td> <input class="form-control" id="export-number-`+ global.ia + `" value="` + 0 + `"> </td>
-              <td> `+ parseTime(detail['expire']) + ` </td>
-              <td> <input class="form-control" id="export-note-`+ global.ia + `"> </td>
-              <td>
-                <button class="btn btn-danger btn-xs btn-edit" onclick="removeRow(`+ global.ia + `)">
-                  xóa
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        `).insertAfter('#export-insert-modal-content')
-        $(".date-" + global.ia).datepicker({
-          format: 'dd/mm/yyyy',
-          changeMonth: true,
-          changeYear: true
-        });
-      });
+    'export': (id) => {
+      vhttp.checkelse('', {
+        action: 'get-detail',
+        id: id
+      }).then(resp => {
+        resp.list.forEach((detail) => {
+          global.ia ++
+          if (!$('[index='+ detail['id'] +']').length) {
+            $(`
+              <tbody class="export" index="`+ detail['id'] + `" ia="` + global.ia + `">
+                <tr>
+                  <td>
+                    `+ detail['name'] + `
+                  </td>
+                  <td> <input class="form-control date-`+ global.ia + `" id="export-date-` + global.ia + `" value="` + global['today'] + `"> </td>
+                  <td> `+ detail['source'] +` </td>
+                  <td> <span id="export-remain-`+ global.ia + `"> ` + detail['number'] + ` </span> </td>
+                  <td> <input class="form-control" id="export-number-`+ global.ia + `" value="` + 0 + `"> </td>
+                  <td> `+ detail['expire'] + ` </td>
+                  <td> <input class="form-control" id="export-note-`+ global.ia + `"> </td>
+                  <td>
+                    <button class="btn btn-danger btn-xs btn-edit" onclick="removeRow(`+ global.ia + `)">
+                      xóa
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            `).insertAfter('#export-insert-modal-content')
+            $(".date-" + global.ia).datepicker({
+              format: 'dd/mm/yyyy',
+              changeMonth: true,
+              changeYear: true
+            });
+          }
+        })
+      })
     }
   }
 
@@ -213,7 +231,7 @@
       $(".import").each((index, item) => {
         ia = trim(item.getAttribute('ia'))
         temp = {
-          id: global.material[$('#import-type-val-' + ia).val()]['id'],
+          id: $('#import-type-val-' + ia).val(),
           date: $('#import-date-' + ia).val(),
           source: $('#import-source-val-' + ia).val(),
           number: $('#import-number-' + ia).val(),
@@ -241,7 +259,7 @@
           number: $("#export-number-" + ia).val(),
           note: $("#export-note-" + ia).val()
         }
-        if (temp['number'] < 0) return msg = 'Số lượng đang âm'
+        if (temp['number'] <= 0) return msg = 'Số lượng đang âm'
         data.push(temp)
       })
       if (msg.length) return msg
@@ -253,49 +271,42 @@
   $(document).ready(() => {
     vremind.install('#export-item-finder', '#export-item-finder-suggest', (input => {
       return new Promise(resolve => {
-        resolve(searchAvaiableMaterial(input, 'export'))
+        vhttp.checkelse('', {
+          action: 'item-suggest',
+          keyword: input,
+        }).then((resp) => {
+          resolve(resp.html)
+        })
       })
     }), 300, 300)
     vremind.install('#report-type', '#report-type-suggest', (input => {
       return new Promise(resolve => {
-        keyword = convert(input)
-        html = ''
-        count = 0
+        vhttp.checkelse('', {
+          action: 'report-suggest',
+          keyword: input,
+        }).then((resp) => {
+          var list = resp.list
+          var html = ''
 
-        global.material.forEach((item, index) => {
-          if (count < 30 && item['alias'].search(keyword) >= 0) {
-            count++
-            check = 0
-            if (global['report'][index]) check = 1
+          list.forEach(item => {
             html += `
-              <label class="suggest-box" onclick="reloadReportSuggest()">
-                `+ item['name'] + `
-                <input class="suggest_box" index="`+ index + `" type="checkbox" style="float: right;" ` + (check ? 'checked' : '') + `>
+              <label class="suggest-box"">
+                `+ item.name + `
+                <input class="suggest_box" id="report-`+ item.id + `" type="checkbox" style="float: right;" ` + ((global.report[item.id] && global.report[item.id].status) ? 'checked' : '') + ` onchange="changeSelect(`+ item.id +`, '`+ item.name +`')">
               </label>`
-          }
+          })
+          resolve(html)
         })
-        if (!html.length) html = 'Không có kết quả'
-        resolve(html)
       })
     }), 300, 300, 1)
     vremind.install('#report-source', '#report-source-suggest', (input => {
       return new Promise(resolve => {
-        keyword = convert(input)
-        html = ''
-        count = 0
-
-        global['source'].forEach((item, index) => {
-          if (count < 30 && item['alias'].search(keyword) >= 0) {
-            count++
-            html += `
-              <div class="suggest-item" onclick="pickSuggest('source', '` + item['id'] + `', '` + item['name'] + `')">
-                `+ item['name'] + `
-              </div>
-              `
-          }
+        vhttp.checkelse('', {
+          action: 'report-source-suggest',
+          keyword: input,
+        }).then((resp) => {
+          resolve(resp.html)
         })
-        if (!html.length) html = 'Không có kết quả'
-          resolve(html)
       })
     }), 300, 300)
     $(".date").datepicker({
@@ -318,17 +329,15 @@
     })
   }
 
-  function reloadReportSuggest() {
-    $('.suggest_box').each((index, item) => {
-      itemIndex = item.getAttribute('index')
-      itemCheck = item.checked
-      if (itemCheck) global['report'][itemIndex] = itemIndex
-      else delete global['report'][itemIndex]
-    })
-    list = []
-    for (const key in global['report']) {
-      if (global['report'].hasOwnProperty(key)) {
-        list.push(global.material[key]['name'])        
+  function changeSelect(id, name) {
+    global.report[id] = {
+      name: name,
+      status: $('#report-'+ id).prop('checked')
+    }
+    var list = []
+    for (const key in global.report) {
+      if (Object.hasOwnProperty.call(global.report, key)) {
+        list.push(global.report[key].name)
       }
     }
     $('#report-type-text').text(list.join(', '))
@@ -354,86 +363,50 @@
     $('#report-modal').modal('show')
   }
 
-  function pickSuggest(type, index, name) {
-    $('#report-' + type).val(name)
-    $('#report-' + type + '-val').val(index)
+  function pickSuggest(index, name) {
+    $('#report-source').val(name)
+    $('#report-source-val').val(index)
   }
 
-  function searchMaterial(keyword, name, ia) {
-    keyword = convert(keyword)
-    html = ''
-    count = 0
+  function removeSource(id) {
+    global.id = id
+    $('#remove-source-modal').modal('show')
+  }
 
-    global.material.forEach((item, index) => {
-      if (count < 30 && item['alias'].search(keyword) >= 0) {
-        count++
-        html += `
-            <div class="suggest-item" onclick="selectItem('`+ name + `', ` + index + `, ` + ia + `)">
-              `+ item['name'] + `
-            </div>`
-      }
+  function removeSourceSubmit() {
+    vhttp.checkelse('', {
+      action: 'remove-source',
+      id: global.id
+    }).then(resp => {
+      $('#source').html(resp.html)
+      $('#remove-source-modal').modal('hide')
     })
-    if (!html.length) return 'Không có kết quả'
-    return html
   }
 
-  function searchAvaiableMaterial(keyword, name) {
-    keyword = convert(keyword)
-    html = ''
-    count = 0
-
-    global.material.forEach((item, index) => {
-      if (count < 30 && item['alias'].search(keyword) >= 0 && item['detail'].length > 0) {
-        count++
-        html += `
-          <div class="suggest-item" onclick="insertLine.export(` + index + `)">
-            `+ item['name'] + `
-          </div>`
+  function updateSourceSubmit() {
+    vhttp.checkelse('', {
+      action: 'update-source',
+      id: global.id,
+      data: {
+        name: $('#source-name').val(),
+        note: $('#source-note').val(),
       }
-    })
-    if (!html.length) return 'Không có kết quả'
-    return html
-  }
-
-  function searchSource(keyword, name, ia) {
-    keyword = convert(keyword)
-    html = ''
-    count = 0
-
-    global['source'].forEach((item, index) => {
-      if (count < 30 && item['alias'].search(keyword) >= 0) {
-        count++
-        html += `
-          <div style="clear: both;">
-            <div class="suggest-item sl" onclick="selectSource('`+ name + `', ` + index + `, ` + ia + `)">
-            `+ item['name'] + `
-            </div>
-            <div class="sr" onclick="removeSource('`+ item['id'] +`', \'`+keyword+`\', \'`+name+`\', `+ia+`)">
-              &times;
-            </div>
-          </div>`
-      }
-    })
-    if (!html.length) return 'Không có kết quả'
-    return html
-  }
-
-  function removeSource(id, keyword, name, ia) {
-    vhttp.checkelse('', {action: 'remove-source', id: id}).then(data => {
-      global['source'] = data['source']
-      $('#import-source-suggest-'+ ia).html(searchSource(keyword, name, ia))      
+    }).then(resp => {
+      $('#source').html(resp.html)
+      $('#source-modal').modal('hide')
     })
   }
 
   function updateSource(id) {
+    global.id = id
     vhttp.checkelse('', {
       action: 'get-source',
       id: id
     }).then(resp => {
       $('#source-insert').hide()
       $('#source-update').show()
-      $('#source-name').val(resp['name'])
-      $('#source-note').val(resp['note'])
+      $('#source-name').val(resp.data.name)
+      $('#source-note').val(resp.data.note)
       $('#source-modal').modal('show')
     })
   }
@@ -473,10 +446,12 @@
       $('.import').remove()
       resp.data.forEach(item => {        
         insertLine['import']()
-        selectItem('import', getItemIndex(item.id), global.ia)
-        selectSource('import', getSourceIndex(item.source), global.ia)
-        $('#import-note-'+ global.ia).val(item.note)
+        $('#import-type-'+ global.ia).val(item.item)
+        $('#import-type-val-'+ global.ia).val(item.itemid)
+        $('#import-source-'+ global.ia).val(item.source)
+        $('#import-source-val-'+ global.ia).val(item.sourceid)
         $('#import-date-'+ global.ia).val(item.date)
+        $('#import-note-'+ global.ia).val(item.note)
         $('#import-expire-'+ global.ia).val(item.expire)
         $('#import-number-'+ global.ia).val(item.number)
       })
@@ -494,41 +469,50 @@
       $("#edit-export-button").show()
 
       global.ia = 0
+      var temp = 1
       global.id = id
       $('.export').remove()
       resp.data.forEach(item => {
-        insertLine['export'](global.ia)
-        selectItem('export', getItemIndex(item.id), global.ia)
-        selectSource('export', getSourceIndex(item.source), global.ia)
-        $('#export-note-'+ global.ia).val(item.note)
-        $('#export-date-'+ global.ia).val(item.date)
-        $('#export-expire-'+ global.ia).val(item.expire)
-        $('#export-number-'+ global.ia).val(item.number)
+        parseExport(item.id)
+        $('#export-name-'+ temp).text(item.name)
+        $('#export-source-'+ temp).text(item.source)
+        $('#export-remain-'+ temp).text(item.remain)
+        $('#export-date-'+ temp).text(item.date)
+        $('#export-expire-'+ temp).text(item.expire)
+        $('#export-note-'+ temp).val(item.note)
+        $('#export-number-'+ temp).val(item.number)
+        temp ++
       })
       $('.btn-edit').prop('disabled', true)
       $("#export-modal-insert").modal('show')
     })
   }
 
-  function getItemIndex(id) {
-    var check = 0
-    global.material.forEach((item, index) => {
-      if (item.id == id) {
-        check = index
-        return
-      }
-    })
-    return check
-  }
-  function getSourceIndex(id) {
-    var check = 0
-    global.source.forEach((item, index) => {
-      if (item.id == id) {
-        check = index
-        return
-      }
-    })
-    return check
+  function parseExport(id) {
+    global.ia ++
+    $(`
+      <tbody class="export" index="`+ id + `" ia="` + global.ia + `">
+        <tr>
+          <td id="export-name-`+ global.ia +`"> </td>
+          <td id="export-date-` + global.ia + `"> </td>
+          <td id="export-source-`+ global.ia +`"> </td>
+          <td> <span id="export-remain-`+ global.ia + `">  </span> </td>
+          <td> <input class="form-control" id="export-number-`+ global.ia + `"> </td>
+          <td id="export-expire-`+ global.ia +`">  </td>
+          <td> <input class="form-control" id="export-note-`+ global.ia + `"> </td>
+          <td>
+            <button class="btn btn-danger btn-xs btn-edit" onclick="removeRow(`+ global.ia + `)">
+              xóa
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    `).insertAfter('#export-insert-modal-content')
+    $(".date-" + global.ia).datepicker({
+      format: 'dd/mm/yyyy',
+      changeMonth: true,
+      changeYear: true
+    });
   }
 
   function exportModal() {
@@ -555,6 +539,9 @@
   }
 
   function insertSource(name, index) {
+    $('#source-insert').show()
+    $('#source-update').hide()
+
     global['name'] = name
     global['index'] = index
     $('#source-name').val('')
@@ -581,38 +568,19 @@
 
   function removeItemSubmit() {
     vhttp.checkelse('', {action: 'remove-item', id: global['id']}).then(data => {
-      global.material = data['material']
       $('#material').html(data['html'])
       $('#remove-modal').modal('hide')
     })
   }
 
-  function findMaterialIndex(id) {
-    index = -1
-    global.material.forEach((item, itemIndex) => {
-      if (item['id'] === id) return index = itemIndex
-    })
-    return index
+  function selectItem(name, id, ia) {
+    $("#import-type-val-" + ia).val(id)
+    $("#import-type-" + ia).val(name)
   }
 
-  function selectItem(name, index, ia) {
-    selected = global.material[index]
-    $("#" + name + "-type-val-" + ia).val(index)
-    $("#" + name + "-type-" + ia).val(selected['name'])
-  }
-
-  function selectSource(name, index, ia) {
-    selected = global['source'][index]
-    $("#" + name + "-source-val-" + ia).val(selected['id'])
-    $("#" + name + "-source-" + ia).val(selected['name'])
-  }
-
-  function parseSource(sourceid) {
-    name = ''
-    global['source'].forEach(source => {
-      if (source['id'] == sourceid) return name = source['name']
-    });
-    return name
+  function selectSource(name, id, ia) {
+    $("#import-source-val-" + ia).val(id)
+    $("#import-source-" + ia).val(name)
   }
 
   function removeRow(ia) {
@@ -643,7 +611,7 @@
       list = []
       for (const key in global['report']) {
         if (global['report'].hasOwnProperty(key)) {
-          if (global['report'][key]) list.push(global.material[key]['id'])
+          if (global['report'][key]) list.push(key)
         }
       }
 
@@ -687,15 +655,19 @@
   function reportSubmit() {
     sdata = checkReportData()
     if (typeof (sdata) == 'string') alert_msg(sdata)
-    else vhttp.checkelse('', { action: global['report_action'][sdata['tick']], data: sdata }).then(data => {
-      $('#' + global['report_action'][sdata['tick']].replace('_', '-') + '-content').html(data['html'])
-    })
+    else {
+      vhttp.checkelse('', {
+        action: global['report_action'][sdata['tick']],
+        data: sdata
+      }).then(data => {
+        $('#' + global['report_action'][sdata['tick']].replace('_', '-') + '-content').html(data['html'])
+      })
+    }
   }
 
   function insertSourceSubmit() {
     if (!$('#source-name').val().length) alert_msg('Nhập tên nguồn trước')
     else vhttp.checkelse('', { action: 'insert-source', name: $('#source-name').val(), note: trim($('#source-note').val()) }).then(data => {
-      if (data['data']) global['source'].push(data['data'])
       $('#' + global['name'] + '-source-' + global['index']).val($('#source-name').val())
       $('#' + global['name'] + '-source-val-' + global['index']).val(data['id'])
       $('#source-modal').modal('hide')
@@ -708,11 +680,8 @@
       if (data['notify']) alert_msg(data['notify'])
       else {
         alert_msg('Đã thêm')
-        global.material.push(data['json'])
-        last = global.material.length - 1
-        selected = global.material[last]
-        $("#" + global['name'] + "-type-val-" + global.ia).val(last)
-        $("#" + global['name'] + "-type-" + global.ia).val(selected['name'])
+        $("#" + global['name'] + "-type-val-" + global.ia).val(data.id)
+        $("#" + global['name'] + "-type-" + global.ia).val(data.name)
         $("#material").html(data['html'])
         $("#material-modal").modal('hide')
       }
@@ -725,12 +694,43 @@
       if (data['notify']) alert_msg(data['notify'])
       else {
         alert_msg('Đã cập nhật')
-        itemIndex = findMaterialIndex(global['id'])
-        global.material[itemIndex] = data['json']
-        selected = global.material[index]
         $("#material").html(data['html'])
         $("#material-modal").modal('hide')
       }
+    })
+  }
+
+  function removeExport(id) {
+    global.id = id
+    $('#export-remove-modal').modal('show')
+  }
+
+  function exportRemoveSubmit() {
+    vhttp.checkelse(
+      '',
+      { action: 'remove-export', id: global.id }
+    ).then(data => {
+      alert_msg('Đã xóa toa xuất')
+      $("#material").html(data['html'])
+      $("#export").html(data['html2'])
+      $('#export-remove-modal').modal('hide')
+    })
+  }
+
+  function removeImport(id) {
+    global.id = id
+    $('#import-remove-modal').modal('show')
+  }
+
+  function importRemoveSubmit() {
+    vhttp.checkelse(
+      '',
+      { action: 'remove-import', id: global.id }
+    ).then(data => {
+      alert_msg('Đã xóa toa nhập')
+      $("#material").html(data['html'])
+      $("#import").html(data['html2'])
+      $('#import-remove-modal').modal('hide')
     })
   }
 
@@ -743,7 +743,6 @@
         { action: 'insert-export', data: sdata }
       ).then(data => {
         alert_msg('Đã thêm toa xuất')
-        global.material = JSON.parse(data['material'])
         $("#material").html(data['html'])
         $("#export").html(data['html2'])
         $('#export-modal-insert').modal('hide')
@@ -761,7 +760,6 @@
         { action: 'insert-import', data: sdata }
       ).then(data => {
         alert_msg('Đã thêm toa nhập')
-        global.material = JSON.parse(data['material'])
         $("#material").html(data['html'])
         $("#import").html(data['html2'])
         $('#import-modal-insert').modal('hide')
@@ -779,7 +777,6 @@
         { action: 'update-import', data: sdata, id: global.id }
       ).then(data => {
         alert_msg('Đã cập nhật toa nhập')
-        global.material = JSON.parse(data['material'])
         $("#material").html(data['html'])
         $("#import").html(data['html2'])
         $('#import-modal-insert').modal('hide')
@@ -796,7 +793,6 @@
         { action: 'update-export', data: sdata, id: global.id }
       ).then(data => {
         alert_msg('Đã cập nhật toa nhập')
-        global.material = JSON.parse(data['material'])
         $("#material").html(data['html'])
         $("#export").html(data['html2'])
         $('#export-modal-insert').modal('hide')

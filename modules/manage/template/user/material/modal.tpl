@@ -16,6 +16,57 @@
   </div>
 </div>
 
+<div class="modal" id="remove-source-modal" role="dialog">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-body">
+        <button type="button" class="close" data-dismiss="modal">&times;</button> <br>
+
+        <div class="text-center">
+          <p> Sau khi xác nhận, nguồn cung sẽ biến mất, có chắc không? </p>
+          <button class="btn btn-danger" onclick="removeSourceSubmit()">
+            Xác nhận
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="import-remove-modal" role="dialog">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-body">
+        <button type="button" class="close" data-dismiss="modal">&times;</button> <br>
+
+        <div class="text-center">
+          <p> Sau khi xác nhận phiếu nhập sẽ biến mất, xác nhận xóa? </p>
+          <button class="btn btn-danger" onclick="importRemoveSubmit()">
+            Xác nhận
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="export-remove-modal" role="dialog">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-body">
+        <button type="button" class="close" data-dismiss="modal">&times;</button> <br>
+
+        <div class="text-center">
+          <p> Sau khi xác nhận phiếu xuất sẽ biến mất, xác nhận xóa? </p>
+          <button class="btn btn-danger" onclick="exportRemoveSubmit()">
+            Xác nhận
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="modal" id="source-modal" role="dialog">
   <div class="modal-dialog modal-sm">
     <div class="modal-content">
@@ -79,14 +130,14 @@
                 <div class="relative">
                   <div class="input-group">
                     <input type="text" class="form-control" id="report-source" placeholder="nguồn gốc">
-                    <input type="hidden" id="report-source-val">
-                    <div class="suggest" id="report-source-suggest"> </div>
                     <div class="input-group-btn">
                       <button class="btn btn-danger" onclick="clearReportSource()">
                         <span class="glyphicon glyphicon-remove"></span>
                       </button>
                     </div>
                   </div>
+                  <div class="suggest" id="report-source-suggest"> </div>
+                  <input type="hidden" id="report-source-val">
                 </div>
               </div>
             </div>
@@ -106,7 +157,8 @@
               </div>
               <div class="col-6">
                 Giới hạn thấp nhất
-                <input class="form-control" id="report-m2-limit" type="text" placeholder="Giới hạn thấp nhất" value="10">
+                <input class="form-control" id="report-m2-limit" type="text" placeholder="Giới hạn thấp nhất"
+                  value="10">
               </div>
             </div>
 
@@ -120,7 +172,8 @@
               </div>
               <div class="col-6">
                 Hết hạn trước
-                <input class="form-control date" id="report-m3-expire" type="text" placeholder="Hết hạn trước" value="{next_half_year}">
+                <input class="form-control date" id="report-m3-expire" type="text" placeholder="Hết hạn trước"
+                  value="{next_half_year}">
               </div>
             </div>
 

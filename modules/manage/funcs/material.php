@@ -15,7 +15,7 @@ $url = "/$module_name/$op?";
 $filter = array(
   'func' => $nv_Request->get_string('func', 'post', 'material'),
   'page' => $nv_Request->get_int('page', 'post', 1),
-  'limit' => $nv_Request->get_int('limit', 'post', 10)
+  'limit' => $nv_Request->get_int('limit', 'post', 20)
 );
 
 $permit = checkMaterialPermit();
@@ -385,6 +385,33 @@ if (!empty($action)) {
       $result['status'] = 1;
       $result['data'] = getExportId($id);
     break;
+    case 'report-source-suggest':
+      $keyword = $nv_Request->get_string('keyword', 'post');
+
+      $xtpl = new XTemplate('report-source-suggest.tpl', PATH);
+      $sql = 'select * from pet_manage_material_source where active = 1 and name like "%'. $keyword .'%" limit 20';
+      $query = $db->query($sql);
+
+      while ($row = $query->fetch()) {
+        $xtpl->assign('id', $row['id']);
+        $xtpl->assign('name', $row['name']);
+        $xtpl->parse('main');
+      }
+      $result['status'] = 1;
+      $result['html'] = $xtpl->text();
+    break;
+    case 'report-suggest':
+      $keyword = $nv_Request->get_string('keyword', 'post');
+
+      $sql = 'select id, name from pet_manage_material where active = 1 and name like "%'. $keyword .'%"';
+      $query = $db->query($sql);
+      $list = array();
+      while ($row = $query->fetch()) {
+        $list []= $row;
+      }
+      $result['status'] = 1;
+      $result['list'] = $list;
+    break;
     case 'insert-material':
       $data = $nv_Request->get_array('data', 'post');
 
@@ -399,6 +426,7 @@ if (!empty($action)) {
         if ($db->query($sql)) {
           $result['status'] = 1;
           $result['id'] = $db->lastInsertId();
+          $result['name'] = $data['name'];
           $result['html'] = materialList();
           $result['json'] = array('id' => $result['id'], 'name' => $data['name'], 'unit' => $data['unit'], 'description' => $data['description']);
         }
@@ -560,6 +588,72 @@ if (!empty($action)) {
       $result['html'] = materialList();
       $result['html2'] = exportList();
       break;
+    case 'get-detail':
+      $id = $nv_Request->get_string('id', 'post');
+
+      $sql = 'select id, source, number, expire from pet_manage_material_detail where number > 0 and materialid = '. $id;
+      $query = $db->query($sql);
+      $list = array();
+      $name = getItemId($id);
+
+      while ($row = $query->fetch()) {
+        $row['name'] = $name;
+        $row['source'] = getSourceId($row['source']);
+        $row['expire'] = date('d/m/Y', $row['expire']);
+        $list []= $row;
+      }
+      $result['status'] = 1;
+      $result['list'] = $list;
+    break;
+    case 'item-suggest':
+      $keyword = $nv_Request->get_string('keyword', 'post');
+
+      $xtpl = new XTemplate('item-suggest.tpl', PATH);
+      $sql = 'select a.id, a.name from pet_manage_material a inner join pet_manage_material_detail b on a.id = b.materialid where a.active = 1 and b.number > 0 and a.name like "%'. $keyword .'%" group by a.id limit 20';
+      $query = $db->query($sql);
+
+      while ($row = $query->fetch()) {
+        $xtpl->assign('id', $row['id']);
+        $xtpl->assign('name', $row['name']);
+        $xtpl->parse('main');
+      }
+      $result['status'] = 1;
+      $result['html'] = $xtpl->text();
+    break;
+    case 'source-suggest':
+      $keyword = $nv_Request->get_string('keyword', 'post');
+      $ia = $nv_Request->get_string('ia', 'post');
+
+      $xtpl = new XTemplate('source-suggest.tpl', PATH);
+      $sql = 'select * from pet_manage_material_source where active = 1 and name like "%'. $keyword .'%" limit 20';
+      $query = $db->query($sql);
+      $xtpl->assign('ia', $ia);
+
+      while ($row = $query->fetch()) {
+        $xtpl->assign('id', $row['id']);
+        $xtpl->assign('name', $row['name']);
+        $xtpl->parse('main');
+      }
+      $result['status'] = 1;
+      $result['html'] = $xtpl->text();
+    break;
+    case 'material-suggest':
+      $keyword = $nv_Request->get_string('keyword', 'post');
+      $ia = $nv_Request->get_string('ia', 'post');
+
+      $xtpl = new XTemplate('material-suggest.tpl', PATH);
+      $sql = 'select * from pet_manage_material where active = 1 and name like "%'. $keyword .'%" limit 20';
+      $query = $db->query($sql);
+      $xtpl->assign('ia', $ia);
+
+      while ($row = $query->fetch()) {
+        $xtpl->assign('id', $row['id']);
+        $xtpl->assign('name', $row['name']);
+        $xtpl->parse('main');
+      }
+      $result['status'] = 1;
+      $result['html'] = $xtpl->text();
+    break;
     case 'insert-export':
       $data = $nv_Request->get_array('data', 'post');
 
@@ -587,7 +681,43 @@ if (!empty($action)) {
       $result['material'] = json_encode(getMaterialDataList(), JSON_UNESCAPED_UNICODE);
       $result['html'] = materialList();
       $result['html2'] = exportList();
-      break;
+    break;
+    case 'remove-export':
+      $id = $nv_Request->get_int('id', 'post');
+
+      $sql = 'select * from pet_manage_material_export_detail where exportid = '. $id;
+      $query = $db->query($sql);
+
+      while ($row = $query->fetch()) {
+        $sql = 'update pet_manage_material_detail set number = number + '. $row['number'] . ' where id = '. $row['detailid'];
+        $db->query($sql);
+      }
+      $sql = 'delete from pet_manage_material_export_detail where exportid = '. $id;
+      $db->query($sql);
+      $sql = 'delete from pet_manage_material_export where id = '. $id;
+      $db->query($sql);
+      $result['status'] = 1;
+      $result['html'] = materialList();
+      $result['html2'] = exportList();
+    break;
+    case 'remove-import':
+      $id = $nv_Request->get_int('id', 'post');
+
+      $sql = 'select * from pet_manage_material_import_detail where importid = '. $id;
+      $query = $db->query($sql);
+
+      while ($row = $query->fetch()) {
+        $sql = 'update pet_manage_material_detail set number = number - '. $row['number'] . ' where id = '. $row['detailid'];
+        $db->query($sql);
+      }
+      $sql = 'delete from pet_manage_material_import_detail where importid = '. $id;
+      $db->query($sql);
+      $sql = 'delete from pet_manage_material_import where id = '. $id;
+      $db->query($sql);
+      $result['status'] = 1;
+      $result['html'] = materialList();
+      $result['html2'] = importList();
+    break;
     case 'report':
       $data = $nv_Request->get_array('data', 'post');
       $data['date'] = totime($data['date']);
@@ -673,9 +803,9 @@ if (!empty($action)) {
             $ce--;
           }
 
-          if (!empty($source[$piece['source']])) $source = $source[$piece['source']];
-          else $source = '';
-          $xtpl->assign('source', $source);
+          if (!empty($source[$piece['source']])) $source2 = $source[$piece['source']];
+          else $source2 = '';
+          $xtpl->assign('source', $source2);
           $xtpl->assign('type', $piece['type']);
           $xtpl->assign('date', $piece['date']);
           $xtpl->assign('number', $piece['number']);
@@ -689,7 +819,7 @@ if (!empty($action)) {
       }
       // die();
       $result['status'] = 1;
-      $result['html'] = $xtpl->text();;
+      $result['html'] = $xtpl->text();
       break;
     case 'report_limit':
       $data = $nv_Request->get_array('data', 'post');
@@ -748,108 +878,6 @@ if (!empty($action)) {
       $result['status'] = 1;
       $result['html'] = $xtpl->text();;
       break;
-      // case 'edit-import':
-      //   $data = $nv_Request->get_array('data', 'post');
-
-      //   if (!($count = count($data))) {
-      //     $result['notify'] = 'Chưa có hàng hóa nhập';
-      //   }
-      //   else {
-      //     $query = $db->query('insert into `'. PREFIX .'import` (import_date, note) values('. time().', "")');
-      //     if ($query) {
-      //       $total = 0;
-      //       $id = $db->lastInsertId();
-      //       foreach ($data as $row) {
-      //         $row['date'] = totimev2($row['date']);
-      //         if (!($item_id = checkItemId($row['id'], $row['date'], $row['status']))) {
-      //           $result['notify'] = 'Lỗi hệ thống';
-      //         }
-      //         else {
-      //           $sql = 'insert into `'. PREFIX .'import_detail` (import_id, item_id, number, note) values('. $id .', '. $item_id .', '. $row['number'] .', "")';
-      //           if ($query) {
-      //             $total ++;
-      //           }
-      //         }
-      //       }
-      //       if ($total > 0) {
-      //         $result['status'] = 1;
-      //         $result['html'] = importList();
-      //         if ($count == $total) {
-      //           $result['notify'] = 'Đã lưu nhập thiết bị';
-      //         }
-      //         else {
-      //           $result['notify'] = "Đã lưu $total/$count";
-      //         }
-      //       }
-
-      //     }
-      //   }
-      // break;
-      // case 'remove-import':
-      //   $id = $nv_Request->get_int('id', 'post', 0);
-
-      //   // ktb: lấy số lượng nhập, giảm số lượng kho
-      //   $query = $db->query('select * from `pet_manage_import_detail` where import_id = ' . $id);
-      //   $count = 0;
-      //   $total = 0;
-      //   while ($row = $query->fetch()) {
-      //     if ($db->query('update `' .  PREFIX . 'material` set number = number - ' . $row['number'] . ' where id = ' . $row['item_id'])) {
-      //       $count++;
-      //     }
-      //     $total++;
-      //   }
-
-      //   if ($db->query('delete from `' .  PREFIX . 'import` where id = ' . $id)) {
-      //     $result['status'] = 1;
-      //     $result['notify'] = 'Đã xóa phiếu nhập';
-      //     $result['html'] = importList();
-      //     $result['html2'] = materialList();
-      //   }
-      //   break;
-      // case 'get-import':
-      //   $id = $nv_Request->get_int('id', 'post');
-
-      //   $query = $db->query('select * from `pet_manage_import_detail` where import_id = ' . $id);
-      //   $list = array();
-      //   $item = getMaterialDataList();
-      //   while ($row = $query->fetch()) {
-      //     $index = checkItemIndex($item, $row['item_id']);
-
-      //     if ($itemData = getItemDatav2($row['item_id'])) {
-      //       $list[] = array(
-      //         'index' => $index,
-      //         'id' => $itemData['id'],
-      //         'date' => $row['date'] ? date('d/m/Y', $row['date']) : '',
-      //         'number' => $row['number'],
-      //         'status' => $itemData['description']
-      //       );
-      //     }
-      //   }
-
-      //   $result['status'] = 1;
-      //   $result['import'] = $list;
-      //   break;
-      // case 'remove-export':
-      //   $id = $nv_Request->get_int('id', 'post', 0);
-
-      //   // ktb: lấy số lượng nhập, giảm số lượng kho
-      //   $query = $db->query('select * from `pet_manage_export_detail` where export_id = ' . $id);
-      //   $count = 0;
-      //   $total = 0;
-      //   while ($row = $query->fetch()) {
-      //     if ($db->query('update `' .  PREFIX . 'material` set number = number + ' . $row['number'] . ' where id = ' . $row['item_id'])) {
-      //       $count++;
-      //     }
-      //     $total++;
-      //   }
-
-      //   if ($db->query('delete from `' .  PREFIX . 'export` where id = ' . $id)) {
-      //     $result['status'] = 1;
-      //     $result['notify'] = 'Đã xóa phiếu nhập';
-      //     $result['html'] = exportList();
-      //     $result['html2'] = materialList();
-      //   }
-      //   break;
       // case 'filter-report':
       //   $result['status'] = 1;
       //   $result['html'] = reportList();
@@ -890,15 +918,34 @@ if (!empty($action)) {
       //     $result['html'] = typeOptionList();
       //   }
       //   break;
-    case 'remove-source':
-      $id = $nv_Request->get_int('id', 'post', 0);
 
-      $sql = 'update `'. PREFIX .'material_source` set active = 0 where id = '. $id;
-      if ($db->query($sql)) {
-        $result['source'] = sourceDataList();
-      }
+    case 'get-source':
+      $id = $nv_Request->get_int('id', 'post');
+
+      $sql = 'select * from pet_manage_material_source where id = '. $id;
+      $query = $db->query($sql);
       $result['status'] = 1;
-      break;
+      $result['data'] = $query->fetch();
+    break;
+    case 'update-source':
+      $id = $nv_Request->get_int('id', 'post');
+      $data = $nv_Request->get_array('data', 'post');
+
+      $sql = 'update pet_manage_material_source set name = "'. $data['name'] .'", note = "'. $data['note'] .'" where id = '. $id;
+      $db->query($sql);
+
+      $result['status'] = 1;
+      $result['html'] = sourceList();
+    break;
+    case 'remove-source':
+      $id = $nv_Request->get_int('id', 'post');
+
+      $sql = 'update pet_manage_material_source set active = 0 where id = '. $id;
+      $db->query($sql);
+
+      $result['status'] = 1;
+      $result['html'] = sourceList();
+    break;
     case 'insert-source':
       $name = $nv_Request->get_string('name', 'post', '');
       $note = $nv_Request->get_string('note', 'post', '');
@@ -906,6 +953,9 @@ if (!empty($action)) {
       $sql = 'select * from `pet_manage_material_source` where name = "' . $name . '"';
       $query = $db->query($sql);
       if (!empty($source = $query->fetch())) {
+        $sql = 'update `pet_manage_material_source` set active = 1, note = "'. $note .'" where name = "' . $name . '"';
+        $query = $db->query($sql);
+
         $result['status'] = 1;
         $result['id'] = $source['id'];
       } else {
@@ -929,8 +979,6 @@ $xtpl = new XTemplate("main.tpl", PATH);
 // die();
 
 $xtpl->assign('today', date('d/m/Y', time()));
-$xtpl->assign('material', json_encode(getMaterialDataList(), JSON_UNESCAPED_UNICODE));
-$xtpl->assign('source', json_encode(sourceDataList()));
 $xtpl->assign('modal', materialModal());
 // var_dump(importList());die();
 $xtpl->assign('import_content', importList());
