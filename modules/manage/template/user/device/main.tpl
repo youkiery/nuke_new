@@ -2,82 +2,42 @@
 <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css" rel="stylesheet">
 <link rel="stylesheet" type="text/css" href="{NV_BASE_SITEURL}{NV_ASSETS_DIR}/js/jquery-ui/jquery-ui.min.css">
 <script type="text/javascript" src="{NV_BASE_SITEURL}{NV_ASSETS_DIR}/js/jquery-ui/jquery-ui.min.js"></script>
+<script type="text/javascript" src="{NV_BASE_SITEURL}{NV_ASSETS_DIR}/js/language/jquery.ui.datepicker-{NV_LANG_INTERFACE}.js"></script>
 
-<style>
-  .red {
-    background: pink;
-  }
-  label { text-align: left !important; padding-left: 10px; }
-  
-  .rows::after {
-    content: "";
-    clear: both;
-    display: table;
-  }
-
-  .col-1, .col-2, .col-3, .col-4, .col-5, .col-6, .col-7, .col-8, .col-9, .col-10, .col-11, .col-12 {
-    float: left;
-  }
-
-  .col-1 {width: 8.33%;}
-  .col-2 {width: 16.66%;}
-  .col-3 {width: 25%;}
-  .col-4 {width: 33.33%;}
-  .col-5 {width: 41.66%;}
-  .col-6 {width: 50%;}
-  .col-7 {width: 58.33%;}
-  .col-8 {width: 66.66%;}
-  .col-9 {width: 75%;}
-  .col-10 {width: 83.33%;}
-  .col-11 {width: 91.66%;}
-  .col-12 {width: 100%;}
-</style>
-
+{excel_modal}
 {device_modal}
-
+{remove_modal}
+{remove_all_modal}
+{transfer_modal}
+{filter_modal}
 <div id="msgshow"></div>
+<!-- BEGIN: v1 -->
+<div style="float: right;">
+  <button class="btn btn-success" onclick="deviceInsert()">
+    <span class="glyphicon glyphicon-plus"></span>
+  </button>
+  <button class="btn btn-success" onclick="$('#filter-modal').modal('show')">
+    <span class="glyphicon glyphicon-filter"></span>
+  </button>
+</div>
+<!-- END: v1 -->
+<div class="form-group">
+  <button class="btn btn-info" onclick="excel()"> Xuất excel </button>
+</div>
 
 <div style="clear: both;"></div>
-
-<!-- BEGIN: m1 -->
-<div class="form-group">
-  <ul class="nav nav-tabs">
-    <li class="active"><a data-toggle="tab" href="#content"> Danh sách </a></li>
-    <li><a data-toggle="tab" href="#manager"> Quản lý </a></li>
-  </ul>
+<div id="content">
+  {content}
 </div>
-<!-- END: m1 -->
-
-<div class="tab-content">
-  <div id="content" class="tab-pane fade in active">
-    {content}
-  </div>
-  <div id="manager" class="tab-pane fade">
-    <div class="rows form-group">
-      <div class="col-6">
-        <input type="text" class="form-control" id="date" value="{today}">
-      </div>
-      <div class="col-6">
-        &nbsp;
-        <button class="btn btn-info" onclick="changeDate(-1)">
-          &lt;
-        </button>    
-        <button class="btn btn-info" onclick="changeDate(1)">
-          &gt;
-        </button>    
-        <button class="btn btn-info" onclick="reportContent()">
-          Báo cáo
-        </button>            
-      </div>
-    </div>
-    <div id="manager-content">
-      {manager_content}
-    </div>
-  </div>
-</div>
-
+<!-- <button class="btn btn-info">
+  edit all
+</button>   -->
+<!-- BEGIN: v2 -->
+<button class="btn btn-danger" onclick="removeAll()">
+  Xóa mục đã chọn
+</button>  
+<!-- END: v2 -->
 <script src="/modules/manage/src/script.js"></script>
-<script src="/modules/core/js/vhttp.js"></script>
 <script>
   var global = {
     id: 0,
@@ -94,19 +54,157 @@
     list: JSON.parse('{depart}'),
     today: '{today}',
     remind: JSON.parse('{remind}'),
-    remindv2: JSON.parse('{remindv2}'),
-    time: Number('{time}') * 1000,
-    config: Number('{config}') * 60 * 60 * 24 * 1000
+    remindv2: JSON.parse('{remindv2}')
   }
 
   $(document).ready(() => {
-    // installCheckAll('device')
-    // installRemindv2('device', 'name')
-    // installRemindv2('device', 'intro')
-    // installRemindv2('device', 'source')
-    // installDepart('filter')
-    // installDepart('device')
+    installCheckAll('device')
+    installRemindv2('device', 'name')
+    installRemindv2('device', 'intro')
+    installRemindv2('device', 'source')
+    installDepart('filter')
+    installDepart('device')
+    $("#device-import-time").datepicker({
+      format: 'dd/mm/yyyy',
+      changeMonth: true,
+      changeYear: true
+    });
   })
+
+  function transfer(id, departid) {
+    global['id'] = id
+    $("#transfer-content").html(parseSelect(departid))
+    $("#transfer-modal").modal('show')
+  }
+
+  function checkTransfer() {
+    return {
+      id: global['id'],
+      depart: $("#transfer-depart").val()
+    }
+  }
+
+  function parseSelect(departid) {
+    html = ''
+    global['list'].forEach(item => {
+      checked = ''
+      if (item['id'] == departid) checked = 'selected'
+      html += `
+        <option value=`+ item['id'] +` `+ checked +`>
+          `+ item['name'] +`
+        </option>`
+    })
+    html = `
+      <select class="form-control form-group" id="transfer-depart">
+        `+ html +`
+      <select>`
+    return html
+  }
+
+  function transferSubmit() {
+    $.post(
+      '',
+      {action: 'transfer', data: checkTransfer(), filter: checkFilter()},
+      (response, status) => {
+        checkResult(response, status).then(data => {
+          $("#content").html(data['html'])
+          $("#transfer-modal").modal('hide')
+        })
+      }
+    )
+  }
+
+  function excelAll() {
+    $.post(
+      '',
+      {action: 'excel'},
+      (response, status) => {
+    		window.open(strHref + '?excel=1')
+      }
+    )
+  }
+
+  function excelDepartSelected() {
+    $.post(
+      '',
+      {action: 'excel', depart: $("#excel-depart").val() },
+      (response, status) => {
+        checkResult(response, status).then(data => {
+      		window.open(strHref + '?excel=1')
+        })
+      }
+    )
+  }
+
+  function excel() {
+    $("#excel-modal").modal('show')
+  }
+
+  function selectDepart(prefix, index) {
+    global['selected'][prefix][index] = 1
+    $("#"+ prefix +"-depart-input").val('')
+    val = []
+    for (const key in global['selected'][prefix]) {
+      if (global['selected'][prefix].hasOwnProperty(key)) {
+        val.push('<span class="btn btn-info btn-xs" onclick="deselectDepart(\''+ prefix +'\', '+ key +')"> '+ global['list'][key]['name'] +' </span>')
+      }
+    }
+    
+    $("#"+ prefix +"-depart").html(val.join(', '))
+  }
+
+  function deselectDepart(prefix, index) {
+    delete global['selected'][prefix][index]
+    val = []
+    for (const key in global['selected'][prefix]) {
+      if (global['selected'][prefix].hasOwnProperty(key)) {
+        val.push('<span class="btn btn-info btn-xs" onclick="deselectDepart(\''+ prefix +'\', '+ key +')"> '+ global['list'][key]['name'] +' </span>')
+      }
+    }
+
+    $("#"+ prefix +"-depart").html(val.join(', '))
+  }
+
+  function insertDepart() {
+    depart = $("#device-depart-input").val()
+    if (!depart.length) {
+      alert_msg('Điền tên đơn vị trước khi thêm mới')
+    }
+    else {
+      $.post(
+        '',
+        { action: 'insert-depart', name: depart },
+        (response, status) => {
+          checkResult(response, status).then(data => {
+            global['depart']['list'].push(data['inserted'])
+            selectDepart('device', global['depart']['list'].length - 1)
+          }, () => {})
+        }
+      )
+    }
+  }
+
+  function checkFilter() {
+    limit = $("#filter-limit").val()
+    if (limit < 10) {
+      $("#filter-limit").val(10)
+    }
+    else if (limit > 200) {
+      $("#filter-limit").val(200)
+    }
+    list = []
+    for (const key in global['selected']['filter']) {
+      if (global['selected']['filter'].hasOwnProperty(key)) {
+        list.push(global['list'][key]['id'])
+      }
+    }
+    return {
+      page: global['page']['main'],
+      limit: $("#filter-limit").val(),
+      depart: list,
+      keyword: $('#filter-keyword').val()
+    }
+  }
 
   function checkDeviceData() {
     list = []
@@ -207,32 +305,30 @@
       (response, status) => {
         checkResult(response, status).then(data => {
           $("#content").html(data['html'])
-          $("#device-name").text(data['device']['name']),
-          $("#device-unit").text(data['device']['unit']),
-          $("#device-number").text(data['device']['number']),
-          $("#device-year").text(data['device']['year']),
-          $("#device-intro").text(data['device']['intro']),
-          $("#device-source").text(data['device']['source']),
-          $("#device-status").text(data['device']['status']),
-          $("#device-import-time").text(data['device']['import'])
-          $("#device-description").text(data['device']['description'])
-          $("#detail-msg").text(data['data']['msg'])
-          $("#detail-note").val(data['data']['note'])
-          $("#detail-status").val(data['data']['status'])
+          $("#device-name").val(data['device']['name']),
+          $("#device-unit").val(data['device']['unit']),
+          $("#device-number").val(data['device']['number']),
+          $("#device-year").val(data['device']['year']),
+          $("#device-intro").val(data['device']['intro']),
+          $("#device-source").val(data['device']['source']),
+          $("#device-status").val(data['device']['status']),
+          $("#device-description").val(data['device']['description'])
+          $("#device-import-time").val(data['device']['import'])
           $("#device-insert").hide()
           $("#device-edit").show()
+          global['selected']['depart'] = {}
+          data['device']['depart'].forEach(depart => {
+            global['list'].forEach((item, index) => {
+              if (item['id'] == depart) {
+                selectDepart('device', index)
+              }
+            })
+          })
           global['id'] = id
           $('#device-modal').modal('show')
         }, () => {})
       }
     )
-  }
-
-  function manual(id) {
-    vhttp.checkelse('', {action: 'get-manual', id: id}).then(data => {
-      $("#manual-content").html(data['manual'])
-      $("#manual-modal").modal('show')
-    })
   }
 
   function loadDefault() {
@@ -246,7 +342,7 @@
     $("#device-import-time").val(global['today']),
     $("#device-import-description").val('')
   }
-  
+
   function deviceRemove(id) {
     $('#remove-modal').modal('show')
     global['id'] = id
@@ -269,7 +365,7 @@
     global['page']['main'] = page
     $.post(
       '',
-      { action: 'filter', 'device_filter': checkFilter() },
+      { action: 'filter', 'filter': checkFilter() },
       (response, status) => {
         checkResult(response, status).then(data => {
           $("#content").html(data['html'])
@@ -386,50 +482,6 @@
 
   function selectRemindv2(prefix, type, value) {
     $("#" + prefix + "-" + type).val(value)
-  }
-
-  function deviceDetail(id, status, note) {
-    global['id'] = id
-    $("#detail-status").val(status)
-    $("#detail-note").val(note)
-    $("#detail-modal").modal('show')
-  }
-
-  function detailSubmit() {
-    vhttp.checkelse('', { action: 'insert-detail', status: $("#detail-status").val(), note: $("#detail-note").val(), id: global['id'] }).then(data => {
-      $("#content").html(data['html'])
-      $("#device-modal").modal('hide')
-    })
-  }
-
-  function reportDetail(id) {
-    vhttp.checkelse('', { action: 'report-detail', id: id, date: Number(global['time']) / 1000 }).then(data => {
-      $("#report-content").html(data['html'])
-      $("#report-modal").modal('show')
-    })
-  }
-
-  function changeDate(multipie) {
-    datetime = global['time'] + global['config'] * multipie
-    vhttp.checkelse('', { action: 'change-date', date: Number(datetime) / 1000 }).then(data => {
-      global['time'] = datetime
-      $("#date").val(parseDate(new Date(global['time'])))
-      $("#manager-content").html(data['html'])
-    })
-  }
-
-  function reportContent() {
-    vhttp.checkelse('', { action: 'report-content', date: Number(global['time']) / 1000 }).then(data => {
-      $("#report-content-content").html(data['html'])
-      $("#report-content-modal").modal('show')
-    })
-  }
-
-  function parseDate(datetime) {
-    date = datetime.getDate()
-    month = datetime.getMonth() + 1
-    year = datetime.getFullYear()
-    return (date < 10 ? '0' : '') + date + '/' + (month < 10 ? '0' : '') + month + '/' + year
   }
 </script>
 <!-- END: main -->

@@ -1,42 +1,47 @@
 <!-- BEGIN: main -->
-<!-- BEGIN: yes -->
 <table class="table table-bordered">
   <thead>
     <tr>
       <th> STT </th>
-      <th> Thiết bị </th>
+      <th> <input type="checkbox" id="device-check-all"> </th>
+      <th> Tên thiết bị </th>
+      <th> Phòng ban </th>
+      <th> Công ty </th>
       <th> Tình trạng </th>
       <th> Số lượng </th>
+      <!-- BEGIN: v1 -->
       <th></th>
+      <!-- END: v1 -->
     </tr>
   </thead>
   <tbody>
     <!-- BEGIN: row -->
     <tr>
       <td> {index} </td>
-      <td> {name} {check} </td>
+      <th> <input type="checkbox" class="device-checkbox" id="device-checkbox-{id}"> </th>
+      <td> {name} </td>
+      <td> {depart} </td>
+      <td> {company} </td>
       <td> {status} </td>
       <td> {number} </td>
+      <!-- BEGIN: v2 -->
       <td> 
+        <button class="btn btn-info btn-xs" onclick="transfer({id}, {departid})">
+          <span class="glyphicon glyphicon-transfer"></span>
+        </button>  
         <button class="btn btn-info btn-xs" onclick="deviceEdit({id})">
-          báo cáo
+          <span class="glyphicon glyphicon-edit"></span>
         </button>  
-        <!-- BEGIN: manual -->
-        <button class="btn btn-info btn-xs" onclick="manual({id})">
-          HDSD
+        <button class="btn btn-danger btn-xs" onclick="deviceRemove({id})">
+          <span class="glyphicon glyphicon-remove"></span>
         </button>  
-        <!-- END: manual -->
       </td>
+      <!-- END: v2 -->
     </tr>
     <!-- END: row -->
   </tbody>
 </table>
-<!-- END: yes -->
-<!-- BEGIN: no -->
-<p class="text-center">
-  <b>
-    Tài khoản không quản lý thiết bị nào
-  </b>
-</p>
-<!-- END: no -->
+<div class="form-group">
+  {nav}
+</div>
 <!-- END: main -->
