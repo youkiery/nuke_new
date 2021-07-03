@@ -494,13 +494,48 @@ if (!empty($action)) {
 
       // b2
       foreach ($data as $row) {
+        // nếu không có itemid
+        if (empty($data['itemid'])) {
+          // tìm kiếm item trong csdl
+          $sql = "select * from pet_manage_material where name like '$row[item]'";
+          $query = $db->query($sql);
+          
+          // chưa có thì thêm
+          if (empty($item = $query->fetch())) {
+            $sql = "insert into pet_manage_material (name, unit, description) values ('$row[item]', '', '')";
+            $db->query($sql);
+            $row['itemid'] = $db->lastInsertid();
+          }
+          else {
+            // có rồi thì đưa vào itemid
+            $row['itemid'] = $item['id'];
+          }
+        }
+        // nếu không có sourceid
+        if (empty($row['sourceid'])) {
+          // tìm kiếm item trong csdl
+          $sql = "select * from pet_manage_material_source where name like '$row[source]'";
+          $query = $db->query($sql);
+          
+          // chưa có thì thêm
+          if (empty($item = $query->fetch())) {
+            $sql = "insert into pet_manage_material_source (name, note) values ('$row[source]', '')";
+            $db->query($sql);
+            $row['sourceid'] = $db->lastInsertid();
+          }
+          else {
+            // có rồi thì đưa vào sourceid
+            $row['sourceid'] = $item['id'];
+          }
+        }
+
         $row['date'] = totime($row['date']);
         $row['expire'] = totime($row['expire']);
-        $sql = 'select * from `pet_manage_material_detail` where materialid = ' . $row['id'] . ' and source = ' . $row['source'] . ' and expire = ' . $row['expire'];
+        $sql = 'select * from `pet_manage_material_detail` where materialid = ' . $row['itemid'] . ' and source = ' . $row['sourceid'] . ' and expire = ' . $row['expire'];
         $query = $db->query($sql);
         if (empty($detail = $query->fetch())) {
           // b3
-          $sql = 'insert into `pet_manage_material_detail` (materialid, expire, number, source) values(' . $row['id'] . ', ' . $row['expire'] . ', ' . $row['number'] . ', ' . $row['source'] . ')';
+          $sql = 'insert into `pet_manage_material_detail` (materialid, expire, number, source) values(' . $row['itemid'] . ', ' . $row['expire'] . ', ' . $row['number'] . ', ' . $row['sourceid'] . ')';
           $db->query($sql);
           $detail = array('id' => $db->lastInsertId());
         } else {
@@ -517,6 +552,7 @@ if (!empty($action)) {
       $result['material'] = json_encode(getMaterialDataList(), JSON_UNESCAPED_UNICODE);
       $result['html'] = materialList();
       $result['html2'] = importList();
+      $result['html3'] = sourceList();
       break;
     case 'update-import':
       $id = $nv_Request->get_int('id', 'post');

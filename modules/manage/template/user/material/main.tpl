@@ -235,15 +235,17 @@
       $(".import").each((index, item) => {
         ia = trim(item.getAttribute('ia'))
         temp = {
-          id: $('#import-type-val-' + ia).val(),
+          item: $('#import-type-' + ia).val(),
+          itemid: $('#import-type-val-' + ia).val(),
           date: $('#import-date-' + ia).val(),
-          source: $('#import-source-val-' + ia).val(),
+          source: $('#import-source-' + ia).val(),
+          sourceid: $('#import-source-val-' + ia).val(),
           number: $('#import-number-' + ia).val(),
           expire: $('#import-expire-' + ia).val(),
           note: $('#import-note-' + ia).val()
         }
-        if (!temp['id']) return msg = 'Chưa chọn hóa chất'
-        if (!temp['source']) return msg = 'Chưa chọn nguồn cung'
+        if (!(temp.item.length || temp.itemid.length)) return msg = 'Chưa chọn hóa chất'
+        if (!(temp.source.length || temp.sourceid.length)) return msg = 'Chưa chọn nguồn cung'
         if (temp['number'] <= 0) return msg = 'Số lượng nhỏ hơn 1'
         data.push(temp)
       })
@@ -765,6 +767,7 @@
         alert_msg('Đã thêm toa nhập')
         $("#material").html(data['html'])
         $("#import").html(data['html2'])
+        $("#source").html(data['html3'])
         $('#import-modal-insert').modal('hide')
         $('.import').remove()
       })
