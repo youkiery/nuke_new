@@ -243,7 +243,7 @@ function deviceList() {
 
   $xtpl = new XTemplate("device-list.tpl", PATH);
 
-  // $query = $db->query('select * from `'. PREFIX .'member` where userid = '. $user_info['userid']);
+  // $query = $db->query('select * from `pet_manage_member` where userid = '. $user_info['userid']);
   // $user = $query->fetch();
   // $authors = json_decode($user['author']);
 
@@ -274,7 +274,7 @@ function deviceList() {
 
   if (!in_array('1', $group)) {
     // check if is allowed
-    $sql = 'select * from `'. PREFIX .'devicon` where userid = ' . $user_info['userid'];
+    $sql = 'select * from `pet_manage_devicon` where userid = ' . $user_info['userid'];
     $query = $db->query($sql);
     $devicon = $query->fetch();
 
@@ -300,14 +300,14 @@ function deviceList() {
     else $xtra .= ' where name like "%'. $filter['keyword'] .'%"';
   }
 
-  // die('select count(*) as count from `'. PREFIX .'device` '. $xtra .' order by update_time desc limit ' . $filter['limit']);
-  $sql = 'select count(*) as count from `'. PREFIX .'device` '. $xtra .' order by update_time desc limit ' . $filter['limit'];
+  // die('select count(*) as count from `pet_manage_device` '. $xtra .' order by update_time desc limit ' . $filter['limit']);
+  $sql = 'select count(*) as count from `pet_manage_device` '. $xtra .' order by update_time desc limit ' . $filter['limit'];
   $query = $db->query($sql);
 
   $count = $query->fetch();
   $number = $count['count'];
-  // die('select * from `'. PREFIX .'device` '. $xtra .' order by update_time desc limit ' . $filter['limit'] . ' offset ' . ($filter['page'] - 1) * $filter['limit']);
-  $query = $db->query('select * from `'. PREFIX .'device` '. $xtra .' order by update_time desc limit ' . $filter['limit'] . ' offset ' . ($filter['page'] - 1) * $filter['limit']);
+  // die('select * from `pet_manage_device` '. $xtra .' order by update_time desc limit ' . $filter['limit'] . ' offset ' . ($filter['page'] - 1) * $filter['limit']);
+  $query = $db->query('select * from `pet_manage_device` '. $xtra .' order by update_time desc limit ' . $filter['limit'] . ' offset ' . ($filter['page'] - 1) * $filter['limit']);
   $index = ($filter['page'] - 1) * $filter['limit'] + 1;
   // $authors = new object();
   // if ($authors->{'device'} == 2) $xtpl->parse('main.v1');

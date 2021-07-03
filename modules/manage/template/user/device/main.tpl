@@ -3,6 +3,37 @@
 <link rel="stylesheet" type="text/css" href="{NV_BASE_SITEURL}{NV_ASSETS_DIR}/js/jquery-ui/jquery-ui.min.css">
 <script type="text/javascript" src="{NV_BASE_SITEURL}{NV_ASSETS_DIR}/js/jquery-ui/jquery-ui.min.js"></script>
 <script type="text/javascript" src="{NV_BASE_SITEURL}{NV_ASSETS_DIR}/js/language/jquery.ui.datepicker-{NV_LANG_INTERFACE}.js"></script>
+<style>
+  .relative {
+    position: relative;
+  }
+
+  .suggest {
+    z-index: 1000;
+    position: absolute;
+    width: 100%;
+    background: #fff;
+    max-height: 400px;
+    overflow-y: scroll;
+    z-index: 1000;
+    display: none;
+  }
+
+  .suggest-item {
+    width: 100%;
+    margin-bottom: 0px;
+    border-top: 1px solid lightgray;
+  }
+
+  .suggest-item p {
+    margin: 0;
+    padding: 5px;
+  }
+
+  .suggest-item:hover {
+    background: lightgreen;
+  }
+</style>
 
 {excel_modal}
 {device_modal}

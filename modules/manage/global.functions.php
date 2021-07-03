@@ -63,31 +63,31 @@ function checkDeviceName($name, $id = 0) {
   if ($id) {
     $xtra = ' and id <> ' . $id;
   }
-  $query = $db->query('select * from `'. PREFIX .'device` where name = "'. $name . '"' . $xtra);
+  $query = $db->query('select * from `pet_manage_device` where name = "'. $name . '"' . $xtra);
   if ($query->fetch()) {
     return true;
   }
-  // die('select * from `'. PREFIX .'device` where name = "'. $name . '"');
+  // die('select * from `pet_manage_device` where name = "'. $name . '"');
   return false;
 }
 
 function checkRemind($name, $value) {
   global $db;
 
-  $query = $db->query('select * from `'. PREFIX .'remind` where name = "'. $name .'" and value = "'. $value .'"');
+  $query = $db->query('select * from `pet_manage_remind` where name = "'. $name .'" and value = "'. $value .'"');
 
   if (!($row = $query->fetch())) {
-    $query = $db->query('insert into `'. PREFIX .'remind` (name, value) values("'. $name .'", "'. $value .'")');
+    $query = $db->query('insert into `pet_manage_remind` (name, value) values("'. $name .'", "'. $value .'")');
   }
   else {
-    $query = $db->query('update `'. PREFIX .'remind` set rate = rate + 1 where id = ' . $row['id']);
+    $query = $db->query('update `pet_manage_remind` set rate = rate + 1 where id = ' . $row['id']);
   }
 }
 
 function getRemind() {
   global $db;
 
-  $query = $db->query('select * from `'. PREFIX .'remind` group by name order by rate desc');
+  $query = $db->query('select * from `pet_manage_remind` group by name order by rate desc');
   $list = array();
   while ($row = $query->fetch()) {
     $list[$row['name']] = $row['value'];
@@ -98,7 +98,7 @@ function getRemind() {
 function getRemindv2() {
   global $db;
 
-  $query = $db->query('select * from `'. PREFIX .'remind`');
+  $query = $db->query('select * from `pet_manage_remind`');
   $list = array();
   while ($row = $query->fetch()) {
     if (empty($list[$row['name']])) $list[$row['name']] = array();
@@ -110,7 +110,7 @@ function getRemindv2() {
 function getDeviceData($id) {
   global $db;
 
-  $query = $db->query('select * from `'. PREFIX .'device` where id = '. $id);
+  $query = $db->query('select * from `pet_manage_device` where id = '. $id);
   if ($row = $query->fetch()) {
     $row['depart'] = json_decode($row['depart']);
     return $row;
@@ -121,8 +121,8 @@ function getDeviceData($id) {
 function checkDepartName($name, $id = 0) {
   global $db;
 
-  if ($id) $sql = 'select * from `'. PREFIX .'device_depart` where name = "'. $name .'" and id <> ' . $id;
-  else $sql = 'select * from `'. PREFIX .'device_depart` where name = "'. $name .'"';
+  if ($id) $sql = 'select * from `pet_manage_device_depart` where name = "'. $name .'" and id <> ' . $id;
+  else $sql = 'select * from `pet_manage_device_depart` where name = "'. $name .'"';
   $query = $db->query($sql);
   if ($query->fetch()) {
     return true;
@@ -133,7 +133,7 @@ function checkDepartName($name, $id = 0) {
 function checkDepartId($id) {
   global $db;
 
-  $query = $db->query('select * from `'. PREFIX .'device_depart` where id = ' . $id);
+  $query = $db->query('select * from `pet_manage_depart` where id = ' . $id);
   if ($row = $query->fetch()) {
     return $row['name'];
   }
@@ -143,7 +143,7 @@ function checkDepartId($id) {
 function checkItemName($name) {
   global $db;
 
-  $query = $db->query('select * from `'. PREFIX .'item` where name = "'. $name .'"');
+  $query = $db->query('select * from `pet_manage_item` where name = "'. $name .'"');
   if ($row = $query->fetch()) return $row['id'];
   return false;
 }
@@ -152,13 +152,13 @@ function checkCompany($name) {
   global $db;
 
   if (empty($name)) return 0;
-  $query = $db->query('select * from `'. PREFIX .'company` where name = "'. $name .'"');
+  $query = $db->query('select * from `pet_manage_company` where name = "'. $name .'"');
   if ($row = $query->fetch()) {
     return $row['id'];
   }
   else {
-    // die('insert into `'. PREFIX .'company` (name) values("'. $name .'")');
-    $query = $db->query('insert into `'. PREFIX .'company` (name) values("'. $name .'")');
+    // die('insert into `pet_manage_company` (name) values("'. $name .'")');
+    $query = $db->query('insert into `pet_manage_company` (name) values("'. $name .'")');
     if ($query) return $row->lastInsertId();
   }
   return 0;
@@ -169,7 +169,7 @@ function getItemData($id) {
   $empty = 'chưa xác định';
 
   if (empty($id)) return $empty;
-  $query = $db->query('select * from `'. PREFIX .'item` where id = '. $id);
+  $query = $db->query('select * from `pet_manage_item` where id = '. $id);
   if ($row = $query->fetch()) {
     return $row;
   }
@@ -181,7 +181,7 @@ function getCompanyName($id) {
   $empty = 'chưa xác định';
 
   if (empty($id)) return $empty;
-  $query = $db->query('select * from `'. PREFIX .'company` where id = '. $id);
+  $query = $db->query('select * from `pet_manage_company` where id = '. $id);
   if ($row = $query->fetch()) {
     return $row['name'];
   }
@@ -204,7 +204,7 @@ function parseFilter($name) {
 function getImportData($id) {
   global $db;
 
-  $query = $db->query('select * from `'. PREFIX .'import_detail` where import_id = '. $id);
+  $query = $db->query('select * from `pet_manage_import_detail` where import_id = '. $id);
   $data = array('total' => 0, 'count' => 0);
   while ($row = $query->fetch()) {
     $data['count'] ++;
@@ -216,7 +216,7 @@ function getImportData($id) {
 function getExportData($id) {
   global $db;
 
-  $query = $db->query('select * from `'. PREFIX .'export_detail` where export_id = '. $id);
+  $query = $db->query('select * from `pet_manage_export_detail` where export_id = '. $id);
   $data = array('total' => 0, 'count' => 0);
   while ($row = $query->fetch()) {
     $data['count'] ++;
@@ -237,7 +237,7 @@ function getItemDataList() {
   global $db;
 
   $list = array();
-  $query = $db->query('select * from `'. PREFIX .'material`');
+  $query = $db->query('select * from `pet_manage_material`');
   while ($row = $query->fetch()) {
     $list []= $row;
   }
@@ -247,12 +247,12 @@ function getItemDataList() {
 function checkItemId($item_id, $item_date, $item_status) {
   global $db;
 
-  // die('select * from `'. PREFIX .'item_detail` where item_id = '. $item_id .' and date = '. $item_date .' and status = "'. $item_status .'"');
-  $query = $db->query('select * from `'. PREFIX .'item_detail` where item_id = '. $item_id .' and date = '. $item_date .' and status = "'. $item_status .'"');
+  // die('select * from `pet_manage_item_detail` where item_id = '. $item_id .' and date = '. $item_date .' and status = "'. $item_status .'"');
+  $query = $db->query('select * from `pet_manage_item_detail` where item_id = '. $item_id .' and date = '. $item_date .' and status = "'. $item_status .'"');
   if ($row = $query->fetch()) {
     return $row['id'];
   }
-  $query = $db->query('insert into `'. PREFIX .'item_detail` (item_id, number, date, status) values ('. $item_id .', 0, '. $item_date .', "'. $row['status'] .'")');
+  $query = $db->query('insert into `pet_manage_item_detail` (item_id, number, date, status) values ('. $item_id .', 0, '. $item_date .', "'. $row['status'] .'")');
   if ($query) return $db->lastInsertId();  
   return 0;
 }
@@ -260,7 +260,7 @@ function checkItemId($item_id, $item_date, $item_status) {
 function getItemDatav2($id) {
   global $db;
 
-  $query = $db->query('select * from `'. PREFIX .'material` where id = ' . $id);
+  $query = $db->query('select * from `pet_manage_material` where id = ' . $id);
   if ($row = $query->fetch()) {
     return $row;
   }
@@ -270,7 +270,7 @@ function getItemDatav2($id) {
 // function getImportData($id) {
 //   global $db;
 
-//   $query = $db->query('select * from `'. PREFIX .'import_detail` where id = ' . $id);
+//   $query = $db->query('select * from `pet_manage_import_detail` where id = ' . $id);
 //   if ($row = $query->fetch()) {
 //     return $row;
 //   }
@@ -292,14 +292,14 @@ function checkItemIndex($list, $id) {
 function getUserDepartList() {
   global $db, $user_info;
 
-  $query = $db->query('select * from `'. PREFIX .'member` where userid = '. $user_info['userid']);
+  $query = $db->query('select * from `pet_manage_member` where userid = '. $user_info['userid']);
   $user = $query->fetch();
   $author = json_decode($user['author']);
 
   $xtra = ' where id in ('. implode(', ', $author->{'depart'}) .') ';
   
   $list = array();
-  $query = $db->query('select * from `'. PREFIX .'depart`'. $xtra);
+  $query = $db->query('select * from `pet_manage_depart`'. $xtra);
   while($row = $query->fetch()) {
     $list []= $row;
   }
@@ -309,7 +309,7 @@ function getUserDepartList() {
 function getDepartList() {
   global $db;
 
-  $query = $db->query('select * from `'. PREFIX .'device_depart`');
+  $query = $db->query('select * from `pet_manage_device_depart`');
   $list = array();
 
   while($row = $query->fetch()) {
@@ -321,7 +321,7 @@ function getDepartList() {
 function getDepartidList() {
   global $db;
 
-  $query = $db->query('select * from `'. PREFIX .'depart`');
+  $query = $db->query('select * from `pet_manage_depart`');
   $list = array();
 
   while($row = $query->fetch()) {
@@ -334,10 +334,10 @@ function checkMaterialName($name, $id = 0) {
   global $db;
 
   if ($id) {
-    $query = $db->query('select * from `'. PREFIX .'material` where name = "'. $name .'" and active = 1 and id <>' . $id);
+    $query = $db->query('select * from `pet_manage_material` where name = "'. $name .'" and active = 1 and id <>' . $id);
   }
   else {
-    $query = $db->query('select * from `'. PREFIX .'material` where name = "'. $name .'" and active = 1');
+    $query = $db->query('select * from `pet_manage_material` where name = "'. $name .'" and active = 1');
   }
   if ($row = $query->fetch()) return $row['id'];
   return false;
@@ -347,11 +347,11 @@ function getMaterialDataList() {
   global $db;
 
   $list = array();
-  $sql = 'select * from `'. PREFIX .'material` where active = 1';
+  $sql = 'select * from `pet_manage_material` where active = 1';
   $query = $db->query($sql);
   // insert link
   while ($row = $query->fetch()) {
-    $sql = 'select * from `'. PREFIX .'material_detail` where number > 0 and materialid = '. $row['id'];
+    $sql = 'select * from `pet_manage_material_detail` where number > 0 and materialid = '. $row['id'];
     $detail_query = $db->query($sql);
     $detail_list = array();
 
@@ -370,7 +370,7 @@ function getMaterialDataList() {
 function checkItem($id) {
   global $db;
 
-  $sql = "select * from `". PREFIX ."material` where id = $id";
+  $sql = "select * from `pet_manage_material` where id = $id";
   $query = $db->query($sql);
   if ($row = $query->fetch()) {
     return $row;
@@ -380,9 +380,9 @@ function checkItem($id) {
 
 function deviceParseExcel($depart) {
   global $db, $objPHPExcel, $i, $j, $xco, $titles;
-  $device_query = $db->query('select * from `'. PREFIX .'device` where depart like \'%"'. $depart['id'] .'"%\' limit 1');
+  $device_query = $db->query('select * from `pet_manage_device` where depart like \'%"'. $depart['id'] .'"%\' limit 1');
   if ($device_query->fetch()) {
-    $device_query = $db->query('select * from `'. PREFIX .'device` where depart like \'%"'. $depart['id'] .'"%\'');
+    $device_query = $db->query('select * from `pet_manage_device` where depart like \'%"'. $depart['id'] .'"%\'');
     $j = 0;
     $objPHPExcel
     ->setActiveSheetIndex(0)
@@ -432,11 +432,11 @@ function materialOverlowList() {
 
   $xtpl = new XTemplate("overlow-list.tpl", PATH);
 
-  $sql = 'select count(*) as count from `'. PREFIX .'material` where number < bound';
+  $sql = 'select count(*) as count from `pet_manage_material` where number < bound';
   $query = $db->query($sql);
   $number = $query->fetch()['count'];
 
-  $sql = 'select * from `'. PREFIX .'material` where number < bound order by id desc';
+  $sql = 'select * from `pet_manage_material` where number < bound order by id desc';
   $query = $db->query($sql);
   $index = 1;
   // $index = ($filter['page'] - 1) * $filter['limit'] + 1;
@@ -461,7 +461,7 @@ function materialOverlowList() {
 function getMaterialData($item_id) {
   global $db;
 
-  $sql = 'select * from `'. PREFIX .'material` where id = ' . $item_id;
+  $sql = 'select * from `pet_manage_material` where id = ' . $item_id;
   $query = $db->query($sql);
   if (!empty($row = $query->fetch())) {
     return $row;
