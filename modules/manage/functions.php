@@ -311,6 +311,8 @@ function deviceList() {
   $index = ($filter['page'] - 1) * $filter['limit'] + 1;
   // $authors = new object();
   // if ($authors->{'device'} == 2) $xtpl->parse('main.v1');
+  $check = empty($devicon) || (!empty($devicon) && $devicon['level'] > 1);
+  if ($check) $xtpl->parse('main.v1');
   while ($row = $query->fetch()) {
     $depart = json_decode($row['depart']);
     $list = array();
@@ -325,7 +327,7 @@ function deviceList() {
     $xtpl->assign('company', $row['intro']);
     $xtpl->assign('status', $row['status']);
     $xtpl->assign('number', $row['number']);
-    if (empty($devicon) || (!empty($devicon) && $devicon['level'] > 1)) $xtpl->parse('main.row.v2');
+    if ($check) $xtpl->parse('main.row.v2');
     $xtpl->parse('main.row');
   }
   $xtpl->assign('nav', navList($number, $filter['page'], $filter['limit'], 'goPage'));

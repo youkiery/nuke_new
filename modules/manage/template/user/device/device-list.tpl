@@ -10,7 +10,7 @@
       <th> Tình trạng </th>
       <th> Số lượng </th>
       <!-- BEGIN: v1 -->
-      <th></th>
+      <th style="width: 100px"></th>
       <!-- END: v1 -->
     </tr>
   </thead>
