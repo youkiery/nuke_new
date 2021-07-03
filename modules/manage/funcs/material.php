@@ -573,15 +573,15 @@ if (!empty($action)) {
         $item = $data[$index ++];
         $expire = totime($item['expire']);
         // cập nhật số lượng mới
-        $sql = 'select * from pet_manage_material_detail where materialid = '. $item['id'] .' and source = '. $item['source'] .' and expire = '. $expire;
+        $sql = 'select * from pet_manage_material_detail where materialid = '. $item['itemid'] .' and source = '. $item['sourceid'] .' and expire = '. $expire;
         $query = $db->query($sql);
         $detail = $query->fetch();
         if (empty($detail)) {
-          $sql = "insert into pet_manage_material_detail (materialid, expire, number, source) values($item[id], $expire, $item[number], $item[source])";
+          $sql = "insert into pet_manage_material_detail (materialid, expire, number, source) values($item[itemid], $expire, $item[number], $item[sourceid])";
           $detail['id'] = $db->insert_id($sql);
         }
         else {
-          $sql = "update pet_manage_material_detail set expire = $expire, number = number + $item[number], source = $item[source] where id = ". $detail['id'];
+          $sql = "update pet_manage_material_detail set expire = $expire, number = number + $item[number], source = $item[sourceid] where id = ". $detail['id'];
           $db->query($sql);
         }
         // cật nhật số lượng phiếu
