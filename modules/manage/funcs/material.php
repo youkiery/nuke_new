@@ -722,6 +722,12 @@ if (!empty($action)) {
       $data = $nv_Request->get_array('data', 'post');
       $data['date'] = totime($data['date']);
       $list = array();
+      if (!count($data['list'])) {
+        $sql = 'select * from pet_manage_material where active = 1';
+        $query = $db->query($sql);
+        
+        while ($row = $query->fetch()) $data['list'] []= $row['id'];
+      }
 
       $xtpl = new XTemplate("report-list.tpl", PATH);
 

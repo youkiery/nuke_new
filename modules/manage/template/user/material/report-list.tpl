@@ -1,8 +1,8 @@
 <!-- BEGIN: main -->
-<table class="table table-bordered">
+<table class="table table-bordered report">
   <thead>
     <tr>
-      <th colspan="7" class="text-center">
+      <th colspan="7" class="text-center green">
         {name}
       </th>
     </tr>

@@ -75,7 +75,7 @@
 
         <div class="form-group">
           Nguồn cung
-          <input type="text" class="form-control" id="source-name">
+          <input autocomplete="off"type="text" class="form-control" id="source-name">
         </div>
         <div class="form-group">
           Ghi chú
@@ -110,26 +110,26 @@
           <div id="m1" class="tab-pane fade in active">
             <div class="rows">
               <div class="col-4">
-                <input type="text" class="form-control date" id="report-date" value="{last_month}">
+                <input autocomplete="off"type="text" class="form-control date" id="report-date" value="{last_month}">
               </div>
               <div class="col-4">
                 <div class="relative">
                   <div class="input-group">
-                    <input type="text" class="form-control" id="report-type" placeholder="loại hóa chất">
+                    <input autocomplete="off"type="text" class="form-control" id="report-type" placeholder="loại hóa chất">
                     <div class="input-group-btn">
                       <button class="btn btn-danger" onclick="clearReportType()">
                         <span class="glyphicon glyphicon-remove"></span>
                       </button>
                     </div>
                   </div>
-                  <input type="hidden" id="report-type-val">
+                  <input autocomplete="off"type="hidden" id="report-type-val">
                   <div class="suggest" id="report-type-suggest"> </div>
                 </div>
               </div>
               <div class="col-4">
                 <div class="relative">
                   <div class="input-group">
-                    <input type="text" class="form-control" id="report-source" placeholder="nguồn gốc">
+                    <input autocomplete="off"type="text" class="form-control" id="report-source" placeholder="nguồn gốc">
                     <div class="input-group-btn">
                       <button class="btn btn-danger" onclick="clearReportSource()">
                         <span class="glyphicon glyphicon-remove"></span>
@@ -137,7 +137,7 @@
                     </div>
                   </div>
                   <div class="suggest" id="report-source-suggest"> </div>
-                  <input type="hidden" id="report-source-val">
+                  <input autocomplete="off"type="hidden" id="report-source-val">
                 </div>
               </div>
             </div>
@@ -153,11 +153,11 @@
             <div class="form-group rows">
               <div class="col-6">
                 Từ khóa
-                <input class="form-control" id="report-m2-name" type="text" placeholder="Từ khóa">
+                <input autocomplete="off"class="form-control" id="report-m2-name" type="text" placeholder="Từ khóa">
               </div>
               <div class="col-6">
                 Giới hạn thấp nhất
-                <input class="form-control" id="report-m2-limit" type="text" placeholder="Giới hạn thấp nhất"
+                <input autocomplete="off"class="form-control" id="report-m2-limit" type="text" placeholder="Giới hạn thấp nhất"
                   value="10">
               </div>
             </div>
@@ -168,11 +168,11 @@
             <div class="form-group rows">
               <div class="col-6">
                 Từ khóa
-                <input class="form-control" id="report-m3-name" type="text" placeholder="Từ khóa">
+                <input autocomplete="off"class="form-control" id="report-m3-name" type="text" placeholder="Từ khóa">
               </div>
               <div class="col-6">
                 Hết hạn trước
-                <input class="form-control date" id="report-m3-expire" type="text" placeholder="Hết hạn trước"
+                <input autocomplete="off"class="form-control date" id="report-m3-expire" type="text" placeholder="Hết hạn trước"
                   value="{next_half_year}">
               </div>
             </div>
@@ -201,13 +201,13 @@
           <div class="form-group rows">
             <label class="control-label col-3"> Tên mục hàng </label>
             <div class="col-9">
-              <input type="text" class="form-control" id="material-name">
+              <input autocomplete="off"type="text" class="form-control" id="material-name">
             </div>
           </div>
           <div class="form-group rows">
             <label class="control-label col-3"> Đơn vị </label>
             <div class="col-9">
-              <input type="text" class="form-control" id="material-unit">
+              <input autocomplete="off"type="text" class="form-control" id="material-unit">
             </div>
           </div>
           <div class="form-group rows">
@@ -273,7 +273,7 @@
         <button type="button" class="close" data-dismiss="modal">&times;</button> <br>
 
         <div class="relative">
-          <input type="text" class="form-control btn-edit" id="export-item-finder">
+          <input autocomplete="off"type="text" class="form-control btn-edit" id="export-item-finder">
           <div id="export-item-finder-suggest" class="suggest"></div>
         </div>
         <div style="margin-top: 10px;">

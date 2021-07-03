@@ -45,6 +45,10 @@
   .sr:hover {
     color: red;
   }
+  .green {
+    background: green;
+    color: white
+  }
 </style>
 
 <div id="msgshow"></div>
@@ -240,7 +244,7 @@
         }
         if (!temp['id']) return msg = 'Chưa chọn hóa chất'
         if (!temp['source']) return msg = 'Chưa chọn nguồn cung'
-        if (temp['number'] <= 0) return msg = 'Số lượng nhỏ hơn 0'
+        if (temp['number'] <= 0) return msg = 'Số lượng nhỏ hơn 1'
         data.push(temp)
       })
       if (msg.length) return msg
@@ -621,7 +625,6 @@
         list: list,
         source: $('#report-source-val').val()
       }
-      if (!list.length) return 'Chọn ít nhất 1 hóa chất'
       return data
     },
     'm2': () => {
