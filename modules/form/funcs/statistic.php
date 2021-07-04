@@ -50,7 +50,7 @@ if (!empty($action)) {
 
       // ownder, sampleplace
 
-      $sql = 'select id, sampletime, owner, sampleplace, ig from pet_form_row where (time between '. $filter['from'] .' and '. $filter['end'] .')'. (count($xtra) ? ' and '. implode(' and ', $xtra) : '');
+      $sql = 'select id, ireceive, owner, sampleplace, ig from pet_form_row where (time between '. $filter['from'] .' and '. $filter['end'] .')'. (count($xtra) ? ' and '. implode(' and ', $xtra) : '');
       $query = $db->query($sql);
       $data = array();
       $index = 1;
@@ -67,7 +67,7 @@ if (!empty($action)) {
           'name' => $check,
           'unit' => array(),
         );
-        $unit = $row['owner'] .', '. $row['sampleplace'];
+        $unit = (empty($row['owner']) ? '' : $row['owner'] .', ') . $row['sampleplace'];
         if ($pos = searchObject($unit, $data[$check]['unit'], 'name') === false) {
           $pos = count($data[$check]['unit']);
           $data[$check]['unit'] []= array(
@@ -75,19 +75,28 @@ if (!empty($action)) {
             'list' => array()
           );
         }
-        $data[$check]['unit'][$pos]['list'][$row['sampletime']] = array();
+        
+        $time = date('d/m/Y', $row['ireceive']);
 
         // parse bệnh, đưa vào thống kê
         $ig = json_decode($row['ig']);
         foreach ($ig as $main) {
           foreach ($main->mainer as $mainer) {
             foreach ($mainer->note as $note) {
-              //  []= array
-              if (empty($data[$check]['unit'][$pos]['list'][$row['sampletime']][$note->note])) $data[$check]['unit'][$pos]['list'][$row['sampletime']][$note->note] = array(
-                '0' => 0, '1' => 0 // 0: minus, 1: plus
-              );
-              if (mb_strpos(mb_strtolower($note->result), 'dương') !== false) $data[$check]['unit'][$pos]['list'][$row['sampletime']][$note->note]['1'] ++;
-              else $data[$check]['unit'][$pos]['list'][$row['sampletime']][$note->note]['0'] ++;
+              $idx = searchObject($note->note, $data[$check]['unit'][$pos]['list'], 'disease');
+              if ($idx == false) {
+                $idx = count($data[$check]['unit'][$pos]['list']);
+
+                $data[$check]['unit'][$pos]['list'] []= $temp = array(
+                  'time' => $time,
+                  'disease' => $note->note,
+                  'minus' => 0,
+                  'plus' => 0
+                );
+              }
+              
+              if (mb_strpos(mb_strtolower($note->result), 'dương') !== false) $data[$check]['unit'][$pos]['list'][$idx]['plus'] ++;
+              else $data[$check]['unit'][$pos]['list'][$idx]['minus'] ++;
             }
           }
         }
@@ -99,10 +108,10 @@ if (!empty($action)) {
       //   unit
       //     name
       //     list
-      //       [time]
-      //         [disease]
-      //           0
-      //           1
+      //       time
+      //       disease
+      //         plus
+      //         minus
 
       $dd = 1;
       $html = '';
@@ -113,61 +122,56 @@ if (!empty($action)) {
         }
         if ($total) {
           $xtpl2 = new XTemplate('pro.tpl', PATH2);
-          $unit = $province['unit'][0]['name'];
-          $uni_cord = count($unit['list']);
-          $date = array_keys($unit['list']);
-          $date_cord = count($date);
-          $disease = array_keys($unit['list'][$date[0]]);
+          $uni_cord = count($province['unit'][0]['list']);
+          $current = $province['unit'][0]['list'][0];
 
           $xtpl2->assign('index', $index ++);
-          $xtpl2->assign('province', (empty($province['name']) ? 'Không có tên' : $province['name']));
           $xtpl2->assign('pro_cord', $total);
-          $xtpl2->assign('uni_cord', $length);
-          $xtpl2->assign('date_cord', $length);
-          $xtpl2->assign('unit', $unit);
-          $xtpl2->assign('disease', $disease[0]);
-          $xtpl2->assign('stat', 'Âm: '. $province['unit'][0]['list'][$disease[0]][0] .', Dương: '. $province['unit'][0]['list'][$disease[0]][1]);
+          $xtpl2->assign('uni_cord', $uni_cord);
+          $xtpl2->assign('province', (empty($province['name']) ? 'Không có tên' : $province['name']));
+          $xtpl2->assign('unit', $province['unit'][0]['name']);
+          $xtpl2->assign('date', $current['time']);
+          $xtpl2->assign('disease', $current['disease']);
+          $xtpl2->assign('stat', 'Âm: '. $current['minus'] .', Dương: '. $current['plus']);
           $xtpl2->parse('main.row');
 
-          $left = count($disease);
+          $left = count($province['unit'][0]['list']);
           for ($j = 1; $j < $left; $j++) {
-            $xtpl2->assign('disease', $disease[$j]);
-            $xtpl2->assign('stat', 'Âm: '. $province['unit'][0]['list'][$disease[$j]][0] .', Dương: '. $province['unit'][0]['list'][$disease[$j]][1]);
+            $current = $province['unit'][0]['list'][$j];
+            $xtpl2->assign('date', $current['time']);
+            $xtpl2->assign('disease', $current['disease']);
+            $xtpl2->assign('stat', 'Âm: '. $current['minus'] .', Dương: '. $current['plus']);
             $xtpl2->parse('main.row3');
           }
 
           $xtpl2->parse('main');
           $html .= $xtpl2->text();
-
-          // lấy ngày thứ hai của đơn vị
-
-          $length = count($province['unit']);
-          for ($j = 1; $j < $length; $j++) {
+          
+          $left = count($province['unit']);
+          for ($i = 1; $i < $left; $i++) { 
             $xtpl2 = new XTemplate('pro.tpl', PATH2);
-            $current = $province['unit'][$j];
-
-            $length2 = count($current['list']);
-            $disease = array_keys($unit = $current['list']);
-
-            $xtpl2->assign('uni_cord', $length2);
-            $xtpl2->assign('unit', $unit = $current['name']);
-            $xtpl2->assign('disease', $disease[0]);
-            $xtpl2->assign('stat', 'Âm: '. $current['list'][$disease[0]][0] .', Dương: '. $current['list'][$disease[0]][1]);
-            $xtpl2->parse('main.row2');
-
-            $left = count($disease);
-            for ($k = 1; $k < $left; $k++) {
-              $disease = array_keys($current['list']);
+            $uni_cord = count($province['unit'][$i]['list']);
+            $current = $province['unit'][$i]['list'][0];
   
-              $xtpl2->assign('disease', $disease[$k]);
-              $xtpl2->assign('stat', 'Âm: '. $current['list'][$disease[$k]][0] .', Dương: '. $province['unit'][0]['list'][$disease[$k]][1]);
+            $xtpl2->assign('uni_cord', $uni_cord);
+            $xtpl2->assign('unit', $province['unit'][$i]['name']);
+            $xtpl2->assign('date', $current['time']);
+            $xtpl2->assign('disease', $current['disease']);
+            $xtpl2->assign('stat', 'Âm: '. $current['minus'] .', Dương: '. $current['plus']);
+            $xtpl2->parse('main.row2');
+  
+            $left2 = count($province['unit'][$i]['list']);
+            for ($j = 1; $j < $left2; $j++) {
+              $current = $province['unit'][$i]['list'][$j];
+              $xtpl2->assign('date', $current['time']);
+              $xtpl2->assign('disease', $current['disease']);
+              $xtpl2->assign('stat', 'Âm: '. $current['minus'] .', Dương: '. $current['plus']);
               $xtpl2->parse('main.row3');
             }
             $xtpl2->parse('main');
             $html .= $xtpl2->text();
-
-            // lấy bệnh thứ 2 của ngày
           }
+          
         }
       }
 
@@ -175,7 +179,6 @@ if (!empty($action)) {
       $xtpl->parse('main');
       $result['status'] = 1;
       $result['html'] = $xtpl->text();
-    break;
   }
   echo json_encode($result);
   die();
