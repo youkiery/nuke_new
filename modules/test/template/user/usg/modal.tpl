@@ -186,6 +186,10 @@
               Thêm phiếu siêu âm
             </button>
           </div>
+
+          <div id="usg-new-content">
+            {new_content}
+          </div>
         </div>
       </div>
     </div>

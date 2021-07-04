@@ -34,6 +34,7 @@ function usgModal($lang_module)
   $xtpl->assign('lang', $lang_module);
   $xtpl->assign('now', date('d/m/Y', time()));
   $xtpl->assign('expecttime', date('d/m/Y', time() + 60 * 60 * 24 * 25));
+  $xtpl->assign('new_content', newUsgContent());
 
   $diseases = getDiseaseList();
   foreach ($diseases as $value) {
@@ -52,6 +53,28 @@ function usgModal($lang_module)
     $xtpl->parse('main.doctor4');
   }
 
+  $xtpl->parse('main');
+  return $xtpl->text();
+}
+
+function newUsgContent() {
+  global $db;
+  $xtpl = new XTemplate("new-content.tpl", PATH2);
+  $start = strtotime(date('Y/m/d'));
+  $end = time();
+
+  $sql = 'select a.id, a.expecttime, a.expectnumber, c.name, c.phone from '. VAC_PREFIX .'_usg2 a inner join '. VAC_PREFIX. '_pet b on a.petid = b.id inner join '. VAC_PREFIX. '_customer c on b.customerid = c.id where time between '. $start .' and '. $end .' order by id desc';
+  $query = $db->query($sql);
+
+  $index = 1;
+  while ($row = $query->fetch()) {
+    $xtpl->assign('index', $index++);
+    $xtpl->assign('customer', $row['name']);
+    $xtpl->assign('phone', $row['phone']);
+    $xtpl->assign('birthtime', date('d/m/Y', $row['expecttime']));
+    $xtpl->assign('number', $row['expectnumber']);
+    $xtpl->parse('main.row');
+  }
   $xtpl->parse('main');
   return $xtpl->text();
 }

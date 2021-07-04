@@ -17,7 +17,6 @@ $filter = array(
   'status' => $nv_Request->get_int('status', 'get', 0)
 );
 
-
 $type = 0;
 $sql = 'select * from `' . VAC_PREFIX . '_user` where userid = ' . $user_info['userid'];
 $query = $db->query($sql);
@@ -315,6 +314,7 @@ if ($action) {
       $db->query($sql);
       $result['status'] = 1;
       $result['html'] = usgCurrentList($filter);
+      $result['html2'] = newUsgContent();
       break;
     case 'change-recall':
       $id = $nv_Request->get_int('id', 'post');
