@@ -6,10 +6,15 @@
     display: table;
   }
 
+  .col-3,
   .col-4,
   .col-6 {
     float: left;
     padding: 0px 5px;
+  }
+
+  .col-3 {
+    width: 25%;
   }
 
   .col-4 {
@@ -43,13 +48,22 @@
     font-size: 0.8em;
   }
 
-  .table-small, td {
+  .table-small,
+  td {
     font-size: 0.9em;
+  }
+
+  .click {
+    cursor: pointer;
+    text-decoration: underline;
+    color: blue;
   }
 </style>
 <link rel="stylesheet" type="text/css" href="/assets/js/jquery-ui/jquery-ui.min.css">
 <script type="text/javascript" src="/assets/js/jquery-ui/jquery-ui.min.js"></script>
 <script type="text/javascript" src="/assets/js/language/jquery.ui.datepicker-vi.js"></script>
+
+{modal}
 
 <ul class="nav nav-tabs">
   <!-- BEGIN: user -->
@@ -70,17 +84,28 @@
 
 <form class="form-group" onsubmit="return filter(event)">
   <div class="rows form-group">
-    <div class="col-4">
+    <div class="col-3">
       <label> Từ ngày </label>
       <input class="form-control date" id="from" value="{from}">
     </div>
-    <div class="col-4">
+    <div class="col-3">
       <label> Đến ngày </label>
       <input class="form-control date" id="end" value="{end}">
     </div>
-    <div class="col-4">
+    <div class="col-3">
       <label> Theo đơn vị </label>
       <input class="form-control" id="province">
+    </div>
+    <div class="col-3">
+      <label> Giói hạn trang </label>
+      <select class="form-control" id="limit">
+        <option value="10" selected> 10 </option>
+        <option value="20"> 20 </option>
+        <option value="50"> 50 </option>
+        <option value="100"> 100 </option>
+        <option value="150"> 150 </option>
+        <option value="200"> 200 </option>
+      </select>
     </div>
   </div>
   <div class="row form-group">
@@ -101,6 +126,12 @@
   </button>
 </form>
 
+<div class="form-group" style="float: right;">
+  <button class="btn btn-info" onclick="excel()"> Xuất Excel </button>
+</div>
+
+<div style="clear: both;"></div>
+
 <div id="content" style="min-height: 200px;">
 
 </div>
@@ -108,6 +139,9 @@
 <script src="/modules/core/js/vhttp.js"></script>
 <script src="/modules/core/js/vcheck.js"></script>
 <script>
+  var style = '.table-bordered {border-collapse: collapse;}.table-wider td, .table-wider th {padding: 10px;}table {width: 100%;}table td {padding: 5px;}.no-bordertop {border-top: 1px solid white; }.no-borderleft {border-left: 1px solid white; }.c20, .c25, .c30, .c35, .c40, .c45, .c50, .c80 {display: inline-block;}.c20 {width: 19%;}.c25 {width: 24%;}.c30 {width: 29%;}.c35 {width: 34%;}.c40 {width: 39%;}.c45 {width: 44%;}.c50 {width: 49%;}.c80 {width: 79%;}.p11 {font-size: 11pt}.p12 {font-size: 12pt}.p13 {font-size: 13pt}.p14 {font-size: 14pt}.p15 {font-size: 15pt}.p16 {font-size: 16pt}.text-center, .cell-center {text-align: center;}.cell-center {vertical-align: inherit;} p {margin: 5px 0px;}'
+  var profile = ['@page { size: A4 portrait; margin: 20mm 10mm 10mm 25mm; }', '@page { size: A4 landscape; margin: 20mm 10mm 10mm 25mm;}']
+
   var checkList = document.getElementById('list1');
   var global = {
     disease: JSON.parse('{disease}'),
@@ -116,8 +150,8 @@
   }
 
   $(document).ready(() => {
-    vcheck.install('#species', '#species-checkbox', 'species', (input) => { return install(input, 'species')}, 300, 300, 1)
-    vcheck.install('#disease', '#disease-checkbox', 'disease', (input) => { return install(input, 'disease')}, 300, 300, 1)
+    vcheck.install('#species', '#species-checkbox', 'species', (input) => { return install(input, 'species') }, 300, 300, 1)
+    vcheck.install('#disease', '#disease-checkbox', 'disease', (input) => { return install(input, 'disease') }, 300, 300, 1)
 
     $('.date').datepicker({
       format: 'dd/mm/yyyy',
@@ -126,32 +160,68 @@
     });
   })
 
+  function excel() {
+    $('#excel').modal('show')
+  }
+
+  function preview(id) {
+    vhttp.check('', {
+      action: 'preview',
+      id: id
+    }).then(resp => {
+      var html = '<style>' + style + profile[0] + '</style>' + resp.html
+      var winPrint = window.open(origin + '/index.php?nv=' + nv_module_name + '&hash=' + (new Date()).getTime(), '_blank', 'left=0,top=0,width=800,height=600');
+      winPrint.focus()
+      winPrint.document.write(html);
+      setTimeout(() => {
+        winPrint.print()
+        winPrint.close()
+      }, 300)
+    })
+  }
+
   function install(key, name) {
     return new Promise(resolve => {
       var html = ''
       key = xoa_dau(key)
       global[name].forEach((item, index) => {
         if (item.alias.search(key) >= 0)
-            html += '<li> <label> <input class="' + name + '-checkbox" type="checkbox" value="' + index + '" '+ ( item.checked ? 'checked' : '' ) +'> ' + item.name + '</label> </li>'
+          html += '<li> <label> <input class="' + name + '-checkbox" type="checkbox" value="' + index + '" ' + (item.checked ? 'checked' : '') + '> ' + item.name + '</label> </li>'
       })
       resolve(html)
     })
   }
 
-  function filter(e) {
-    e.preventDefault()
+  function download() {
+    var link = '/form/?excel=1&excelf=' + $('#from').val() + '&excelt=' + $('#end').val() + '&data=' + (checkExcel().join(','))
+    window.open(link)
+  }
+
+  function checkExcel() {
+    var list = []
+    $('.po').each((index, checkbox) => {
+      if (checkbox.checked) {
+        list.push(checkbox.getAttribute('id'))
+      }
+    })
+    return list
+  }
+
+  function goPage(page) {
     var species = []
     global.species.forEach(item => {
       if (item.checked) species.push(item.name)
     })
-    
+
     var disease = []
     global.disease.forEach(item => {
       if (item.checked) disease.push(item.name)
     })
 
     vhttp.checkelse('', {
+      page: page,
       action: 'filter',
+      limit: $('#limit').val(),
       from: $('#from').val(),
       end: $('#end').val(),
       province: $('#province').val(),
@@ -160,6 +230,11 @@
     }).then(resp => {
       $('#content').html(resp.html)
     })
+  }
+
+  function filter(e) {
+    e.preventDefault()
+    goPage(1)
     return false
   }
 

@@ -25,6 +25,24 @@ function searchObject($key, $list, $collumn){
   return false;
 }
 
+function extractExam($data) {
+  $list = array();
+  $result = array();
+  // echo json_encode($data);die();
+  foreach ($data as $main) {
+    foreach ($main->exam as $item) {
+      $list []= '&emsp;&emsp;'. $item . ', Phương pháp xét nghiệm: '. $main->method .', Ký hiệu phương pháp: '. $main->symbol;
+    }
+  }
+
+  $length = count($list);
+  foreach ($list as $item) {
+    $result []= $item;
+  }
+  return implode('<br>', $result);
+}
+
+
 if (empty($user_info) || !checkIsViewer($user_info['userid'])) {
   include ( NV_ROOTDIR . "/includes/header.php" );
   echo nv_site_theme('Chưa đăng nhập hoặc tài khoản không có quyền truy cập');

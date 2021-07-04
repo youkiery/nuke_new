@@ -394,6 +394,24 @@ function formList($keyword = '', $page = 1, $limit = 10, $printer = 1, $other = 
   return $xtpl->text();
 }
 
+function navigator($number, $page, $limit, $func) {
+  $html = '';
+  $total = floor($number / $limit) + ($number % $limit ? 1 : 0);
+  for ($i = 1; $i <= $total; $i++) {
+    // echo "$page, $i <br>";
+    if ($page == $i) {
+      $html .= '<li class="active"><a href="#">' . $i . '</a></li>';
+    } 
+    else {
+      $html .= '<li><a href="#" onclick="goPage('. $i .', \''. $func .'\')">' . $i . '</a></li>';
+    }
+  }
+  return '
+    <ul class="pagination">
+      '. $html .'
+    </ul>';
+}
+
 function navList ($number, $page, $limit) {
   global $lang_global;
   $total_pages = ceil($number / $limit);

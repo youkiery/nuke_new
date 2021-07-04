@@ -10,4 +10,5 @@
   </tr>
   {html}
 </table>
+{nav}
 <!-- END: main -->

@@ -3941,7 +3941,7 @@
             }
             var iresend = data['noticetime'].split('/')
             
-            html = html.replace('(receiveleader-signer)', Number(data['signer']['receiveleader']) ? '<img src="'+ global['signer'][data['signer']['receiveleader']]['url'] +'">' : '<br><br><br>')
+            html = html.replace('(receiveleader-signer)', Number(data['signer']) ? '<img src="'+ global['signer'][Number(data['signer'])]['url'] +'">' : '<br><br><br>')
             
             html = html.replace('xcode-0', trim(data['xcode'][0]))
             html = html.replace('xcode-1', trim(data['xcode'][1]))
