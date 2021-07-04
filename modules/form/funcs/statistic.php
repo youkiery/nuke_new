@@ -111,15 +111,18 @@ if (!empty($action)) {
       if ($form['xsign']) $xtpl->assign('xsigner', 'KT CHI CỤC TRƯỞNG<br>PHÓ CHI CỤC TRƯỞNG<br>');
       else $xtpl->assign('xsigner', 'CHI CỤC TRƯỞNG<br>');
 
-      $form['xsign'] = 1;
       $sql = 'select * from pet_form_signer where id = '. $form['xsign'];
       $query = $db->query($sql);
       $sign = $query->fetch();
 
-      if (empty($sign)) $xtpl->assign('xsign', '');
-      else $xtpl->assign('xsign', $sign['url']);
-
-      $xtpl->assign('receiveleader', $form['receiveleader']);
+      if (empty($sign)) {
+        $xtpl->assign('xsign', '');
+        $xtpl->assign('receiveleader', '<br><br>'. $form['receiveleader']);
+      }
+      else {
+        $xtpl->assign('xsign', $sign['url']);
+        $xtpl->assign('receiveleader', $form['receiveleader']);
+      }
 
       $xtpl->parse('main');
       $result['status'] = 1;
@@ -182,7 +185,8 @@ if (!empty($action)) {
         
         $time = date('d/m/Y', $row['time']);
         $link = 0;
-        if ($row['printer'] == 5) $link = $row['id'];
+        // if ($row['printer'] == 5) 
+            $link = $row['id'];
 
         // parse bệnh, đưa vào thống kê
         $ig = json_decode($row['ig']);
@@ -226,7 +230,7 @@ if (!empty($action)) {
       foreach ($data as $i => $province) {
         $total = 0;
         foreach ($province['unit'] as $unit) {
-          $total .= count($unit['list']);
+          $total += count($unit['list']);
         }
         if ($total) {
           $xtpl2 = new XTemplate('pro.tpl', PATH2);
@@ -260,7 +264,9 @@ if (!empty($action)) {
           $html .= $xtpl2->text();
           
           $left = count($province['unit']);
+          // echo("$left");
           for ($i = 1; $i < $left; $i++) { 
+            // echo("$left");
             $xtpl2 = new XTemplate('pro.tpl', PATH2);
             $uni_cord = count($province['unit'][$i]['list']);
             $current = $province['unit'][$i]['list'][0];

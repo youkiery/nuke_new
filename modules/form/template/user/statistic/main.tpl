@@ -153,6 +153,9 @@
     vcheck.install('#species', '#species-checkbox', 'species', (input) => { return install(input, 'species') }, 300, 300, 1)
     vcheck.install('#disease', '#disease-checkbox', 'disease', (input) => { return install(input, 'disease') }, 300, 300, 1)
 
+    $("#species-checkbox").html(search('', 'species'))
+    $("#disease-checkbox").html(search('', 'disease'))
+
     $('.date').datepicker({
       format: 'dd/mm/yyyy',
       changeMonth: true,
@@ -182,14 +185,19 @@
 
   function install(key, name) {
     return new Promise(resolve => {
-      var html = ''
-      key = xoa_dau(key)
-      global[name].forEach((item, index) => {
-        if (item.alias.search(key) >= 0)
-          html += '<li> <label> <input class="' + name + '-checkbox" type="checkbox" value="' + index + '" ' + (item.checked ? 'checked' : '') + '> ' + item.name + '</label> </li>'
-      })
+      var html = search(key, name)
       resolve(html)
     })
+  }
+
+  function search(key, name) {
+    html = ''
+    key = xoa_dau(key)
+    global[name].forEach((item, index) => {
+      if (item.alias.search(key) >= 0)
+        html += '<li> <label> <input class="' + name + '-checkbox" type="checkbox" value="' + index + '" ' + (item.checked ? 'checked' : '') + '> ' + item.name + '</label> </li>'
+    })
+    return html
   }
 
   function download() {
