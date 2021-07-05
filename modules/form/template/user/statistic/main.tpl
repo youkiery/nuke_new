@@ -20,6 +20,20 @@
     z-index: 10000;
   }
 
+  .suggest li label {
+    width: 95%;
+  }
+
+  .xmark {
+    float: right;
+    text-align: center;
+    width: 5%;
+    border-radius: 50%;
+    background: red;
+    color: white;
+    cursor: pointer;
+  }
+
   .col-3,
   .col-4,
   .col-6 {
@@ -228,6 +242,7 @@
       keyword = $('#' + global.id).val()
       $('#' + global.id + '-checkbox').html(search(keyword, global.id))
       $('#remind-modal').modal('hide')
+      alert_msg(resp.messenger)
     }, (e) => {
       alert_msg(e.messenger)
     })
@@ -245,9 +260,27 @@
     key = xoa_dau(key)
     global[name].forEach((item, index) => {
       if (item.alias.search(key) >= 0)
-        html += '<li> <label> <input class="' + name + '-checkbox" type="checkbox" onchange="reload(event, \''+ name +'\')" value="' + index + '" ' + (item.checked ? 'checked' : '') + '> ' + item.name + '</label> </li>'
+        html += '<li> <label> <input class="' + name + '-checkbox" type="checkbox" onchange="reload(event, \''+ name +'\')" value="' + index + '" ' + (item.checked ? 'checked' : '') + '> ' + item.name + '</label> <span class="xmark" onclick="remove('+ item.id +', \''+ name +'\')"> x </span> </li>'
     })
     return html
+  }
+
+  function remove(id, name) {
+    vhttp.checkelse('', {
+      action: 'remove-remind',
+      id: id,
+      name: name,
+    }).then(resp => {
+      global[name] = resp.data
+      keyword = $('#' + name).val()
+      $('#' + name + '-checkbox').html(search(keyword, name))
+      var list = []
+      global[name].forEach(item => {
+        if (item.checked) list.push(item.name)
+      })
+      $('#context-'+ name).text(list.join(', '))
+      alert_msg(resp.messenger)
+    })
   }
 
   function alert_msg(msg) {

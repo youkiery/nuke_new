@@ -29,6 +29,17 @@ $action = $nv_Request->get_string('action', 'post/get', "");
 if (!empty($action)) {
   $result = array("status" => 0);
   switch ($action) {
+    case 'remove-remind':
+      $id = $nv_Request->get_string('id', 'post', '');
+      $name = $nv_Request->get_string('name', 'post', '');
+
+      $sql = 'delete from pet_form_remindv3 where id = '. $id;
+      $query = $db->query($sql);
+
+      $result['status'] = 1;
+      $result['messenger'] = 'Đã xóa gợi ý';
+      $result['data'] = getRemindv3($name);
+    break;
     case 'insert-remind':
       $name = $nv_Request->get_string('name', 'post', '');
       $remind = $nv_Request->get_string('remind', 'post', '');
@@ -36,7 +47,7 @@ if (!empty($action)) {
       $msg = '';
       if (empty($remind)) $msg = 'Nhập gợi ý trước đã';
       else {
-        $sql = "select * from pet_form_remindv3 where remind like '$remind'";
+        $sql = "select * from pet_form_remindv3 where remind = '$remind'";
         $query = $db->query($sql);
   
         if (!empty($row = $query->fetch())) $msg = 'Gợi ý đã đã tồn tại';
@@ -44,6 +55,7 @@ if (!empty($action)) {
           $sql = "insert into pet_form_remindv3 (name, remind) values('$name', '$remind')";
           $db->query($sql);
           $result['status'] = 1;
+          $result['messenger'] = 'Đã thêm';
           $result['data'] = getRemindv3($name);
         }
       }
