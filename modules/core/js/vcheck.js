@@ -32,10 +32,6 @@ var vcheck = {
             excuteFunction(input.val()).then((html) => {
               previous = input.val()
               suggest.html(html)
-              $('.' + name + '-checkbox').change(e => {
-                var index = e.currentTarget.value
-                global[name][index].checked = e.currentTarget.checked      
-              })
             })
           }
         } 

@@ -18,6 +18,22 @@ define("MODAL_PATH", NV_ROOTDIR . "/modules/" . $module_file . '/modal/');
 
 require NV_ROOTDIR . '/modules/' . $module_file . '/global.functions.php';
 
+function getRemindv3($name) {
+  global $db;
+  $sql = 'select * from pet_form_remindv3 where name = "'. $name .'" order by remind desc';
+  $query = $db->query($sql);
+  
+  $list = array();
+  while ($row = $query->fetch()) {
+    $list []= array(
+      'name' => $row['remind'],
+      'alias' => deuft8($row['remind']),
+      'id' => $row['id'],
+    );
+  }
+  return $list;  
+}
+
 function searchObject($key, $list, $collumn){
   foreach ($list as $index => $row) {
     if ($row[$collumn] == $key) return $index;

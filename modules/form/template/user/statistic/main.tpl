@@ -6,6 +6,20 @@
     display: table;
   }
 
+  #msgshow {
+    position: fixed;
+    top: 0px;
+    right: 0px;
+    background: white;
+    padding: 10px;
+    z-index: 100;
+    border: 1px solid gray;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+    display: none;
+    z-index: 10000;
+  }
+
   .col-3,
   .col-4,
   .col-6 {
@@ -62,6 +76,7 @@
 <link rel="stylesheet" type="text/css" href="/assets/js/jquery-ui/jquery-ui.min.css">
 <script type="text/javascript" src="/assets/js/jquery-ui/jquery-ui.min.js"></script>
 <script type="text/javascript" src="/assets/js/language/jquery.ui.datepicker-vi.js"></script>
+<div id="msgshow"></div>
 
 {modal}
 
@@ -82,49 +97,62 @@
   <li class="active"><a href="/form/statistic"> Thống kê </a></li>
 </ul>
 
-<form class="form-group" onsubmit="return filter(event)">
-  <div class="rows form-group">
-    <div class="col-3">
-      <label> Từ ngày </label>
-      <input class="form-control date" id="from" value="{from}">
-    </div>
-    <div class="col-3">
-      <label> Đến ngày </label>
-      <input class="form-control date" id="end" value="{end}">
-    </div>
-    <div class="col-3">
-      <label> Theo đơn vị </label>
-      <input class="form-control" id="province">
-    </div>
-    <div class="col-3">
-      <label> Giói hạn trang </label>
-      <select class="form-control" id="limit">
-        <option value="10" selected> 10 </option>
-        <option value="20"> 20 </option>
-        <option value="50"> 50 </option>
-        <option value="100"> 100 </option>
-        <option value="150"> 150 </option>
-        <option value="200"> 200 </option>
-      </select>
-    </div>
+<div class="rows form-group">
+  <div class="col-3">
+    <label> Từ ngày </label>
+    <input class="form-control date" id="from" value="{from}" autocomplete="off">
   </div>
-  <div class="row form-group">
-    <div class="col-6">
-      <label> Theo loại bệnh </label>
-      <input class="form-control form-checkbox" id="disease">
-      <ul class="items suggest" id="disease-checkbox"> </ul>
-    </div>
-    <div class="col-6">
-      <label> Loại động vật </label>
-      <input class="form-control form-checkbox" id="species">
-      <ul class="items suggest" id="species-checkbox">
-      </ul>
-    </div>
+  <div class="col-3">
+    <label> Đến ngày </label>
+    <input class="form-control date" id="end" value="{end}" autocomplete="off">
   </div>
-  <button class="btn btn-info btn-block">
-    Thống kê
-  </button>
-</form>
+  <div class="col-3">
+    <label> Theo đơn vị </label>
+    <input class="form-control" id="province" autocomplete="off">
+  </div>
+  <div class="col-3">
+    <label> Giói hạn trang </label>
+    <select class="form-control" id="limit">
+      <option value="10"> 10 </option>
+      <option value="20" selected> 20 </option>
+      <option value="50"> 50 </option>
+      <option value="100"> 100 </option>
+      <option value="150"> 150 </option>
+      <option value="200"> 200 </option>
+    </select>
+  </div>
+</div>
+<div class="row form-group">
+  <div class="col-6">
+    <label> Theo loại bệnh </label>
+    <div class="input-group">
+      <input class="form-control form-checkbox" id="disease" autocomplete="off">
+      <div class="input-group-btn">
+        <button class="btn btn-success" onclick="insertRemind('disease')">
+          Thêm
+        </button>
+      </div>
+    </div>
+    <ul class="items suggest" id="disease-checkbox"> </ul>
+    <div> Đã chọn: <span id="context-disease"> </span> </div>
+  </div>
+  <div class="col-6">
+    <label> Loại động vật </label>
+    <div class="input-group">
+      <input class="form-control form-checkbox" id="species" autocomplete="off">
+      <div class="input-group-btn">
+        <button class="btn btn-success" onclick="insertRemind('species')">
+          Thêm
+        </button>
+      </div>
+    </div>
+    <ul class="items suggest" id="species-checkbox"> </ul>
+    <div> Đã chọn: <span id="context-species"></span> </div>
+  </div>
+</div>
+<button class="btn btn-info btn-block" onclick="goPage(1)">
+  Thống kê
+</button>
 
 <div class="form-group" style="float: right;">
   <button class="btn btn-info" onclick="excel()"> Xuất Excel </button>
@@ -144,6 +172,7 @@
 
   var checkList = document.getElementById('list1');
   var global = {
+    id: '',
     disease: JSON.parse('{disease}'),
     species: JSON.parse('{species}'),
     select: ''
@@ -183,6 +212,27 @@
     })
   }
 
+  function insertRemind(name) {
+    global.id = name
+    $('#remind').val('')
+    $('#remind-modal').modal('show')
+  }
+
+  function insertRemindSubmit() {
+    vhttp.check('', {
+      action: 'insert-remind',
+      name: global.id,
+      remind: $('#remind').val()
+    }).then(resp => {
+      global[global.id] = resp.data
+      keyword = $('#' + global.id).val()
+      $('#' + global.id + '-checkbox').html(search(keyword, global.id))
+      $('#remind-modal').modal('hide')
+    }, (e) => {
+      alert_msg(e.messenger)
+    })
+  }
+
   function install(key, name) {
     return new Promise(resolve => {
       var html = search(key, name)
@@ -195,9 +245,25 @@
     key = xoa_dau(key)
     global[name].forEach((item, index) => {
       if (item.alias.search(key) >= 0)
-        html += '<li> <label> <input class="' + name + '-checkbox" type="checkbox" value="' + index + '" ' + (item.checked ? 'checked' : '') + '> ' + item.name + '</label> </li>'
+        html += '<li> <label> <input class="' + name + '-checkbox" type="checkbox" onchange="reload(event, \''+ name +'\')" value="' + index + '" ' + (item.checked ? 'checked' : '') + '> ' + item.name + '</label> </li>'
     })
     return html
+  }
+
+  function alert_msg(msg) {
+    $('#msgshow').html(msg); 
+    $('#msgshow').show('slide').delay(2000).hide('slow'); 
+  }
+
+  function reload(e, name) {
+    var index = e.currentTarget.value
+    global[name][index].checked = e.currentTarget.checked      
+    var list = []
+    global[name].forEach(item => {
+      if (item.checked) list.push(item.name)
+    })
+
+    $('#context-'+ name).text(list.join(', '))
   }
 
   function download() {
@@ -238,12 +304,6 @@
     }).then(resp => {
       $('#content').html(resp.html)
     })
-  }
-
-  function filter(e) {
-    e.preventDefault()
-    goPage(1)
-    return false
   }
 
   function xoa_dau(str) {

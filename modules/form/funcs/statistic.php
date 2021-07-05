@@ -14,7 +14,7 @@ if (!defined('NV_IS_FORM')) {
 $page_title = "Thống kê";
 $filter = array(
   'page' => $nv_Request->get_string('page', 'post', 1),
-  'limit' => $nv_Request->get_string('limit', 'post', 10),
+  'limit' => $nv_Request->get_string('limit', 'post', 20),
   'from' => $nv_Request->get_string('from', 'post', ""),
   'end' => $nv_Request->get_string('end', 'post', ""),
   'province' => $nv_Request->get_string('province', 'post', ""),
@@ -29,8 +29,28 @@ $action = $nv_Request->get_string('action', 'post/get', "");
 if (!empty($action)) {
   $result = array("status" => 0);
   switch ($action) {
+    case 'insert-remind':
+      $name = $nv_Request->get_string('name', 'post', '');
+      $remind = $nv_Request->get_string('remind', 'post', '');
+
+      $msg = '';
+      if (empty($remind)) $msg = 'Nhập gợi ý trước đã';
+      else {
+        $sql = "select * from pet_form_remindv3 where remind like '$remind'";
+        $query = $db->query($sql);
+  
+        if (!empty($row = $query->fetch())) $msg = 'Gợi ý đã đã tồn tại';
+        else {
+          $sql = "insert into pet_form_remindv3 (name, remind) values('$name', '$remind')";
+          $db->query($sql);
+          $result['status'] = 1;
+          $result['data'] = getRemindv3($name);
+        }
+      }
+      if ($msg) $result['messenger'] = $msg;
+    break;
     case 'preview':
-      $id = $nv_Request->get_string('id', 'get/post', '');
+      $id = $nv_Request->get_string('id', 'post', '');
       
       $sql = 'select * from `pet_form_row` where id = ' . $id;
       $query = $db->query($sql);
@@ -152,12 +172,9 @@ if (!empty($action)) {
 
       // ownder, sampleplace
       $xtra = 'where (time between '. $filter['from'] .' and '. $filter['end'] .')'. (count($xtra) ? ' and '. implode(' and ', $xtra) : '');
-
-      $sql = 'select count(*) as number from pet_form_row ' . $xtra;
-      $query = $db->query($sql);
-      $number = $query->fetch()['number'];
-
-      $sql = 'select id, time, owner, sampleplace, ig, printer from pet_form_row '. $xtra .' limit '. $filter['limit'] .' offset '. ($filter['page'] - 1) * $filter['limit'];
+      
+      $sql = 'select id, time, owner, sampleplace, ig, printer from pet_form_row '. $xtra;
+      // die($sql);
       $query = $db->query($sql);
       $data = array();
       $index = 1;
@@ -185,8 +202,7 @@ if (!empty($action)) {
         
         $time = date('d/m/Y', $row['time']);
         $link = 0;
-        // if ($row['printer'] == 5) 
-            $link = $row['id'];
+        if ($row['printer'] == 5) $link = $row['id'];
 
         // parse bệnh, đưa vào thống kê
         $ig = json_decode($row['ig']);
@@ -215,90 +231,46 @@ if (!empty($action)) {
       }
       // echo json_encode($data);die();
 
-      // list
-      //   name
-      //   unit
-      //     name
-      //     list
-      //       time
-      //       disease
-      //         plus
-      //         minus
-
-      $dd = 1;
-      $html = '';
-      foreach ($data as $i => $province) {
-        $total = 0;
+      $i = 1;
+      $prv_pro = '';
+      $prv_unit = '';
+      $start = ($filter['page'] - 1) * $filter['limit'];
+      $end = $start + $filter['limit'];
+      $xtpl2 = new XTemplate('pro.tpl', PATH2);
+      foreach ($data as $province) {
         foreach ($province['unit'] as $unit) {
-          $total += count($unit['list']);
-        }
-        if ($total) {
-          $xtpl2 = new XTemplate('pro.tpl', PATH2);
-          $uni_cord = count($province['unit'][0]['list']);
-          $current = $province['unit'][0]['list'][0];
-
-          $xtpl2->assign('index', $index ++);
-          $xtpl2->assign('pro_cord', $total);
-          $xtpl2->assign('uni_cord', $uni_cord);
-          $xtpl2->assign('province', (empty($province['name']) ? 'Không có tên' : $province['name']));
-          $xtpl2->assign('unit', $province['unit'][0]['name']);
-          $xtpl2->assign('date', $current['time']);
-          $xtpl2->assign('click', '');
-          if ($current['link'] > 0) $xtpl2->assign('click', 'class="click" onclick="preview('. $current['link'] .')"');
-          $xtpl2->assign('disease', $current['disease']);
-          $xtpl2->assign('stat', 'Âm: '. $current['minus'] .', Dương: '. $current['plus']);
-          $xtpl2->parse('main.row');
-
-          $left = count($province['unit'][0]['list']);
-          for ($j = 1; $j < $left; $j++) {
-            $current = $province['unit'][0]['list'][$j];
-            $xtpl2->assign('click', '');
-            if ($current['link'] > 0) $xtpl2->assign('click', 'class="click" onclick="preview('. $current['link'] .')"');
-            $xtpl2->assign('date', $current['time']);
-            $xtpl2->assign('disease', $current['disease']);
-            $xtpl2->assign('stat', 'Âm: '. $current['minus'] .', Dương: '. $current['plus']);
-            $xtpl2->parse('main.row3');
-          }
-
-          $xtpl2->parse('main');
-          $html .= $xtpl2->text();
-          
-          $left = count($province['unit']);
-          // echo("$left");
-          for ($i = 1; $i < $left; $i++) { 
-            // echo("$left");
-            $xtpl2 = new XTemplate('pro.tpl', PATH2);
-            $uni_cord = count($province['unit'][$i]['list']);
-            $current = $province['unit'][$i]['list'][0];
+          foreach ($unit['list'] as $stat) {
+            if ($i > $start && $i <= $end) {
+              $xtpl2->assign('index', $i);
+              $pro = empty($province['name']) ? 'Không có tên' : $province['name'];
+              if ($prv_pro !== $pro) {
+                $prv_pro = $pro;
+                $xtpl2->assign('province', $pro);
+              }
+              else $xtpl2->assign('province', '');
   
-            $xtpl2->assign('uni_cord', $uni_cord);
-            $xtpl2->assign('unit', $province['unit'][$i]['name']);
-            $xtpl2->assign('click', '');
-            if ($current['link'] > 0) $xtpl2->assign('click', 'class="click" onclick="preview('. $current['link'] .')"');
-            $xtpl2->assign('date', $current['time']);
-            $xtpl2->assign('disease', $current['disease']);
-            $xtpl2->assign('stat', 'Âm: '. $current['minus'] .', Dương: '. $current['plus']);
-            $xtpl2->parse('main.row2');
+              $uni = $unit['name'];
+              if ($prv_unit !== $uni) {
+                $prv_unit = $uni;
+                $xtpl2->assign('unit', $uni);
+              }
+              else $xtpl2->assign('unit', '');
   
-            $left2 = count($province['unit'][$i]['list']);
-            for ($j = 1; $j < $left2; $j++) {
-              $current = $province['unit'][$i]['list'][$j];
+              $xtpl2->assign('date', $stat['time']);
               $xtpl2->assign('click', '');
-              if ($current['link'] > 0) $xtpl2->assign('click', 'class="click" onclick="preview('. $current['link'] .')"');
-              $xtpl2->assign('date', $current['time']);
-              $xtpl2->assign('disease', $current['disease']);
-              $xtpl2->assign('stat', 'Âm: '. $current['minus'] .', Dương: '. $current['plus']);
-              $xtpl2->parse('main.row3');
+              if ($stat['link'] > 0) $xtpl2->assign('click', 'class="click" onclick="preview('. $stat['link'] .')"');
+              $xtpl2->assign('disease', $stat['disease']);
+              $xtpl2->assign('stat', 'Âm: '. $stat['minus'] .', Dương: '. $stat['plus']);
+              $xtpl2->parse('main.row');
             }
-            $xtpl2->parse('main');
-            $html .= $xtpl2->text();
+            $i ++;
           }
-          
         }
       }
 
-      $xtpl->assign('html', $html);
-      $xtpl->assign('nav', navigator($number, $filter['page'], $filter['limit'], 'goPage'));
+      $xtpl2->parse('main');
+      $xtpl->assign('html', $xtpl2->text());
+      $xtpl->assign('nav', navigator($i, $filter['page'], $filter['limit'], 'goPage'));
       $xtpl->parse('main');
       $result['status'] = 1;
       $result['html'] = $xtpl->text();
@@ -341,31 +313,8 @@ switch ($permission) {
 	break;
 }
 
-$sql = 'select * from pet_form_remindv2 where type = "sample" order by rate desc';
-$query = $db->query($sql);
-
-$list = array();
-while ($row = $query->fetch()) {
-  $list []= array(
-    'name' => $row['name'],
-    'alias' => deuft8($row['name']),
-    'id' => $row['id'],
-  );
-}
-$xtpl->assign('species', json_encode($list));
-
-$sql = 'select * from pet_form_remindv2 where type = "exam" order by rate desc';
-$query = $db->query($sql);
-
-$list = array();
-while ($row = $query->fetch()) {
-  $list []= array(
-    'name' => $row['name'],
-    'alias' => deuft8($row['name']),
-    'id' => $row['id'],
-  );
-}
-$xtpl->assign('disease', json_encode($list));
+$xtpl->assign('species', json_encode(getRemindv3('species')));
+$xtpl->assign('disease', json_encode(getRemindv3('disease')));
 
 $time = time();
 

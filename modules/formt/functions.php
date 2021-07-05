@@ -84,7 +84,7 @@ function formTranslateCode($samplecode) {
   
   // resultChecker = result.length == $number ? true : false
   // if (!resultChecker) {
-  //   alert_msg('Ký hiệu mẫu không khớp số lượng, ' + result.length + ' trên ' + $number)
+  //   ('Ký hiệu mẫu không khớp số lượng, ' + result.length + ' trên ' + $number)
   // }
 
   return $result;
