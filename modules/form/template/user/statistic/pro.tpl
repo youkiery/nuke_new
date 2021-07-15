@@ -7,6 +7,11 @@
   <td> {date} </td>
   <td> {disease} </td>
   <td> {stat} </td>
+  <td>
+    <button class="btn btn-info" onclick="preview({link})">
+      chi tiết
+    </button>
+  </td>
 </tr>
 <!-- END: row -->
 <!-- END: main -->

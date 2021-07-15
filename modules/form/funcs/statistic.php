@@ -185,7 +185,7 @@ if (!empty($action)) {
       // ownder, sampleplace
       $xtra = 'where (time between '. $filter['from'] .' and '. $filter['end'] .')'. (count($xtra) ? ' and '. implode(' and ', $xtra) : '');
       
-      $sql = 'select id, time, owner, sampleplace, ig, printer from pet_form_row '. $xtra;
+      $sql = 'select id, time, owner, sampleplace, ig, printer from pet_form_row '. $xtra .' order by time desc';
       // die($sql);
       $query = $db->query($sql);
       $data = array();
@@ -269,8 +269,8 @@ if (!empty($action)) {
               else $xtpl2->assign('unit', '');
   
               $xtpl2->assign('date', $stat['time']);
-              $xtpl2->assign('click', '');
-              if ($stat['link'] > 0) $xtpl2->assign('click', 'class="click" onclick="preview('. $stat['link'] .')"');
+              $xtpl2->assign('link', '');
+              if ($stat['link'] > 0) $xtpl2->assign('link', $stat['link']);
               $xtpl2->assign('disease', $stat['disease']);
               $xtpl2->assign('stat', 'Âm: '. $stat['minus'] .', Dương: '. $stat['plus']);
               $xtpl2->parse('main.row');
