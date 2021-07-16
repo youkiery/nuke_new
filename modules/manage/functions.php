@@ -78,6 +78,7 @@ function importList() {
     $xtpl->assign('index', $index++);
     $xtpl->assign('id', $row['id']);
     $xtpl->assign('time', date('d/m/Y', $row['time']));
+    $xtpl->assign('material', importMaterial($row['id']));
     $xtpl->assign('number', $count['number']);
     $xtpl->assign('total', $count['total']);
     if ($permit) $xtpl->parse('main.row.manager');
@@ -87,6 +88,32 @@ function importList() {
   $xtpl->assign('nav', navigator($number, $filter['page'], $filter['limit'], 'import'));
   $xtpl->parse('main');
   return $xtpl->text();
+}
+
+function importMaterial($id) {
+  global $db;
+
+  $sql = "select a.number, c.name from pet_manage_material_import_detail a inner join pet_manage_material_detail b on a.detailid = b.id inner join pet_manage_material c on b.materialid = c.id where a.importid = $id";
+  $query = $db->query($sql);
+  $list = array();
+
+  while ($row = $query->fetch()) {
+    $list []= "$row[name]: $row[number]";
+  }
+  return implode('<br>', $list);
+}
+
+function exportMaterial($id) {
+  global $db;
+
+  $sql = "select a.number, c.name from pet_manage_material_export_detail a inner join pet_manage_material_detail b on a.detailid = b.id inner join pet_manage_material c on b.materialid = c.id where a.exportid = $id";
+  $query = $db->query($sql);
+  $list = array();
+
+  while ($row = $query->fetch()) {
+    $list []= "$row[name]: $row[number]";
+  }
+  return implode('<br>', $list);
 }
 
 function countImport($id) {
@@ -129,12 +156,11 @@ function getImportId($id) {
 function getExportId($id) {
   global $db;
 
-  $sql = 'select a.number, a.date, b.expire, a.note, b.id, b.materialid as name, b.source, b.number as remain from pet_manage_material_export_detail a inner join pet_manage_material_detail b on a.detailid = b.id where a.exportid = '. $id;
+  $sql = 'select a.number, a.date, b.expire, a.note, b.id, c.name, b.source, b.number as remain from pet_manage_material_export_detail a inner join pet_manage_material_detail b on a.detailid = b.id inner join pet_manage_material c on b.materialid = c.id where a.exportid = '. $id;
   $query = $db->query($sql);
   $data = array();
 
   while ($row = $query->fetch()) {
-    $row['name'] = ($row['name']);
     $row['source'] = getSourceId($row['source']);
 
     $row['date'] = date('d/m/Y', $row['date']);
@@ -177,6 +203,7 @@ function exportList() {
     $xtpl->assign('index', $index++);
     $xtpl->assign('id', $row['id']);
     $xtpl->assign('time', date('d/m/Y', $row['time']));
+    $xtpl->assign('material', exportMaterial($row['id']));
     $xtpl->assign('number', $count['number']);
     $xtpl->assign('total', $count['total']);
     if ($permit) $xtpl->parse('main.row.manager');

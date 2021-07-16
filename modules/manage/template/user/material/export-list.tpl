@@ -6,6 +6,7 @@
       <th> Ngày xuất </th>
       <th> Tổng loại </th>
       <th> Số lượng </th>
+      <th> Hóa chất </th>
       <th></th>
     </tr>
   </thead>
@@ -16,6 +17,7 @@
       <td> {time} </td>
       <td> {number} </td>
       <td> {total} </td>
+      <td> {material} </td>
       <td>
         <!-- BEGIN: manager -->
         <button class="btn btn-info btn-xs" onclick="updateExport({id})">
