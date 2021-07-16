@@ -14,8 +14,8 @@ if (!defined('NV_ADMIN') or !defined('NV_MAINFILE')) {
 
 $module_version = array(
     'name' => 'Users',
-    'modfuncs' => 'main, spa, usg, vaccine, kaizen, xray, dailyrou, blood, device, price, market, expire',
-    'submenu' => 'main, spa, usg, vaccine, kaizen, xray, dailyrou, blood, device, price, market, expire',
+    'modfuncs' => 'main, spa, usg, vaccine, kaizen, xray, dailyrou, blood, device, price, market, expire, position',
+    'submenu' => 'main, spa, usg, vaccine, kaizen, xray, dailyrou, blood, device, price, market, expire, position',
     'is_sysmod' => 1,
     'virtual' => 1,
     'version' => '4.3.04',
