@@ -4,9 +4,8 @@
     <tr>
       <th> STT </th>
       <th> Ngày nhập </th>
-      <th> Tổng loại </th>
-      <th> Số lượng </th>
       <th> Hóa chất </th>
+      <th> Số lượng </th>
       <th></th>
     </tr>
   </thead>
@@ -15,9 +14,8 @@
     <tr>
       <td> {index} </td>
       <td> {time} </td>
-      <td> {number} </td>
-      <td> {total} </td>
       <td> {material} </td>
+      <td> {total} </td>
       <td>
         <!-- BEGIN: manager -->
         <button class="btn btn-info btn-xs" onclick="updateImport({id})">
