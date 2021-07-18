@@ -64,13 +64,15 @@ if (!empty($action)) {
             // xóa
             $sql = "delete from `". VAC_PREFIX ."_price_detail` where id = " . $row['id'];
           }
-          // echo $sql . '<br>';
+        //   echo $sql . '<br>';
           $db->query($sql);
           $current ++;
         }
         // thêm phần còn lại
         for ($i = $current; $i < $count; $i++) { 
           $sql = "insert into `". VAC_PREFIX ."_price_detail` (itemid, number, price) values($id, '". $section[$current]['number'] ."', ". str_replace(',', '', $section[$current]['price']) .")";
+        //   echo $sql . '<br>';
+          $current ++;
           $db->query($sql);
         }
         $result['status'] = 1;
@@ -81,7 +83,7 @@ if (!empty($action)) {
     case 'item-get':
       $id = $nv_Request->get_int('id', 'post');
       
-      $sql = 'select * from `'. VAC_PREFIX .'_price_detail` where itemid = ' . $id;
+      $sql = 'select * from `'. VAC_PREFIX .'_price_detail` where itemid = ' . $id . ' order by id asc';
       $query = $db->query($sql);
       $section = array();
       while ($row = $query->fetch()) {
