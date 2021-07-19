@@ -83,7 +83,7 @@ if (!empty($action)) {
     case 'item-get':
       $id = $nv_Request->get_int('id', 'post');
       
-      $sql = 'select * from `'. VAC_PREFIX .'_price_detail` where itemid = ' . $id . ' order by id asc';
+      $sql = 'select * from `'. VAC_PREFIX .'_price_detail` where itemid = ' . $id . ' order by price desc';
       $query = $db->query($sql);
       $section = array();
       while ($row = $query->fetch()) {

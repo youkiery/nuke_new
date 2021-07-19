@@ -831,7 +831,7 @@ function priceCategoryList()
 function priceItemDetail($id)
 {
   global $db;
-  $sql = 'select * from `' . VAC_PREFIX . '_price_detail` where itemid = ' . $id . ' order by id';
+  $sql = 'select * from `' . VAC_PREFIX . '_price_detail` where itemid = ' . $id . ' order by price desc';
   $query = $db->query($sql);
   $list = array();
 
