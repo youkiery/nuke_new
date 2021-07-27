@@ -15,9 +15,7 @@
 <div class="text-center p16"> <b> PHIẾU KẾT QUẢ XÉT NGHIỆM </b> </div> 
 <br>
 <span> <b> Số ĐKXN: xcode-0/xcode-1/xcode-2 </b> </span>
-<span style="float: right; width: 100px;"><i> Trang: (page)</i> </span>
-<p class="text-center"> <b> Số phiếu kết quả thử nghiệm: xcode-0/xcode-1/xcode-2.CĐXN </b> </p> 
-<div id="a">xtable</div>
+xtable
 <div style="display: inline-block"><b> &emsp;&emsp; <u> Ghi chú: </u> </b> </div>
 <div style="display: inline-flex"><i> <pre style="margin: 0px; font-family: unset;">(vnote)</pre> </i></div>
 <p> <i> &emsp;&emsp; Kết quả chỉ có giá trị trên mẫu thử nghiệm. Việc sao chép kết quả này chỉ có giá trị khi được sao chép toàn bộ, và không có giá trị nếu chỉ sao chép một phần./. </i> </p>

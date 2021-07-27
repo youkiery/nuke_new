@@ -1138,7 +1138,7 @@
 <script src="/modules/core/js/vhttp.js"></script>
 <script>
   var style = '.table-bordered {border-collapse: collapse;}.table-wider td, .table-wider th {padding: 10px;}table {width: 100%;}table td {padding: 5px;}.no-bordertop {border-top: 1px solid white; }.no-borderleft {border-left: 1px solid white; }.c20, .c25, .c30, .c35, .c40, .c45, .c50, .c80 {display: inline-block;}.c20 {width: 19%;}.c25 {width: 24%;}.c30 {width: 29%;}.c35 {width: 34%;}.c40 {width: 39%;}.c45 {width: 44%;}.c50 {width: 49%;}.c80 {width: 79%;}.p11 {font-size: 11pt}.p12 {font-size: 12pt}.p13 {font-size: 13pt}.p14 {font-size: 14pt}.p15 {font-size: 15pt}.p16 {font-size: 16pt}.text-center, .cell-center {text-align: center;}.cell-center {vertical-align: inherit;} p {margin: 5px 0px;}'
-  var profile = ['@page { size: A4 portrait; margin: 20mm 10mm 10mm 25mm; }', '@page { size: A4 landscape; margin: 20mm 10mm 10mm 25mm;}']
+  var profile = ['@media print { @page { size: A4 portrait; margin: 20mm 10mm 10mm 25mm; } .pagebreak { clear: both; page-break-after: always; } }', '@media print { @page { size: A4 landscape; margin: 20mm 10mm 10mm 25mm;} .pagebreak { clear: both; page-break-after: always; } }']
   var former = {
     1: `{form1}`,
     2: `{form2}`,
@@ -2456,45 +2456,96 @@
     return ((Number(number) < 10 ? '0' : '') + number)
   }
 
-  function parseFieldTable2(data) {
-    var html = `  <table class="table-bordered" border="1">
-    <tr>
-      <th style="width: 50px"> KHM </th>
-      <th style="width: 50px"> Số nhận diện </th>
-      <th> Phương pháp XN </th> 
-      <th> Kết quả </th>
-      <th> Ghi chú </th>
-    </tr>`
-    var html2 = ''
+  function parseFieldTable2(data, xcode) {
     var index = 1
+    var list = []
 
-    data.forEach((sample, sampleIndex) => {
-      var html3 = ''
-      var noteCount = 0 
-
-      sample['mainer'].forEach((result, resultIndex) => {
-        var html4 = ''
-        var mainerNoteCount = 0;
-            
-        if (result['note'].length > 1) {
-          result['note'].forEach((note, noteIndex) => {
-            noteCount ++
-            mainerNoteCount ++
-            html4 += `<td class="text-center">`+ note['result'] +`</td> <td>`+ note['note'] +`</td></tr>`
+    data.forEach((sample, sampleId) => {
+      sample.mainer.forEach((result, resultId) => {
+        result.note.forEach((note, noteId) => {
+          list.push({
+            index: parseIntNum(index),
+            code: sample.code,
+            method: result.main,
+            result: note.result,
+            note: note.note
           })
-          html4 = `<td rowspan="`+ mainerNoteCount +`" class="text-center">`+ result['main'] + `</td>` + html4
-        }
-        else {
-          noteCount ++
-          html4 += `<td class="text-center">`+ result['main'] + `</td><td class="text-center">`+ result['note'][0]['result'] +`</td> <td>`+ result['note'][0]['note'] +`</td></tr>`
-        }
-        html3 += html4
+        })
       })
-
-      html2 += '<tr><td rowspan="'+ noteCount +'" class="text-center">'+ parseIntNum(index++) +'</td><td rowspan="'+ noteCount +'" class="text-center">'+ sample['code'] +'</td>' + html3;
+      index ++
     })
 
-    html += html2 + '</table>'
+    var length = list.length
+    var page = 1
+    var min = Math.floor((length - 24) / 30)
+    var total = 1 + min + ((length - 24 - min * 30 ) ? 1 : 0)
+    var html = `
+    <span style="float: right; width: 100px;"> <i>Trang: 1/`+ total +`</i> </span>
+    <p class="text-center" style="clear:both"> <b> Số phiếu kết quả thử nghiệm: `+xcode[0]+`/`+xcode[1]+`/`+xcode[2]+`.CĐXN </b> </p> 
+    <table class="table-bordered" border="1">
+      <tr>
+        <th style="width: 50px"> KHM </th>
+        <th style="width: 50px"> Số nhận diện </th>
+        <th> Phương pháp XN </th> 
+        <th> Kết quả </th>
+        <th> Ghi chú </th>
+      </tr>`
+
+    prv = { index: '', code: '' }
+    for (let i = 0; i < 24; i++) {
+      if (item = list[i]) {
+        if (prv.index == item.index) item.index = ''
+        else prv.index = item.index
+        if (prv.code == item.code) item.code = ''
+        else prv.code = item.code
+        html += `
+          <tr>
+            <td> `+ item.index +` </td>
+            <td> `+ item.code +` </td>
+            <td> `+ item.method +` </td>
+            <td> `+ item.result +` </td>
+            <td> `+ item.note +` </td>
+          </tr>`
+      }      
+    }
+
+    while (length - 24 - (page - 1) * 30 > 0) {
+      html += `
+      </table>
+      <div class="pagebreak"> </div>
+      <span style="float: right; width: 100px;"> <i>Trang: `+ (page + 1) +`/`+ total +`</i> </span>
+      <table class="table-bordered" border="1" style="clear:both">
+        <tr>
+          <th style="width: 50px"> KHM </th>
+          <th style="width: 50px"> Số nhận diện </th>
+          <th> Phương pháp XN </th> 
+          <th> Kết quả </th>
+          <th> Ghi chú </th>
+        </tr>`
+
+      prv = { index: '', code: '' }
+      max = 24 + page * 30
+      for (let i = 24 + (page - 1) * 30; i < max; i++) {
+        if (item = list[i]) {
+          if (prv.index == item.index) item.index = ''
+          else prv.index = item.index
+          if (prv.code == item.code) item.code = ''
+          else prv.code = item.code
+          html += `
+            <tr>
+              <td> `+ item.index +` </td>
+              <td> `+ item.code +` </td>
+              <td> `+ item.method +` </td>
+              <td> `+ item.result +` </td>
+              <td> `+ item.note +` </td>
+            </tr>`
+        }
+      }
+      page ++
+      console.log(page * 30 - length);
+    }
+    
+    html += `</table>`
     return html
   }
 
@@ -2671,7 +2722,6 @@
             type: type,
             key: input.val()
           }).then(response => {
-            console.log(response);
             html = response.html
             check = true
             suggest.html(html)
@@ -3834,12 +3884,9 @@
             html = html.replace('(receiveleader-signer)', Number(data['signer']['xresender']) ? '<img src="'+ global['signer'][data['signer']['xresender']]['url'] +'">' : '<br><br><br>')
 
             html = html.replace('(page)', data['page3'])
-            html = html.replace(/xcode-0/g, trim(data['xcode'][0]))
-            html = html.replace(/xcode-1/g, trim(data['xcode'][1]))
-            html = html.replace(/xcode-2/g, trim(data['xcode'][2]))
             html = html.replace(/xexam/g, data['xexam'])
             html = html.replace(/receiveleader/g, data['xresender'])
-            html = html.replace('xtable', parseFieldTable2(data['ig']))
+            html = html.replace('xtable', parseFieldTable2(data['ig'], data.xcode))
             html = html.replace('(vnote)', data['vnote'].replace(/\n/g, '<br>'))
           break;
           case 4:
