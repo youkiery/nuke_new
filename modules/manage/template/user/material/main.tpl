@@ -9,6 +9,17 @@
 {modal}
 
 <style>
+	.rows::after {
+	  content: "";
+	  clear: both;
+	  display: table;
+	}
+	.col-6 {
+	  float: left;
+	}
+	.col-6 {width: 50%;}
+
+
   a.btn-default {
     color: #333;
   }
@@ -275,6 +286,12 @@
   }
 
   $(document).ready(() => {
+    $(".date").datepicker({
+      format: 'dd/mm/yyyy',
+      changeMonth: true,
+      changeYear: true
+    });
+
     vremind.install('#export-item-finder', '#export-item-finder-suggest', (input => {
       return new Promise(resolve => {
         vhttp.checkelse('', {
@@ -446,6 +463,7 @@
     }).then(resp => {
       $("#import-button").hide()
       $("#edit-import-button").show()
+      $('#import-item-time').val(resp.time)
 
       global.ia = 0
       global.id = id
@@ -473,6 +491,7 @@
     }).then(resp => {
       $("#export-button").hide()
       $("#edit-export-button").show()
+      $('#export-item-time').val(resp.time)
 
       global.ia = 0
       var temp = 1
@@ -745,7 +764,7 @@
     else {
       vhttp.checkelse(
         '',
-        { action: 'insert-export', data: sdata }
+        { action: 'insert-export', data: sdata, time: $('#export-item-time').val() }
       ).then(data => {
         alert_msg('Đã thêm toa xuất')
         $("#material").html(data['html'])
@@ -762,7 +781,7 @@
     else {
       vhttp.checkelse(
         '',
-        { action: 'insert-import', data: sdata }
+        { action: 'insert-import', data: sdata, time: $('#import-item-time').val() }
       ).then(data => {
         alert_msg('Đã thêm toa nhập')
         $("#material").html(data['html'])
@@ -780,7 +799,7 @@
     else {
       vhttp.checkelse(
         '',
-        { action: 'update-import', data: sdata, id: global.id }
+        { action: 'update-import', data: sdata, time: $('#import-item-time').val(), id: global.id }
       ).then(data => {
         alert_msg('Đã cập nhật toa nhập')
         $("#material").html(data['html'])
@@ -796,7 +815,7 @@
     else {
       vhttp.checkelse(
         '',
-        { action: 'update-export', data: sdata, id: global.id }
+        { action: 'update-export', data: sdata, time: $('#export-item-time').val(), id: global.id }
       ).then(data => {
         alert_msg('Đã cập nhật toa nhập')
         $("#material").html(data['html'])

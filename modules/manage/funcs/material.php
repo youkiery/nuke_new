@@ -376,14 +376,24 @@ if (!empty($action)) {
     case 'get-import':
       $id = $nv_Request->get_int('id', 'post', 0);
 
+      $sql = "select time from pet_manage_material_import where id = $id";
+      $query = $db->query($sql);
+      $import = $query->fetch();
+
       $result['status'] = 1;
       $result['data'] = getImportId($id);
+      $result['time'] = date('d/m/Y', $import['time']);
     break;
     case 'get-export':
       $id = $nv_Request->get_int('id', 'post', 0);
 
+      $sql = "select time from pet_manage_material_export where id = $id";
+      $query = $db->query($sql);
+      $export = $query->fetch();
+
       $result['status'] = 1;
       $result['data'] = getExportId($id);
+      $result['time'] = date('d/m/Y', $export['time']);
     break;
     case 'report-source-suggest':
       $keyword = $nv_Request->get_string('keyword', 'post');
@@ -480,6 +490,8 @@ if (!empty($action)) {
       break;
     case 'insert-import':
       $data = $nv_Request->get_array('data', 'post');
+      $time = $nv_Request->get_string('time', 'post');
+      $time = totime($time);
 
       // b1: thêm vào import
       // b2: kiểm tra từng item, source, expire từ detail
@@ -488,7 +500,7 @@ if (!empty($action)) {
       // b5: lấy importid, detailid thêm vào import detail
 
       // b1
-      $sql = 'insert into `pet_manage_material_import` (time) values(' . time() . ')';
+      $sql = 'insert into `pet_manage_material_import` (time) values(' . $time . ')';
       $query = $db->query($sql);
       $importid = $db->lastInsertId();
 
@@ -557,8 +569,13 @@ if (!empty($action)) {
     case 'update-import':
       $id = $nv_Request->get_int('id', 'post');
       $data = $nv_Request->get_array('data', 'post');
+      $time = $nv_Request->get_string('time', 'post');
+      $time = totime($time);
 
       // trừ số lượng cũ
+      $sql = "update pet_manate_material_import set time = $time where id = $id";
+      $db->query($sql);
+
       $sql = 'select a.id as ipid, a.number as sub, b.* from pet_manage_material_import_detail a inner join pet_manage_material_detail b on a.detailid = b.id where a.importid = '. $id;
       $query = $db->query($sql);
       $list = array();
@@ -597,6 +614,11 @@ if (!empty($action)) {
     case 'update-export':
       $id = $nv_Request->get_int('id', 'post');
       $data = $nv_Request->get_array('data', 'post');
+      $time = $nv_Request->get_string('time', 'post');
+      $time = totime($time);
+
+      $sql = "update pet_manage_material_import set time = $time where id = $id";
+      $db->query($sql);
 
       // trừ số lượng cũ
       $sql = 'select a.id as ipid, a.number as sub, b.* from pet_manage_material_export_detail a inner join pet_manage_material_detail b on a.detailid = b.id where a.exportid = '. $id;
@@ -692,12 +714,14 @@ if (!empty($action)) {
     break;
     case 'insert-export':
       $data = $nv_Request->get_array('data', 'post');
+      $time = $nv_Request->get_string('time', 'post');
+      $time = totime($time);
 
       // b1: thêm phiếu xuất
       // b2: nếu number > 0, thêm import_detail, cập nhật số lượng detail
 
       // b1
-      $sql = 'insert into `pet_manage_material_export` (time) values (' . time() . ')';
+      $sql = 'insert into `pet_manage_material_export` (time) values (' . $time . ')';
       $db->query($sql);
       $exportid = $db->lastInsertId();
 

@@ -455,6 +455,7 @@ function materialModal() {
   $xtpl = new XTemplate("modal.tpl", PATH);
  
   $day = 60 * 60 * 24;
+  $xtpl->assign('today', date('d/m/Y'));
   $xtpl->assign('last_month', date('d/m/Y', time() - $day * 30));
   $xtpl->assign('next_half_year', date('d/m/Y', time() + $day * 30 * 6));
 

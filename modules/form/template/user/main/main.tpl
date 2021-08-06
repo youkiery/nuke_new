@@ -2494,10 +2494,10 @@
     prv = { index: '', code: '' }
     for (let i = 0; i < 24; i++) {
       if (item = list[i]) {
-        if (prv.index == item.index) item.index = ''
-        else prv.index = item.index
-        if (prv.code == item.code) item.code = ''
-        else prv.code = item.code
+        // if (prv.index == item.index) item.index = ''
+        // else prv.index = item.index
+        // if (prv.code == item.code) item.code = ''
+        // else prv.code = item.code
         html += `
           <tr>
             <td> `+ item.index +` </td>
@@ -2527,10 +2527,10 @@
       max = 24 + page * 30
       for (let i = 24 + (page - 1) * 30; i < max; i++) {
         if (item = list[i]) {
-          if (prv.index == item.index) item.index = ''
-          else prv.index = item.index
-          if (prv.code == item.code) item.code = ''
-          else prv.code = item.code
+          // if (prv.index == item.index) item.index = ''
+          // else prv.index = item.index
+          // if (prv.code == item.code) item.code = ''
+          // else prv.code = item.code
           html += `
             <tr>
               <td> `+ item.index +` </td>
