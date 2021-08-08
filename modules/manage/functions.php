@@ -191,7 +191,7 @@ function exportList() {
   $query = $db->query($sql);
   $number = $query->fetch()['number'];
 
-  $sql = 'select * from pet_manage_material_export order by time desc limit '. $filter['limit'] .' offset '. ($filter['page'] - 1) * $filter['limit'];
+  $sql = 'select * from pet_manage_material_export order by time desc, id desc limit '. $filter['limit'] .' offset '. ($filter['page'] - 1) * $filter['limit'];
   $query = $db->query($sql);
   $list = array();
 
@@ -403,6 +403,17 @@ function checkMaterialPermit() {
   $permit = $query->fetch();
   if (empty($permit)) return false;
   return $permit['type'];
+}
+
+function materialRemain($id) {
+  global $db;
+
+  $sum = 0;
+  $sql = "select * from pet_manage_material_detail where materialid = $id";
+  $query = $db->query($sql);
+
+  while ($row = $query->fetch()) $sum += $row['number'];
+  return $sum;
 }
 
 function materialList() {

@@ -27,332 +27,76 @@ if ($permit === false) {
   include NV_ROOTDIR . '/includes/footer.php';
 }
 
-$excel = $nv_Request->get_int('excel', 'get');
-if ($nv_Request->get_int('excel', 'get')) {
-  header('location: /excel-output.xlsx?time=' . time());
+if ($nv_Request->isset_request("excel", "get")) {
+  $xco = array('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z');
+
+  $data = array('index', 'type');
+  if (strlen($temp = $nv_Request->get_string('data', 'get', '')) > 0) {
+    $data = explode(',', $temp);
+  }
+
+  $excelf = totime(str_replace('-', '/', $nv_Request->get_string('excelf', 'get/post', '')));
+  $excelt = totime(str_replace('-', '/', $nv_Request->get_string('excelt', 'get/post', '')));
+  include 'PHPExcel/IOFactory.php';
+  $fileType = 'Excel2007'; 
+  $objPHPExcel = PHPExcel_IOFactory::load(NV_ROOTDIR . '/assets/excel/material.xlsx');
+
+  $i = 2;
+  $list = array();
+  $sql = "select a.time, b.number, b.remain, d.name, 'export' as type from pet_manage_material_export a inner join pet_manage_material_export_detail b on a.id = b.exportid inner join pet_manage_material_detail c on b.detailid = c.id inner join pet_manage_material d on c.materialid = d.id where time between $excelf and $excelt";
+  $list = all($db, $sql);
+  $sql = "select a.time, b.number, b.remain, d.name, 'import' as type from pet_manage_material_import a inner join pet_manage_material_import_detail b on a.id = b.importid inner join pet_manage_material_detail c on b.detailid = c.id inner join pet_manage_material d on c.materialid = d.id where time between $excelf and $excelt";
+  $list = array_merge($list, all($db, $sql));
+  
+  // sắp xếp lại theo time
+  usort($list, "cmp");
+
+  // tính tồn kho
+  $index = 1;
+
+  $objPHPExcel->setActiveSheetIndex(0);
+  foreach ($list as $row) {
+    $j = 0;
+
+    $temp = array(
+      'export' => '',
+      'exporttime' => '',
+      'import' => '',
+      'importtime' => '',
+    );
+    if ($row['type'] == 'export') {
+      $temp['export'] = $row['number'];
+      $temp['exporttime'] = date('d/m/Y', $row['time']);
+    }
+    else {
+      $temp['import'] = $row['number'];
+      $temp['importtime'] = date('d/m/Y', $row['time']);
+    }
+
+    $objPHPExcel
+      ->setActiveSheetIndex(0)
+      ->setCellValue($xco[$j ++] . $i, (($index < 10 ? '0' : '') . ($index++)))
+      ->setCellValue($xco[$j ++] . $i, $row['name'])
+      ->setCellValue($xco[$j ++] . $i, $temp['export'])
+      ->setCellValue($xco[$j ++] . $i, $temp['exporttime'])
+      ->setCellValue($xco[$j ++] . $i, $temp['import'])
+      ->setCellValue($xco[$j ++] . $i, $temp['importtime'])
+      ->setCellValue($xco[$j ++] . $i, $row['remain']);
+    $i ++;
+  }
+
+  $outFile = 'excel/excel-'. time() .'.xlsx';
+  $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, $fileType);
+  $objWriter->save($outFile);
+  $objPHPExcel->disconnectWorksheets();
+  unset($objWriter, $objPHPExcel);
+  header('location: /' . $outFile);
 }
+
 $action = $nv_Request->get_string('action', 'post', '');
 if (!empty($action)) {
   $result = array('status' => 0);
   switch ($action) {
-    // case 'report-excel':
-    //   $xco = array(1 => 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'AA', 'AB', 'AC', 'AD', 'AE', 'AF', 'AG', 'AH', 'AI', 'AJ', 'AK', 'AM', 'AN', 'AO', 'AP', 'AQ', 'AR', 'AS', 'AT', 'AU', 'AV', 'AW', 'AX', 'AY', 'AZ');
-    //   //   // Tìm kiếm số lượng tồn kho trước 1 thời điểm
-
-    //   include NV_ROOTDIR . '/PHPExcel/IOFactory.php';
-    //   $fileType = 'Excel2007';
-
-    //   $id = $nv_Request->get_int('id', 'post');
-    //   $filter = $nv_Request->get_array('filter', 'post');
-    //   $i = 3;
-
-    //   if (empty($filter['start'])) $filter['start'] = strtotime(date('Y/m/d', time() - (date('d') - 1) * 60 * 60 * 24));
-    //   else $filter['start'] = totime($filter['start']);
-
-    //   if (empty($filter['end'])) $filter['end'] = strtotime(date('Y/m/d')) + 60 * 60 * 24 - 1;
-    //   else $filter['end'] = totime($filter['end']) + 60 * 60 * 24 - 1;
-
-    //   $sql = 'select * from `pet_manage_material_link` where item_id = ' . $id . ' or link_id = ' . $id;
-    //   $query = $db->query($sql);
-    //   if (empty($link_data = $query->fetch())) {
-    //     // không phải vật liệu liên kết
-    //     // loại 1
-    //     $objPHPExcel = PHPExcel_IOFactory::load(NV_ROOTDIR . '/assets/excel-material-template.xlsx');
-
-    //     $sql = 'select * from ((select a.number, b.export_date as time, 0 as type, a.note from `pet_manage_export_detail` a inner join `pet_manage_export` b on a.item_id = ' . $id . ' and a.export_id = b.id) union (select a.number, b.import_date as time, 1 as type, a.note from `pet_manage_import_detail` a inner join `pet_manage_import` b on a.item_id = ' . $id . ' and a.import_id = b.id)) as a where time between ' . $filter['start'] . ' and ' . $filter['end'] . ' order by time desc';
-    //     $query = $db->query($sql);
-    //     $summary = array(
-    //       'import' => 0,
-    //       'export' => 0
-    //     );
-    //     $data = array();
-
-    //     while ($row = $query->fetch()) {
-    //       $temp = array(
-    //         'import_date' => '', 'export_date' => '', 'import' => 0, 'export' => 0, 'note' => $row['note']
-    //       );
-    //       if ($row['type']) {
-    //         $summary['import'] += $row['number'];
-    //         $temp['import_date'] = date('d/m/Y', $row['time']);
-    //         $temp['import'] = $row['number'];
-    //       } else {
-    //         $summary['export'] += $row['number'];
-    //         $temp['export_date'] = date('d/m/Y', $row['time']);
-    //         $temp['export'] = $row['number'];
-    //       }
-    //       $data[] = $temp;
-    //     }
-
-    //     $objPHPExcel
-    //       ->setActiveSheetIndex(0)
-    //       ->setCellValue($xco[5] . 2, $summary['import'])
-    //       ->setCellValue($xco[6] . 2, $summary['export'])
-    //       ->setCellValue($xco[7] . 2, $summary['import'] - $summary['export']);
-
-    //     foreach ($data as $key => $data_row) {
-    //       $j = 1;
-
-    //       $objPHPExcel
-    //         ->setActiveSheetIndex(0)
-    //         ->setCellValue($xco[$j++] . $i, $index++) // STT
-    //         ->setCellValue($xco[$j++] . $i, $data_row['import_date']) // Ngày nhập
-    //         ->setCellValue($xco[$j++] . $i, $data_row['export_date']) // Ngày xuất
-    //         ->setCellValue($xco[$j++] . $i, $data_row['import']) // nhập
-    //         ->setCellValue($xco[$j++] . $i, $data_row['export']) // xuất
-    //         ->setCellValue($xco[$j++] . $i, $summary['import'] -= $data_row['export']) // tồn
-    //         ->setCellValue($xco[$j++] . $i, $data_row['note']);  // ghi chú
-    //       $i++;
-    //     }
-    //   } else {
-    //     // loại 2
-    //     $objPHPExcel = PHPExcel_IOFactory::load(NV_ROOTDIR . '/assets/excel-material-template-2.xlsx');
-
-    //     $sql = 'select * from ((select a.id, b.export_date as time, 0 as type, a.note from `pet_manage_export_detail` a inner join `pet_manage_export` b on (a.item_id = ' . $link_data['item_id'] . ' or a.item_id = ' . $link_data['link_id'] . ') and a.export_id = b.id) union (select a.id, b.import_date as time, 1 as type, a.note from `pet_manage_import_detail` a inner join `pet_manage_import` b on (a.item_id = ' . $link_data['item_id'] . ' or a.item_id = ' . $link_data['link_id'] . ') and a.import_id = b.id)) as a where time between ' . $filter['start'] . ' and ' . $filter['end'] . ' order by time desc';
-    //     $query = $db->query($sql);
-
-    //     $summary = array(
-    //       'import' => 0,
-    //       'export' => 0,
-    //       'import2' => 0,
-    //       'export2' => 0
-    //     );
-    //     $data = array();
-
-    //     while ($row = $query->fetch()) {
-    //       $temp = array(
-    //         'import_date' => '', 'export_date' => '', 'import' => 0, 'export' => 0, 'note' => '', 'import2' => 0, 'export2' => 0, 'note' => $row['note']
-    //       );
-
-    //       if ($row['type']) {
-    //         $sql = 'select * from `pet_manage_import_detail` where import_id = ' . $row['id'] . ' and item_id = ' . $link_data['item_id'];
-    //         $sql2 = 'select * from `pet_manage_import_detail` where import_id = ' . $row['id'] . ' and item_id = ' . $link_data['link_id'];
-    //       } else {
-    //         $sql = 'select * from `pet_manage_export_detail` where export_id = ' . $row['id'] . ' and item_id = ' . $link_data['item_id'];
-    //         $sql2 = 'select * from `pet_manage_export_detail` where export_id = ' . $row['id'] . ' and item_id = ' . $link_data['link_id'];
-    //       }
-
-    //       $item = array('number' => 0, 'note' => '');
-    //       $link = array('number' => 0, 'note' => '');
-    //       if (!empty($link_data['item_id'])) {
-    //         $item_query = $db->query($sql);
-    //         $item = $item_query->fetch();
-    //       }
-    //       if (!empty($link_data['link_id'])) {
-    //         $link_query = $db->query($sql2);
-    //         $link = $link_query->fetch();
-    //       }
-
-    //       if ($row['type']) {
-    //         $summary['import'] += $item['number'];
-    //         $summary['import2'] += $link['number'];
-    //         $temp['import_date'] = date('d/m/Y', $row['time']);
-    //         $temp['import'] = $item['number'];
-    //         $temp['import2'] = $link['number'];
-    //       } else {
-    //         $summary['export'] += $item['number'];
-    //         $summary['export2'] += $link['number'];
-    //         $temp['export_date'] = date('d/m/Y', $row['time']);
-    //         $temp['export'] = $item['number'];
-    //         $temp['export2'] = $link['number'];
-    //       }
-    //       $data[] = $temp;
-    //     }
-
-    //     $objPHPExcel
-    //       ->setActiveSheetIndex(0)
-    //       ->setCellValue($xco[4] . 2, $summary['import'])
-    //       ->setCellValue($xco[5] . 2, $summary['export'])
-    //       ->setCellValue($xco[6] . 2, $summary['import'] - $summary['export'])
-    //       ->setCellValue($xco[7] . 2, $summary['import2'])
-    //       ->setCellValue($xco[8] . 2, $summary['export2'])
-    //       ->setCellValue($xco[9] . 2, $summary['import2'] - $summary['export2']);
-
-    //     foreach ($data as $key => $data_row) {
-    //       $j = 1;
-
-    //       $summary['import'] -= $data_row['export'];
-    //       $summary['import2'] -= $data_row['export2'];
-    //       $objPHPExcel
-    //         ->setActiveSheetIndex(0)
-    //         ->setCellValue($xco[$j++] . $i, $index++) // STT
-    //         ->setCellValue($xco[$j++] . $i, $data_row['import_date']) // Ngày nhập
-    //         ->setCellValue($xco[$j++] . $i, $data_row['export_date']) // Ngày xuất
-    //         ->setCellValue($xco[$j++] . $i, $data_row['import']) // nhập
-    //         ->setCellValue($xco[$j++] . $i, $data_row['export']) // xuất
-    //         ->setCellValue($xco[$j++] . $i, $summary['import']) // tồn
-    //         ->setCellValue($xco[$j++] . $i, $data_row['import2']) // nhập
-    //         ->setCellValue($xco[$j++] . $i, $data_row['export2']) // xuất
-    //         ->setCellValue($xco[$j++] . $i, $summary['import2']) // tồn
-    //         ->setCellValue($xco[$j++] . $i, $data_row['note']);  // ghi chú
-    //       $i++;
-    //     }
-    //   }
-
-    //   $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, $fileType);
-    //   $objWriter->save(NV_ROOTDIR . '/assets/excel-material.xlsx');
-    //   $objPHPExcel->disconnectWorksheets();
-    //   unset($objWriter, $objPHPExcel);
-    //   $result['status'] = 1;
-    //   break;
-      // $objPHPExcel = PHPExcel_IOFactory::load(NV_ROOTDIR . '/assets/excel-material-template.xlsx');
-
-      // $i = 1;
-      // $j = 1;
-
-      // $id = $nv_Request->get_int('id', 'post');
-      // $filter = $nv_Request->get_array('filter', 'post');
-
-      // if (empty($filter['start'])) $filter['start'] = strtotime(date('Y/m/d', time() - (date('d') - 1) * 60 * 60 * 24));
-      // else $filter['start'] = totime($filter['start']);
-      // if (empty($filter['end'])) $filter['end'] = strtotime(date('Y/m/d')) + 60 * 60 * 24 - 1;
-      // else $filter['end'] = totime($filter['end']) + 60 * 60 * 24 - 1;
-
-      // if (!empty($link = $query->fetch())) {
-      //   foreach ($title2 as $key => $value) {
-      //     $objPHPExcel
-      //     ->setActiveSheetIndex(0)
-      //     ->setCellValue($xco[$j++] . $i, $value);
-      //   }
-
-      //   $sql = 'select * from ((select a.id, b.export_date as time, 0 as type, a.note from `'. PREFIX .'export_detail` a inner join `'. PREFIX .'export` b on (a.item_id = '. $link['item_id'] .' or a.item_id = '. $link['link_id'] .') and a.export_id = b.id) union (select a.id, b.import_date as time, 1 as type, a.note from `'. PREFIX .'import_detail` a inner join `'. PREFIX .'import` b on (a.item_id = '. $link['item_id'] .' or a.item_id = '. $link['link_id'] .') and a.import_id = b.id)) as a where time between '. $filter['start'] .' and '. $filter['end'] .' order by time desc';
-      //   $query = $db->query($sql);
-
-      //   $summary = array('import' => 0, 'export' => 0);
-      //   $i = 4;
-      //   $index = 1;
-
-      //   while ($row = $query->fetch()) {
-      //     $j = 1;
-      //     if ($row['type']) {
-      //       $sql = 'select * from `'. PREFIX .'import_detail` where import_id = ' . $row['id'] . ' and item_id = ' . $link['item_id'];
-      //       $sql2 = 'select * from `'. PREFIX .'import_detail` where import_id = ' . $row['id'] . ' and item_id = ' . $link['link_id'];
-      //     }
-      //     else {
-      //       $sql = 'select * from `'. PREFIX .'export_detail` where export_id = ' . $row['id'] . ' and item_id = ' . $link['item_id'];
-      //       $sql2 = 'select * from `'. PREFIX .'export_detail` where export_id = ' . $row['id'] . ' and item_id = ' . $link['link_id'];
-      //     }
-
-      //     if (!empty($link['item_id'])) {
-      //       $item_query = $db->query($sql);
-      //       $item = $item_query->fetch();
-      //     }
-      //     if (!empty($link['link_id'])) {
-      //       $link_query = $db->query($sql2);
-      //       $link = $link_query->fetch();
-      //     }
-
-      //     // $title2 = array('STT', 'Ngày tháng mua', 'Ngày nhận', 'Nhập', 'Xuất', 'Tồn', 'Nhập', 'Xuất', 'Tồn', 'Ghi chú');
-
-      //     $a = ''; $b = ''; $c = ''; $d = ''; $e = ''; $f = '';
-      //     if ($row['type']) {
-      //       $a = date('d/m/Y', $row['time']);
-      //       $c = $item['number'];
-      //       $e = $link['number'];
-      //     }
-      //     else {
-      //       $b = date('d/m/Y', $row['time']);
-      //       $d = $item['number'];
-      //       $f = $link['number'];
-      //     }
-
-      //     $objPHPExcel
-      //     ->setActiveSheetIndex(0)
-      //     ->setCellValue($xco[$j++] . $i, $index++)
-      //     ->setCellValue($xco[$j++] . $i, $a)
-      //     ->setCellValue($xco[$j++] . $i, $b)
-      //     ->setCellValue($xco[$j++] . $i, $c) // nhập
-      //     ->setCellValue($xco[$j++] . $i, $d) // xuất
-      //     ->setCellValue($xco[$j++] . $i, $b) // tồn
-      //     ->setCellValue($xco[$j++] . $i, $e) // nhập
-      //     ->setCellValue($xco[$j++] . $i, $f) // xuất
-      //     ->setCellValue($xco[$j++] . $i, $b) // tồn
-      //     ->setCellValue($xco[$j++] . $i, $row['note']);
-      //     $i ++;
-      //   }
-      // }
-      // else {
-      //   foreach ($title as $key => $value) {
-      //     $objPHPExcel
-      //     ->setActiveSheetIndex(0)
-      //     ->setCellValue($xco[$j++] . $i, $value);
-      //   }
-
-      //   $sql = 'select * from ((select a.number, b.export_date as time, 0 as type, a.note from `'. PREFIX .'export_detail` a inner join `'. PREFIX .'export` b on a.item_id = '. $id .' and a.export_id = b.id) union (select a.number, b.import_date as time, 1 as type, a.note from `'. PREFIX .'import_detail` a inner join `'. PREFIX .'import` b on a.item_id = '. $id .' and a.import_id = b.id)) as a where time between '. $filter['start'] .' and '. $filter['end'] .' order by time desc';
-      //   $query = $db->query($sql);
-
-      //   $summary = array('import' => 0, 'export' => 0);
-      //   $i = 4;
-      //   $index = 1;
-      //   while ($row = $query->fetch()) {
-      //     $j = 1;
-      //     $a = ''; $b = ''; $c = ''; $d = '';
-      //     if ($row['type'] == 0) {
-      //       $summary['export'] += $row['number'];
-      //       $b = date('d/m/Y', $row['time']);
-      //       $d = $row['number'];
-      //     }
-      //     else {
-      //       $summary['import'] += $row['number'];
-      //       $a = date('d/m/Y', $row['time']);
-      //       $c = $row['number'];
-      //     }
-
-      //     $objPHPExcel
-      //     ->setActiveSheetIndex(0)
-      //     ->setCellValue($xco[$j++] . $i, $index++)
-      //     ->setCellValue($xco[$j++] . $i, $a)
-      //     ->setCellValue($xco[$j++] . $i, $b)
-      //     ->setCellValue($xco[$j++] . $i, $c)
-      //     ->setCellValue($xco[$j++] . $i, $d)
-      //     ->setCellValue($xco[$j++] . $i, $row['note']);
-      //     $i++;
-      //   }
-
-      //   $objPHPExcel
-      //   ->setActiveSheetIndex(0)
-      //   ->setCellValue($xco[4] . 2, $summary['import'])
-      //   ->setCellValue($xco[5] . 2, $summary['export'])
-      //   ->setCellValue($xco[6] . 2, $summary['import'] - $summary['export']);
-      // }
-
-      // $sql = 'select * from '
-      //   $filter = $nv_Request->get_array('filter', 'post');
-      //   if (empty($filter['start'])) $filter['start'] = strtotime(date('Y/m/d', time() - (date('d') - 1) * 60 * 60 * 24));
-      //   else $filter['start'] = totime($filter['start']);
-      //   if (empty($filter['end'])) $filter['end'] = strtotime(date('Y/m/d')) + 60 * 60 * 24 - 1;
-      //   else $filter['end'] = totime($filter['end']) + 60 * 60 * 24 - 1;
-
-      //   $sql = 'select * from ((select a.number, b.export_date as time, 0 as type from `'. PREFIX .'export_detail` a inner join `'. PREFIX .'export` b on a.item_id = '. $id .' and a.export_id = b.id) union (select a.number, b.import_date as time, 1 as type from `'. PREFIX .'import_detail` a inner join `'. PREFIX .'import` b on a.item_id = '. $id .' and a.import_id = b.id)) as a order by time asc';
-      //   $query = $db->query($sql);
-      //   $i = 1; $j = 0;
-      //   $index = 1;
-
-      //   foreach ($title as $value) {
-      //     $objPHPExcel
-      //     ->setActiveSheetIndex(0)
-      //     ->setCellValue($xco[$j++] . $i, $value);
-      //   }
-
-      //   while ($row = $query->fetch()) {
-      //     $j = 0;
-      //     $i ++;
-
-      //     // $objPHPExcel
-      //     // ->setActiveSheetIndex(0)
-      //     // ->setCellValue($xco[$j++] . $i, $index ++)
-      //     // ->setCellValue($xco[$j++] . $i, $index +);
-      //   }
-
-      //   $objPHPExcel
-      //   ->setActiveSheetIndex(0)
-      //   ->setCellValue($xco[$j++] . $i, $value);
-
-      //   $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, $fileType);
-      //   $objWriter->save(NV_ROOTDIR . '/assets/excel-material.xlsx');
-      //   $objPHPExcel->disconnectWorksheets();
-      //   unset($objWriter, $objPHPExcel);
-      //   $result['status'] = 1;
-      // break;
     case 'filter':
       switch ($filter['func']) {
         case 'material':
@@ -547,7 +291,7 @@ if (!empty($action)) {
         $query = $db->query($sql);
         if (empty($detail = $query->fetch())) {
           // b3
-          $sql = 'insert into `pet_manage_material_detail` (materialid, expire, number, source) values(' . $row['itemid'] . ', ' . $row['expire'] . ', ' . $row['number'] . ', ' . $row['sourceid'] . ')';
+          $sql = "insert into `pet_manage_material_detail` (materialid, expire, number, source) values($row[itemid], $row[expire], $row[number] $row[sourceid])";
           $db->query($sql);
           $detail = array('id' => $db->lastInsertId());
         } else {
@@ -557,7 +301,7 @@ if (!empty($action)) {
         }
 
         // b5
-        $sql = 'insert into `pet_manage_material_import_detail` (importid, detailid, number, note, date) values (' . $importid . ', ' . $detail['id'] . ', ' . $row['number'] . ', "' . $row['note'] . '", ' . $row['date'] . ')';
+        $sql = "insert into `pet_manage_material_import_detail` (importid, detailid, number, remain, note, date) values ($importid, $detail[id], $row[number], ". materialRemain($row['itemid']) .", '$row[note]', $row[date])";
         $db->query($sql);
       }
       $result['status'] = 1;
@@ -573,13 +317,15 @@ if (!empty($action)) {
       $time = totime($time);
 
       // trừ số lượng cũ
-      $sql = "update pet_manate_material_import set time = $time where id = $id";
+      $sql = "update pet_manage_material_import set time = $time where id = $id";
       $db->query($sql);
 
       $sql = 'select a.id as ipid, a.number as sub, b.* from pet_manage_material_import_detail a inner join pet_manage_material_detail b on a.detailid = b.id where a.importid = '. $id;
       $query = $db->query($sql);
       $list = array();
+      $change = array();
       while ($row = $query->fetch()) {
+        $change[$row['materialid']] = -1 * $row['sub'];
         $list []= $row;
         $sql = 'update pet_manage_material_detail set number = number - '. $row['sub'] .' where id = '. $row['id'];
         $db->query($sql);
@@ -593,6 +339,8 @@ if (!empty($action)) {
         $sql = 'select * from pet_manage_material_detail where materialid = '. $item['itemid'] .' and source = '. $item['sourceid'] .' and expire = '. $expire;
         $query = $db->query($sql);
         $detail = $query->fetch();
+        if (empty($change[$item['itemid']])) $change[$item['itemid']] = 0;
+        $change[$item['itemid']] += $item['number'];
         if (empty($detail)) {
           $sql = "insert into pet_manage_material_detail (materialid, expire, number, source) values($item[itemid], $expire, $item[number], $item[sourceid])";
           $detail['id'] = $db->insert_id($sql);
@@ -602,7 +350,9 @@ if (!empty($action)) {
           $db->query($sql);
         }
         // cật nhật số lượng phiếu
-        $sql = 'update pet_manage_material_import_detail set detailid = '. $detail['id'] .', number = '. $item['number'] .', note = "'. $item['note'] .'" where id = '. $row['ipid'];
+
+        $xtra = "remain = remain ". ($change[$item['itemid']] >= 0 ? '+' : '0') . " ". $change[$item['itemid']];
+        $sql = "update pet_manage_material_import_detail set detailid = $detail[id], number = $item[number], $xtra, note = '$item[note]' where id = $row[ipid]";
         $db->query($sql);
       }
 
@@ -624,20 +374,25 @@ if (!empty($action)) {
       $sql = 'select a.id as ipid, a.number as sub, b.* from pet_manage_material_export_detail a inner join pet_manage_material_detail b on a.detailid = b.id where a.exportid = '. $id;
       $query = $db->query($sql);
       $list = array();
+      $change = array();
       while ($row = $query->fetch()) {
         $list []= $row;
         $sql = 'update pet_manage_material_detail set number = number + '. $row['sub'] .' where id = '. $row['id'];
         $db->query($sql);
+        $change[$row['materialid']] = $row['sub'];
       }
 
       $index = 0;
       foreach ($list as $row) {
         $item = $data[$index ++];
+        if (empty($change[$row['materialid']])) $change[$item['materialid']] = 0;
+        $change[$item['materialid']] -= $item['number'];
 
         $sql = "update pet_manage_material_detail set number = number - $item[number] where id = ". $item['id'];
         $db->query($sql);
         // cật nhật số lượng phiếu
-        $sql = 'update pet_manage_material_export_detail set number = '. $item['number'] .', note = "'. $item['note'] .'" where id = '. $row['ipid'];
+        $xtra = "remain = remain ". ($change[$item['itemid']] >= 0 ? '+' : '0') . " ". $change[$item['itemid']];
+        $sql = "update pet_manage_material_export_detail set number = $item[number], $xtra,  note = '$item[note]' where id = $row[ipid]";
         $db->query($sql);
       }
 
@@ -728,12 +483,15 @@ if (!empty($action)) {
       foreach ($data as $row) {
         if ($row['number'] > 0) {
           // b2
-          $row['date'] = totime($row['date']);
+          $sql = "select * from pet_manage_material_detail where id = $row[id]";
+          $query = $db->query($sql);
+          $detail = $query->fetch();
 
-          $sql = 'insert into `pet_manage_material_export_detail` (exportid, detailid, number, note, date) values (' . $exportid . ', ' . $row['id'] . ', ' . $row['number'] . ', "' . $row['note'] . '", ' . $row['date'] . ')';
+          $row['date'] = totime($row['date']);
+          $sql = 'update `pet_manage_material_detail` set number = number - ' . $row['number'] . ' where id = ' . $row['id'];
           $db->query($sql);
 
-          $sql = 'update `pet_manage_material_detail` set number = number - ' . $row['number'] . ' where id = ' . $row['id'];
+          $sql = "insert into `pet_manage_material_export_detail` (exportid, detailid, number, remain, note, date) values ($exportid, $row[id], $row[number], ". materialRemain($detail['materialid']) .", '$row[note]', $row[date])";
           $db->query($sql);
         }
       }
@@ -1044,6 +802,7 @@ if (!empty($action)) {
 $xtpl = new XTemplate("main.tpl", PATH);
 // die();
 
+$xtpl->assign('last_week', date('d/m/Y', time() - 60 * 60 * 24 * 7));
 $xtpl->assign('today', date('d/m/Y', time()));
 $xtpl->assign('modal', materialModal());
 // var_dump(importList());die();

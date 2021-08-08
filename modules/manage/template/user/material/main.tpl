@@ -81,6 +81,7 @@
   <li><a data-toggle="tab" href="#source"> Nguồn cung </a></li>
   <li><a data-toggle="tab" href="#import"> Phiếu nhập </a></li>
   <li><a data-toggle="tab" href="#export"> Phiếu xuất </a></li>
+  <li><a data-toggle="tab" href="#excel"> Xuất Excel </a></li>
 </ul>
 
 <div class="tab-content">
@@ -95,6 +96,33 @@
   </div>
   <div id="source" class="tab-pane fade">
     {source_content}
+  </div>
+  <div id="excel" class="tab-pane fade">
+    <label class="row" style="width: 100%;">
+      <div class="col-sm-6">Ngày bắt đầu</div>
+      <div class="col-sm-12">
+        <input type="text" value="{last_week}" class="date form-control" id="excelf">
+      </div>
+    </label>
+    <label class="row" style="width: 100%;">
+      <div class="col-sm-6">Ngày kết thúc </div>
+      <div class="col-sm-12">
+        <input type="text" value="{today}" class="date form-control" id="excelt">
+      </div>
+    </label>
+    <!-- khách hàng, địa chỉ, email, điện thoại, chỉ hộ, nơi lấy mẫu, mục đích, nơi nhận, người phụ trách --> 
+    <label style="width: 30%"> <input type="checkbox" class="po" id="index" checked readonly> STT </label>
+    <label style="width: 30%"> <input type="checkbox" class="po" id="type" checked readonly> Loại hóa chất </label>
+    <label style="width: 30%"> <input type="checkbox" class="po" id="export" checked readonly> Xuất </label>
+    <label style="width: 30%"> <input type="checkbox" class="po" id="import" checked readonly> Nhập </label>
+    <label style="width: 30%"> <input type="checkbox" class="po" id="exporttime" checked readonly> Ngày xuất </label>
+    <label style="width: 30%"> <input type="checkbox" class="po" id="importtime" checked readonly> Ngày nhập </label>
+    <label style="width: 30%"> <input type="checkbox" class="po" id="remain" checked readonly> Tồn kho </label>
+    <div class="text-center">
+      <button class="btn btn-info" onclick="download()">
+        Xuất ra Excel
+      </button>
+    </div>
   </div>
 </div>
 
@@ -824,5 +852,21 @@
       })
     }
   }
+
+  function checkExcel() {
+    var list = []
+    $('.po').each((index, checkbox) => {
+      if (checkbox.checked) {
+        list.push(checkbox.getAttribute('id'))
+      }
+    })
+    return list
+  }
+
+  function download() {
+		var link = '/manage/material/?excel=1&excelf=' + $('#excelf').val().replace(/\//g, '-') + '&excelt=' + $('#excelt').val().replace(/\//g, '-') + '&data=' + (checkExcel().join(','))
+    console.log(link);
+		window.open(link)
+	}
 </script>
 <!-- END: main -->

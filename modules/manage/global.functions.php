@@ -10,6 +10,17 @@ if (!defined('NV_MAINFILE')) { die('Stop!!!'); }
 define('PREFIX', $db_config['prefix'] . '_' . $module_name . '_');
 define('PATH2', NV_ROOTDIR . "/modules/". $module_file ."/template");
 
+function all($db, $sql) {
+  $list = array();
+  $query = $db->query($sql);
+  while ($row = $query->fetch()) $list []= $row;
+  return $list;
+}
+
+function cmp($a, $b) {
+  return $a['time'] > $b['time'];
+}
+
 function loadModal($name) {
   $xtpl = new XTemplate($name . ".tpl", PATH);
   $xtpl->parse('main');
