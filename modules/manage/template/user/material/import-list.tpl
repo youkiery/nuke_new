@@ -6,6 +6,7 @@
       <th> Ngày nhập </th>
       <th> Hóa chất </th>
       <th> Số lượng </th>
+      <th> Ghi chú </th>
       <th></th>
     </tr>
   </thead>
@@ -13,9 +14,10 @@
   <tbody>
     <tr>
       <td> {index} </td>
-      <td> {time} </td>
+      <td> {date} </td>
       <td> {material} </td>
       <td> {total} </td>
+      <td> {note} </td>
       <td>
         <!-- BEGIN: manager -->
         <button class="btn btn-info btn-xs" onclick="updateImport({id})">

@@ -20,6 +20,9 @@
       <td> {description} </td>
       <td>
         <!-- BEGIN: manager -->
+        <button class="btn btn-info btn-xs" onclick="detailItem({id})">
+          chi tiết
+        </button>  
         <button class="btn btn-info btn-xs" onclick="updateItem({id})">
           sửa
         </button>  

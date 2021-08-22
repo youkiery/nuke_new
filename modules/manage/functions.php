@@ -58,29 +58,29 @@ function removeAllModal() {
 }
 
 function importList() {
-  global $db, $filter, $permit;
+  global $db, $filter, $permit, $keyword;
   
-  $sql = 'select count(*) as number from pet_manage_material_import';
+  $sql = "select count(*) as number from pet_manage_material_import a inner join pet_manage_material_detail b on a.detailid = b.id inner join pet_manage_material c on b.materialid = c.id where c.name like '%$keyword%'";
+  // die($sql);
   $query = $db->query($sql);
   $number = $query->fetch()['number'];
 
-  $sql = 'select * from pet_manage_material_import order by time desc limit '. $filter['limit'] .' offset '. ($filter['page'] - 1) * $filter['limit'];
+  $sql = "select a.* from pet_manage_material_import a inner join pet_manage_material_detail b on a.detailid = b.id inner join pet_manage_material c on b.materialid = c.id where c.name like '%$keyword%' order by id desc limit $filter[limit] offset ". ($filter['page'] - 1) * $filter['limit'];
   // $sql = 'select c.* from pet_manage_material_import a inner join pet_manage_material_import_detail b on a.id = b.importid inner join pet_manage_material_detail c on b.detailid = c.id order by id desc limit '. $filter['limit'] .' offset '. ($filter['page'] - 1) * $filter['limit'];
   $query = $db->query($sql);
-  $list = array();
 
   $xtpl = new XTemplate("import-list.tpl", PATH);
 
   $index = ($filter['page'] - 1) * $filter['limit'] + 1;
   while ($row = $query->fetch()) {
     // echo json_encode($row);die();
-    $count = countImport($row['id']);
+    $material = getMaterialByDetail($row['detailid']);
     $xtpl->assign('index', $index++);
     $xtpl->assign('id', $row['id']);
-    $xtpl->assign('time', date('d/m/Y', $row['time']));
-    $xtpl->assign('material', importMaterial($row['id']));
-    $xtpl->assign('number', $count['number']);
-    $xtpl->assign('total', $count['total']);
+    $xtpl->assign('date', date('d/m/Y', $row['date']));
+    $xtpl->assign('total', $row['number']);
+    $xtpl->assign('note', $row['note']);
+    $xtpl->assign('material', $material['name']);
     if ($permit) $xtpl->parse('main.row.manager');
     $xtpl->parse('main.row');
   }
@@ -116,6 +116,13 @@ function exportMaterial($id) {
   return implode('<br>', $list);
 }
 
+function getMaterialByDetail($detailid) {
+  global $db;
+
+  $sql = "select b.* from pet_manage_material_detail a inner join pet_manage_material b on a.materialid = b.id where a.id = $detailid";
+  return fetch($sql);
+}
+
 function countImport($id) {
   global $db;
 
@@ -137,37 +144,31 @@ function countImport($id) {
 function getImportId($id) {
   global $db;
 
-  $sql = 'select a.number, a.date, b.expire, a.note, b.materialid as itemid, b.source as sourceid from pet_manage_material_import_detail a inner join pet_manage_material_detail b on a.detailid = b.id where a.importid = '. $id;
+  $sql = 'select a.date, a.number, b.expire, a.note, b.materialid as itemid, b.source as sourceid from pet_manage_material_import a inner join pet_manage_material_detail b on a.detailid = b.id where a.id = '. $id;
   // item, itemid, source, sourceid
 
-  $query = $db->query($sql);
-  $data = array();
+  $row = fetch($sql);
+  $row['item'] = getItemId($row['itemid']);
+  $row['source'] = getSourceId($row['sourceid']);
+  $row['date'] = date('d/m/Y', $row['date']);
+  $row['expire'] = date('d/m/Y', $row['expire']);
 
-  while ($row = $query->fetch()) {
-    $row['item'] = getItemId($row['itemid']);
-    $row['source'] = getSourceId($row['sourceid']);
-    $row['date'] = date('d/m/Y', $row['date']);
-    $row['expire'] = date('d/m/Y', $row['expire']);
-    $data []= $row;
-  }
-  return $data;
+  return $row;
 }
 
 function getExportId($id) {
   global $db;
 
-  $sql = 'select a.number, a.date, b.expire, a.note, b.id, c.name, b.source, b.number as remain from pet_manage_material_export_detail a inner join pet_manage_material_detail b on a.detailid = b.id inner join pet_manage_material c on b.materialid = c.id where a.exportid = '. $id;
-  $query = $db->query($sql);
-  $data = array();
+  $sql = 'select a.id, a.date, a.number, b.expire, a.note, b.materialid as itemid, b.source as sourceid from pet_manage_material_export a inner join pet_manage_material_detail b on a.detailid = b.id where a.id = '. $id;
 
-  while ($row = $query->fetch()) {
-    $row['source'] = getSourceId($row['source']);
+  $row = fetch($sql);
+  $row['item'] = getItemId($row['itemid']);
+  $row['source'] = getSourceId($row['sourceid']);
+  $row['date'] = date('d/m/Y', $row['date']);
+  $row['expire'] = date('d/m/Y', $row['expire']);
+  $row['remain'] = materialRemain($row['itemid']);
 
-    $row['date'] = date('d/m/Y', $row['date']);
-    $row['expire'] = date('d/m/Y', $row['expire']);
-    $data []= $row;
-  }
-  return $data;
+  return $row;
 }
 
 function getSourceId($id) {
@@ -185,32 +186,31 @@ function getItemId($id) {
 }
 
 function exportList() {
-  global $db, $filter, $permit;
+  global $db, $filter, $permit, $keyword;
   
-  $sql = 'select count(*) as number from pet_manage_material_export';
+  $sql = "select count(*) as number from pet_manage_material_export a inner join pet_manage_material_detail b on a.detailid = b.id inner join pet_manage_material c on b.materialid = c.id where c.name like '%$keyword%'";
   $query = $db->query($sql);
   $number = $query->fetch()['number'];
 
-  $sql = 'select * from pet_manage_material_export order by time desc, id desc limit '. $filter['limit'] .' offset '. ($filter['page'] - 1) * $filter['limit'];
+  $sql = "select a.* from pet_manage_material_export a inner join pet_manage_material_detail b on a.detailid = b.id inner join pet_manage_material c on b.materialid = c.id where c.name like '%$keyword%' order by id desc limit $filter[limit] offset ". ($filter['page'] - 1) * $filter['limit'];
   $query = $db->query($sql);
-  $list = array();
 
   $xtpl = new XTemplate("export-list.tpl", PATH);
 
   $index = ($filter['page'] - 1) * $filter['limit'] + 1;
   while ($row = $query->fetch()) {
-    $count = countExport($row['id']);
+    $material = getMaterialByDetail($row['detailid']);
     $xtpl->assign('index', $index++);
     $xtpl->assign('id', $row['id']);
-    $xtpl->assign('time', date('d/m/Y', $row['time']));
-    $xtpl->assign('material', exportMaterial($row['id']));
-    $xtpl->assign('number', $count['number']);
-    $xtpl->assign('total', $count['total']);
+    $xtpl->assign('date', date('d/m/Y', $row['date']));
+    $xtpl->assign('number', $row['number']);
+    $xtpl->assign('note', $row['note']);
+    $xtpl->assign('material', $material['name']);
     if ($permit) $xtpl->parse('main.row.manager');
     $xtpl->parse('main.row');
   }
 
-  $xtpl->assign('nav', navigator($number, $filter['page'], $filter['limit'], 'import'));
+  $xtpl->assign('nav', navigator($number, $filter['page'], $filter['limit'], 'export'));
   $xtpl->parse('main');
   return $xtpl->text();
 }
@@ -234,13 +234,13 @@ function countExport($id) {
 }
 
 function sourceList() {
-  global $db, $filter, $permit;
+  global $db, $filter, $permit, $keyword;
   
-  $sql = 'select count(*) as number from pet_manage_material_source where active = 1';
+  $sql = "select count(*) as number from pet_manage_material_source where name like '%$keyword%' and active = 1";
   $query = $db->query($sql);
   $number = $query->fetch()['number'];
 
-  $sql = 'select * from pet_manage_material_source where active = 1 order by id desc limit '. $filter['limit'] .' offset '. ($filter['page'] - 1) * $filter['limit'];
+  $sql = "select * from pet_manage_material_source where name like '%$keyword%' and active = 1 order by id desc limit $filter[limit] offset ". ($filter['page'] - 1) * $filter['limit'];
   $query = $db->query($sql);
   $list = array();
 
@@ -248,7 +248,7 @@ function sourceList() {
 
   $index = ($filter['page'] - 1) * $filter['limit'] + 1;
   while ($row = $query->fetch()) {
-    $count = countExport($row['id']);
+    // $count = countExport($row['id']);
     $xtpl->assign('index', $index++);
     $xtpl->assign('id', $row['id']);
     $xtpl->assign('name', $row['name']);
@@ -417,26 +417,26 @@ function materialRemain($id) {
 }
 
 function materialList() {
-  global $db, $url, $filter, $permit;
+  global $db, $url, $filter, $permit, $keyword;
 
   $xtpl = new XTemplate("material-list.tpl", PATH);
 
-  $sql = 'select count(*) as count from `pet_manage_material` where active = 1';
+  $sql = "select count(*) as count from `pet_manage_material` where name like '%$keyword%' and active = 1";
   $query = $db->query($sql);
   $count = $query->fetch()['count'];
 
-  $sql = 'select * from `pet_manage_material` where active = 1 order by id desc limit ' . $filter['limit'] . ' offset ' . ($filter['page'] - 1) * $filter['limit'];
+  $sql = "select * from `pet_manage_material` where name like '%$keyword%' and active = 1 order by name asc limit $filter[limit]  offset " . ($filter['page'] - 1) * $filter['limit'];
   $query = $db->query($sql);
   $index = ($filter['page'] - 1) * $filter['limit'] + 1;
   $today = time();
 
   while($row = $query->fetch()) {
     $number = 0;
-    $sql = 'select * from `pet_manage_material_detail` where number > 0 and materialid = '. $row['id'];
+    $sql = 'select * from `pet_manage_material_detail` where materialid = '. $row['id'];
     $detail_query = $db->query($sql);
     $expire = 9999999999;
     while ($detail = $detail_query->fetch()) {
-      if ($detail['expire'] < $expire) $expire = $detail['expire'];
+      if ($detail['number'] > 0 && ($detail['expire'] < $expire)) $expire = $detail['expire'];
       // echo "$expire, ";
       $number += $detail['number'];
     }

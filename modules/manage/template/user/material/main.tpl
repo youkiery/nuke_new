@@ -9,15 +9,27 @@
 {modal}
 
 <style>
-	.rows::after {
-	  content: "";
-	  clear: both;
-	  display: table;
-	}
-	.col-6 {
-	  float: left;
-	}
-	.col-6 {width: 50%;}
+  .excel {
+    background: lightskyblue;
+    color: white;
+    font-size: 0.8em;
+    border-radius: 20px;
+    padding: 5px;
+  }
+
+  .rows::after {
+    content: "";
+    clear: both;
+    display: table;
+  }
+
+  .col-6 {
+    float: left;
+  }
+
+  .col-6 {
+    width: 50%;
+  }
 
 
   a.btn-default {
@@ -49,16 +61,24 @@
     float: left;
     width: calc(100% - 10px);
   }
+
   .sr {
     float: right;
     width: 10px;
   }
+
   .sr:hover {
     color: red;
   }
+
   .green {
     background: green;
     color: white
+  }
+
+  .item {
+    border-top: 1px solid lightgray;
+    padding: 5px;
   }
 </style>
 
@@ -77,25 +97,74 @@
 </div>
 
 <ul class="nav nav-tabs">
-  <li class="active"><a data-toggle="tab" href="#material"> Vật tư, hóa chất </a></li>
-  <li><a data-toggle="tab" href="#source"> Nguồn cung </a></li>
-  <li><a data-toggle="tab" href="#import"> Phiếu nhập </a></li>
-  <li><a data-toggle="tab" href="#export"> Phiếu xuất </a></li>
+  <li class="active"><a data-toggle="tab" href="#material-tab"> Vật tư, hóa chất </a></li>
+  <li><a data-toggle="tab" href="#source-tab"> Nguồn cung </a></li>
+  <li><a data-toggle="tab" href="#import-tab"> Phiếu nhập </a></li>
+  <li><a data-toggle="tab" href="#export-tab"> Phiếu xuất </a></li>
   <li><a data-toggle="tab" href="#excel"> Xuất Excel </a></li>
 </ul>
 
 <div class="tab-content">
-  <div id="material" class="tab-pane fade in active">
-    {content}
+  <div id="material-tab" class="tab-pane fade in active">
+    <div class="rows form-group">
+      <div class="col-6">
+        <label for="material-keyword"></label>
+        <form class="input-group" onsubmit="return filter(event, 'material')">
+          <input type="text" class="form-control" id="material-keyword" placeholder="Tìm kiếm vật tư theo tên">
+          <div class="input-group-btn"> <button class="btn btn-info"> Tìm kiếm </button> </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="material">
+      {content}
+    </div>
   </div>
-  <div id="import" class="tab-pane fade">
-    {import_content}
+  <div id="import-tab" class="tab-pane fade">
+    <div class="rows form-group">
+      <div class="col-6">
+        <label for="import-keyword"></label>
+        <form class="input-group" onsubmit="return filter(event, 'import')">
+          <input type="text" class="form-control" id="import-keyword" placeholder="Tìm kiếm vật tư theo tên">
+          <div class="input-group-btn"> <button class="btn btn-info"> Tìm kiếm </button> </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="import">
+      {import_content}
+    </div>
   </div>
-  <div id="export" class="tab-pane fade">
-    {export_content}
+
+  <div id="export-tab" class="tab-pane fade">
+    <div class="rows form-group">
+      <div class="col-6">
+        <label for="export-keyword"></label>
+        <form class="input-group" onsubmit="return filter(event, 'export')">
+          <input type="text" class="form-control" id="export-keyword" placeholder="Tìm kiếm vật tư theo tên">
+          <div class="input-group-btn"> <button class="btn btn-info"> Tìm kiếm </button> </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="export">
+      {export_content}
+    </div>
   </div>
-  <div id="source" class="tab-pane fade">
-    {source_content}
+  <div id="source-tab" class="tab-pane fade">
+    <div class="rows form-group">
+      <div class="col-6">
+        <label for="source-keyword"></label>
+        <form class="input-group" onsubmit="return filter(event, 'source')">
+          <input type="text" class="form-control" id="source-keyword" placeholder="Tìm kiếm vật tư theo tên">
+          <div class="input-group-btn"> <button class="btn btn-info"> Tìm kiếm </button> </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="source">
+      {source_content}
+    </div>
   </div>
   <div id="excel" class="tab-pane fade">
     <label class="row" style="width: 100%;">
@@ -110,14 +179,26 @@
         <input type="text" value="{today}" class="date form-control" id="excelt">
       </div>
     </label>
-    <!-- khách hàng, địa chỉ, email, điện thoại, chỉ hộ, nơi lấy mẫu, mục đích, nơi nhận, người phụ trách --> 
-    <label style="width: 30%"> <input type="checkbox" class="po" id="index" checked readonly> STT </label>
+
+    <div class="relative">
+      <input type="text" class="form-control" id="excel-filter" placeholder="Tìm kiếm, chạm vật tư để thêm">
+      <div class="suggest" id="excel-filter-suggest"> </div>
+    </div>
+
+    <div
+      style="border: 1px solid light gray; border-radius: 10px; padding: 10px; overflow-y: scroll; overflow-x: hidden; height: 200px; display: none;"
+      id="excel-item"> </div>
+    <div id="excel-list" style="margin: 5px;"></div>
+    <p style="text-align:center; color: gray; display: none;" id="excel-tap"> Chạm vật tư để xóa </p>
+
+    <!-- khách hàng, địa chỉ, email, điện thoại, chỉ hộ, nơi lấy mẫu, mục đích, nơi nhận, người phụ trách -->
+    <!-- <label style="width: 30%"> <input type="checkbox" class="po" id="index" checked readonly> STT </label>
     <label style="width: 30%"> <input type="checkbox" class="po" id="type" checked readonly> Loại hóa chất </label>
     <label style="width: 30%"> <input type="checkbox" class="po" id="export" checked readonly> Xuất </label>
     <label style="width: 30%"> <input type="checkbox" class="po" id="import" checked readonly> Nhập </label>
     <label style="width: 30%"> <input type="checkbox" class="po" id="exporttime" checked readonly> Ngày xuất </label>
     <label style="width: 30%"> <input type="checkbox" class="po" id="importtime" checked readonly> Ngày nhập </label>
-    <label style="width: 30%"> <input type="checkbox" class="po" id="remain" checked readonly> Tồn kho </label>
+    <label style="width: 30%"> <input type="checkbox" class="po" id="remain" checked readonly> Tồn kho </label> -->
     <div class="text-center">
       <button class="btn btn-info" onclick="download()">
         Xuất ra Excel
@@ -131,6 +212,7 @@
 <script src="/modules/manage/src/script.js"></script>
 <script>
   var global = {
+    excel: [],
     page: {
       report: 1,
       material: 1,
@@ -163,10 +245,10 @@
             <td>
               <div class="relative">
                 <div class="input-group">
-                  <input type="text" class="form-control" id="import-type-`+ global.ia + `">
+                  <input type="text" class="form-control btn-edit" id="import-type-`+ global.ia + `">
                   <input type="hidden" class="form-control" id="import-type-val-`+ global.ia + `">
                   <div class="input-group-btn">
-                    <button class="btn btn-success" onclick="materialModal('import', `+ global.ia + `)">
+                    <button class="btn btn-success btn-edit" onclick="materialModal('import', `+ global.ia + `)">
                       <span class="glyphicon glyphicon-plus"></span>
                     </button>
                   </div>
@@ -234,8 +316,8 @@
         id: id
       }).then(resp => {
         resp.list.forEach((detail) => {
-          global.ia ++
-          if (!$('[index='+ detail['id'] +']').length) {
+          global.ia++
+          if (!$('[index=' + detail['id'] + ']').length) {
             $(`
               <tbody class="export" index="`+ detail['id'] + `" ia="` + global.ia + `">
                 <tr>
@@ -243,7 +325,7 @@
                     `+ detail['name'] + `
                   </td>
                   <td> <input class="form-control date-`+ global.ia + `" id="export-date-` + global.ia + `" value="` + global['today'] + `"> </td>
-                  <td> `+ detail['source'] +` </td>
+                  <td> `+ detail['source'] + ` </td>
                   <td> <span id="export-remain-`+ global.ia + `"> ` + detail['number'] + ` </span> </td>
                   <td> <input class="form-control" id="export-number-`+ global.ia + `" value="` + 0 + `"> </td>
                   <td> `+ detail['expire'] + ` </td>
@@ -300,11 +382,10 @@
         id = trim(item.getAttribute('index'))
         temp = {
           id: id,
-          date: $("#export-date-" + ia).val(),
           number: $("#export-number-" + ia).val(),
           note: $("#export-note-" + ia).val()
         }
-        if (temp['number'] <= 0) return msg = 'Số lượng đang âm'
+        if (temp['number'] == 0) return msg = 'Hãy nhập số lượng`'
         data.push(temp)
       })
       if (msg.length) return msg
@@ -313,12 +394,32 @@
     }
   }
 
+  function excelId() {
+    var list = []
+    global.excel.forEach(item => {
+      list.push(item.id)
+    })
+    return list.join(',')
+  }
+
   $(document).ready(() => {
     $(".date").datepicker({
       format: 'dd/mm/yyyy',
       changeMonth: true,
       changeYear: true
     });
+
+    vremind.install('#excel-filter', '#excel-filter-suggest', (input) => {
+      return new Promise(resolve => {
+        vhttp.checkelse('', {
+          action: 'excel-suggest',
+          keyword: input,
+          id: excelId()
+        }).then((resp) => {
+          resolve(resp.html)
+        })
+      })
+    }, 300, 300)
 
     vremind.install('#export-item-finder', '#export-item-finder-suggest', (input => {
       return new Promise(resolve => {
@@ -343,7 +444,7 @@
             html += `
               <label class="suggest-box"">
                 `+ item.name + `
-                <input class="suggest_box" id="report-`+ item.id + `" type="checkbox" style="float: right;" ` + ((global.report[item.id] && global.report[item.id].status) ? 'checked' : '') + ` onchange="changeSelect(`+ item.id +`, '`+ item.name +`')">
+                <input class="suggest_box" id="report-`+ item.id + `" type="checkbox" style="float: right;" ` + ((global.report[item.id] && global.report[item.id].status) ? 'checked' : '') + ` onchange="changeSelect(` + item.id + `, '` + item.name + `')">
               </label>`
           })
           resolve(html)
@@ -367,23 +468,30 @@
     });
   })
 
+  function filter(e, func = 'material') {
+    e.preventDefault()
+    goPage(1, func)
+    return false
+  }
+
   function goPage(page = 1, func = 'material') {
     vhttp.checkelse(
       '', {
-        action: 'filter',
-        page: page,
-        func: func
-      }
+      action: 'filter',
+      keyword: $('#' + func + '-keyword').val(),
+      page: page,
+      func: func
+    }
     ).then(resp => {
       global[func] = page
-      $('#'+ func).html(resp['html'])
+      $('#' + func).html(resp['html'])
     })
   }
 
   function changeSelect(id, name) {
     global.report[id] = {
       name: name,
-      status: $('#report-'+ id).prop('checked')
+      status: $('#report-' + id).prop('checked')
     }
     var list = []
     for (const key in global.report) {
@@ -491,22 +599,19 @@
     }).then(resp => {
       $("#import-button").hide()
       $("#edit-import-button").show()
-      $('#import-item-time').val(resp.time)
 
       global.ia = 0
       global.id = id
       $('.import').remove()
-      resp.data.forEach(item => {        
-        insertLine['import']()
-        $('#import-type-'+ global.ia).val(item.item)
-        $('#import-type-val-'+ global.ia).val(item.itemid)
-        $('#import-source-'+ global.ia).val(item.source)
-        $('#import-source-val-'+ global.ia).val(item.sourceid)
-        $('#import-date-'+ global.ia).val(item.date)
-        $('#import-note-'+ global.ia).val(item.note)
-        $('#import-expire-'+ global.ia).val(item.expire)
-        $('#import-number-'+ global.ia).val(item.number)
-      })
+      insertLine['import']()
+      $('#import-type-' + global.ia).val(resp.data.item)
+      $('#import-type-val-' + global.ia).val(resp.data.itemid)
+      $('#import-source-' + global.ia).val(resp.data.source)
+      $('#import-source-val-' + global.ia).val(resp.data.sourceid)
+      $('#import-date-' + global.ia).val(resp.data.date)
+      $('#import-note-' + global.ia).val(resp.data.note)
+      $('#import-expire-' + global.ia).val(resp.data.expire)
+      $('#import-number-' + global.ia).val(resp.data.number)
       $('.btn-edit').prop('disabled', true)
       $("#import-modal-insert").modal('show')
     })
@@ -519,39 +624,34 @@
     }).then(resp => {
       $("#export-button").hide()
       $("#edit-export-button").show()
-      $('#export-item-time').val(resp.time)
 
       global.ia = 0
-      var temp = 1
       global.id = id
       $('.export').remove()
-      resp.data.forEach(item => {
-        parseExport(item.id)
-        $('#export-name-'+ temp).text(item.name)
-        $('#export-source-'+ temp).text(item.source)
-        $('#export-remain-'+ temp).text(item.remain)
-        $('#export-date-'+ temp).text(item.date)
-        $('#export-expire-'+ temp).text(item.expire)
-        $('#export-note-'+ temp).val(item.note)
-        $('#export-number-'+ temp).val(item.number)
-        temp ++
-      })
+      parseExport(resp.data.id)
+      $('#export-name-1').text(resp.data.item)
+      $('#export-source-1').text(resp.data.source)
+      $('#export-remain-1').text(resp.data.remain)
+      $('#export-date-1').text(resp.data.date)
+      $('#export-expire-1').text(resp.data.expire)
+      $('#export-note-1').val(resp.data.note)
+      $('#export-number-1').val(resp.data.number)
       $('.btn-edit').prop('disabled', true)
       $("#export-modal-insert").modal('show')
     })
   }
 
   function parseExport(id) {
-    global.ia ++
+    global.ia++
     $(`
       <tbody class="export" index="`+ id + `" ia="` + global.ia + `">
         <tr>
-          <td id="export-name-`+ global.ia +`"> </td>
+          <td id="export-name-`+ global.ia + `"> </td>
           <td id="export-date-` + global.ia + `"> </td>
-          <td id="export-source-`+ global.ia +`"> </td>
+          <td id="export-source-`+ global.ia + `"> </td>
           <td> <span id="export-remain-`+ global.ia + `">  </span> </td>
           <td> <input class="form-control" id="export-number-`+ global.ia + `"> </td>
-          <td id="export-expire-`+ global.ia +`">  </td>
+          <td id="export-expire-`+ global.ia + `">  </td>
           <td> <input class="form-control" id="export-note-`+ global.ia + `"> </td>
           <td>
             <button class="btn btn-danger btn-xs btn-edit" onclick="removeRow(`+ global.ia + `)">
@@ -604,7 +704,7 @@
 
   function updateItem(id) {
     global['id'] = id
-    vhttp.checkelse('', {action: 'get-item', id: id}).then(data => {
+    vhttp.checkelse('', { action: 'get-item', id: id }).then(data => {
       $('#material-name').val(data['data']['name'])
       $('#material-unit').val(data['data']['unit'])
       $('#material-description').val(data['data']['description'])
@@ -620,7 +720,7 @@
   }
 
   function removeItemSubmit() {
-    vhttp.checkelse('', {action: 'remove-item', id: global['id']}).then(data => {
+    vhttp.checkelse('', { action: 'remove-item', id: global['id'] }).then(data => {
       $('#material').html(data['html'])
       $('#remove-modal').modal('hide')
     })
@@ -809,7 +909,7 @@
     else {
       vhttp.checkelse(
         '',
-        { action: 'insert-import', data: sdata, time: $('#import-item-time').val() }
+        { action: 'insert-import', data: sdata }
       ).then(data => {
         alert_msg('Đã thêm toa nhập')
         $("#material").html(data['html'])
@@ -853,20 +953,81 @@
     }
   }
 
-  function checkExcel() {
-    var list = []
-    $('.po').each((index, checkbox) => {
-      if (checkbox.checked) {
-        list.push(checkbox.getAttribute('id'))
-      }
+  // function checkExcel() {
+  //   var list = []
+  //   $('.po').each((index, checkbox) => {
+  //     if (checkbox.checked) {
+  //       list.push(checkbox.getAttribute('id'))
+  //     }
+  //   })
+  //   return list
+  // }
+
+  function detailItem(id) {
+    vhttp.checkelse('', {
+      action: 'detail',
+      id: id
+    }).then(resp => {
+      $('#detail-content').html(resp.html)
+      $('#detail-modal').modal('show')
     })
-    return list
+  }
+
+  // function excelFilter(e) {
+  //   e.preventDefault()
+  //   vhttp.checkelse('', {
+  //     action: 'excel-filter',
+  //     key: $('#excel-filter').val()
+  //   }).then(resp => {
+  //     $('#excel-item').html(resp.html)
+  //     $('#excel-item').show()
+  //   })
+  //   return false
+  // }
+
+  function excelInsert(id, name) {
+    global.excel.push({
+      id: id,
+      name: name
+    })
+    $('#excel-' + id).remove()
+    $('#excel-tap').show()
+    excelReload()
+  }
+
+  function excelClear() {
+    global.excel = []
+    excelReload()
+  }
+
+  function excelRemove(id) {
+    global.excel = global.excel.filter(item => {
+      return item.id !== id
+    })
+    excelReload()
+  }
+
+  function excelReload() {
+    var html = []
+    global.excel.forEach(excel => {
+      html.push("<span class='excel' onclick='excelRemove(" + excel.id + ")' id='item-" + excel.id + "'> " + excel.name + "</span>")
+    })
+    $('#excel-list').html((html.length ? 'Danh sách vật tư: ' + html.join(', ') : ''))
+  }
+
+  function checkMaterial() {
+    var list = []
+    global.excel.forEach(item => {
+      // console.log(list, item.id, list.indexOf(item.id));
+      if (list.indexOf(item.id) < 0) list.push(item.id)
+    });
+    return list.join(',')
   }
 
   function download() {
-		var link = '/manage/material/?excel=1&excelf=' + $('#excelf').val().replace(/\//g, '-') + '&excelt=' + $('#excelt').val().replace(/\//g, '-') + '&data=' + (checkExcel().join(','))
-    console.log(link);
-		window.open(link)
-	}
+    var link = '/manage/material/?excel=1&excelf=' + $('#excelf').val().replace(/\//g, '-') + '&excelt=' + $('#excelt').val().replace(/\//g, '-') + '&material=' + checkMaterial()
+    // var link = '/manage/material/?excel=1&excelf=' + $('#excelf').val().replace(/\//g, '-') + '&excelt=' + $('#excelt').val().replace(/\//g, '-') + '&data=' + (checkExcel().join(','))
+    window.open(link)
+  }
 </script>
 <!-- END: main -->

@@ -13,7 +13,6 @@ var vremind = {
         if (input.val() != previous) {
           if (variable !== null) {
             excuteFunction(input.val(), variable).then((html) => {
-              console.log(variable);
               previous = input.val()
               suggest.html(html)
             })

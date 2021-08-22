@@ -18,6 +18,52 @@ $filter = array(
   'limit' => $nv_Request->get_int('limit', 'post', 20)
 );
 
+// $sql = "select * from pet_manage_material";
+// $list = all($sql);
+
+// foreach ($list as $row) {
+//   $sql = "update pet_manage_material_detail set number = 0 where materialid = $row[id]";
+//   $db->query($sql);
+// }
+
+// $sql = "select b.id, b.number, b.remain, b.detailid, b.date, c.materialid, d.name, 'export' as type from pet_manage_material_export b inner join pet_manage_material_detail c on b.detailid = c.id inner join pet_manage_material d on c.materialid = d.id";
+// $list = all($sql);
+// $sql = "select b.id, b.number, b.remain, b.detailid, b.date, c.materialid, d.name, 'import' as type from pet_manage_material_import b inner join pet_manage_material_detail c on b.detailid = c.id inner join pet_manage_material d on c.materialid = d.id";
+// $list = array_merge($list, all($sql));
+
+// // sắp xếp lại theo time
+// usort($list, "cmp");
+
+// $change = array();
+// // echo json_encode($list);
+// // die();
+// foreach ($list as $row) {
+//   if (empty($change[$row['materialid']])) $change[$row['materialid']] = array(
+//     'name' => $row['name'],
+//     'remain' => 0,
+//     'expect' => 0
+//   );
+//   $change[$row['materialid']]['expect'] += $row['number'] * ( $row['type'] == 'export' ? -1 : 1 );
+
+//   // if ($row['type'] == 'export') $sql = "update pet_manage_material_export set remain = ". $change[$row['materialid']]['expect'] . " where id = $row[id]";
+//   // else $sql = "update pet_manage_material_import set remain = ". $change[$row['materialid']]['expect'] . " where id = $row[id]";
+//   // $db->query($sql);
+
+//   // if ($row['type'] == 'export') $sql = "update pet_manage_material_detail set number = number - $row[number] where id = $row[detailid]";
+//   // else $sql = "update pet_manage_material_detail set number = number + $row[number] where id = $row[detailid]";
+//   // $db->query($sql);
+// }
+
+// foreach ($change as $key => $value) {
+//   $value['remain'] = materialRemain($key);
+//   echo $value['name'] . ": tồn - $value[remain] - thực tế - $value[expect]<br>";
+// }
+
+// die();
+
+// select * from pet_manage_material a inner join pet_manage_material_detail b on b.materialid = a.id where a.name like "%Thùng bảo quản mẫu%"
+
+
 $permit = checkMaterialPermit();
 if ($permit === false) {
   // không có quyền
@@ -30,26 +76,31 @@ if ($permit === false) {
 if ($nv_Request->isset_request("excel", "get")) {
   $xco = array('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z');
 
-  $data = array('index', 'type');
-  if (strlen($temp = $nv_Request->get_string('data', 'get', '')) > 0) {
-    $data = explode(',', $temp);
-  }
+  $material = $nv_Request->get_string('material', 'get', '');
+  $list = explode(',', $material);
+  if (!empty($material) && count($list)) $xtra = "and d.id in ($material)";
+  else $xtra = "";
 
   $excelf = totime(str_replace('-', '/', $nv_Request->get_string('excelf', 'get/post', '')));
-  $excelt = totime(str_replace('-', '/', $nv_Request->get_string('excelt', 'get/post', '')));
+  $excelt = totime(str_replace('-', '/', $nv_Request->get_string('excelt', 'get/post', ''))) + 60 * 60 * 24 - 1;
   include 'PHPExcel/IOFactory.php';
   $fileType = 'Excel2007'; 
   $objPHPExcel = PHPExcel_IOFactory::load(NV_ROOTDIR . '/assets/excel/material.xlsx');
 
   $i = 2;
   $list = array();
-  $sql = "select a.time, b.number, b.remain, d.name, 'export' as type from pet_manage_material_export a inner join pet_manage_material_export_detail b on a.id = b.exportid inner join pet_manage_material_detail c on b.detailid = c.id inner join pet_manage_material d on c.materialid = d.id where time between $excelf and $excelt";
-  $list = all($db, $sql);
-  $sql = "select a.time, b.number, b.remain, d.name, 'import' as type from pet_manage_material_import a inner join pet_manage_material_import_detail b on a.id = b.importid inner join pet_manage_material_detail c on b.detailid = c.id inner join pet_manage_material d on c.materialid = d.id where time between $excelf and $excelt";
-  $list = array_merge($list, all($db, $sql));
+  $sql = "select a.date, a.number, a.remain, d.name, 'export' as type from pet_manage_material_export a inner join pet_manage_material_detail c on a.detailid = c.id inner join pet_manage_material d on c.materialid = d.id where (date between $excelf and $excelt) $xtra";
+  $list = all($sql);
+  $sql = "select a.date, a.number, a.remain, d.name, 'import' as type from pet_manage_material_import a inner join pet_manage_material_detail c on a.detailid = c.id inner join pet_manage_material d on c.materialid = d.id where (date between $excelf and $excelt) $xtra";
+
+  $list = array_merge($list, all($sql));
   
   // sắp xếp lại theo time
   usort($list, "cmp");
+  // foreach ($list as $row) {
+  //   echo date('d/m/Y', $row['date']) . "<br>";
+  // }
+  // die();
 
   // tính tồn kho
   $index = 1;
@@ -66,11 +117,11 @@ if ($nv_Request->isset_request("excel", "get")) {
     );
     if ($row['type'] == 'export') {
       $temp['export'] = $row['number'];
-      $temp['exporttime'] = date('d/m/Y', $row['time']);
+      $temp['exporttime'] = date('d/m/Y', $row['date']);
     }
     else {
       $temp['import'] = $row['number'];
-      $temp['importtime'] = date('d/m/Y', $row['time']);
+      $temp['importtime'] = date('d/m/Y', $row['date']);
     }
 
     $objPHPExcel
@@ -97,7 +148,22 @@ $action = $nv_Request->get_string('action', 'post', '');
 if (!empty($action)) {
   $result = array('status' => 0);
   switch ($action) {
+    case 'excel-suggest':
+      $id = $nv_Request->get_string('id', 'post', '');
+      $keyword = $nv_Request->get_string('keyword', 'post', '');
+
+      $sql = "select * from pet_manage_material where name like '%$keyword%' " . (strlen($id) ? "and id not in ($id)" : "");
+      $query = $db->query($sql);
+      $html = "";
+
+      while ($row = $query->fetch()) {
+        $html .= "<div class='item' onclick='excelInsert($row[id], \"$row[name]\")' id='excel-$row[id]'> [+] $row[name] </div>";
+      }
+      $result['status'] = 1;
+      $result['html'] = $html;
+      break;
     case 'filter':
+      $keyword = $nv_Request->get_string('keyword', 'post', '');
       switch ($filter['func']) {
         case 'material':
           $result['status'] = 1;
@@ -120,24 +186,14 @@ if (!empty($action)) {
     case 'get-import':
       $id = $nv_Request->get_int('id', 'post', 0);
 
-      $sql = "select time from pet_manage_material_import where id = $id";
-      $query = $db->query($sql);
-      $import = $query->fetch();
-
       $result['status'] = 1;
       $result['data'] = getImportId($id);
-      $result['time'] = date('d/m/Y', $import['time']);
     break;
     case 'get-export':
       $id = $nv_Request->get_int('id', 'post', 0);
 
-      $sql = "select time from pet_manage_material_export where id = $id";
-      $query = $db->query($sql);
-      $export = $query->fetch();
-
       $result['status'] = 1;
       $result['data'] = getExportId($id);
-      $result['time'] = date('d/m/Y', $export['time']);
     break;
     case 'report-source-suggest':
       $keyword = $nv_Request->get_string('keyword', 'post');
@@ -234,19 +290,11 @@ if (!empty($action)) {
       break;
     case 'insert-import':
       $data = $nv_Request->get_array('data', 'post');
-      $time = $nv_Request->get_string('time', 'post');
-      $time = totime($time);
 
-      // b1: thêm vào import
       // b2: kiểm tra từng item, source, expire từ detail
       // b3: nếu không tồn tại, thêm vào detail
       // b4: nếu tồn tại, cập nhật số lượng
       // b5: lấy importid, detailid thêm vào import detail
-
-      // b1
-      $sql = 'insert into `pet_manage_material_import` (time) values(' . $time . ')';
-      $query = $db->query($sql);
-      $importid = $db->lastInsertId();
 
       // b2
       foreach ($data as $row) {
@@ -291,7 +339,7 @@ if (!empty($action)) {
         $query = $db->query($sql);
         if (empty($detail = $query->fetch())) {
           // b3
-          $sql = "insert into `pet_manage_material_detail` (materialid, expire, number, source) values($row[itemid], $row[expire], $row[number] $row[sourceid])";
+          $sql = "insert into `pet_manage_material_detail` (materialid, expire, number, source) values($row[itemid], $row[expire], $row[number], $row[sourceid])";
           $db->query($sql);
           $detail = array('id' => $db->lastInsertId());
         } else {
@@ -301,7 +349,7 @@ if (!empty($action)) {
         }
 
         // b5
-        $sql = "insert into `pet_manage_material_import_detail` (importid, detailid, number, remain, note, date) values ($importid, $detail[id], $row[number], ". materialRemain($row['itemid']) .", '$row[note]', $row[date])";
+        $sql = "insert into `pet_manage_material_import` (detailid, number, remain, note, date) values ($detail[id], $row[number], ". materialRemain($row['itemid']) .", '$row[note]', $row[date])";
         $db->query($sql);
       }
       $result['status'] = 1;
@@ -313,14 +361,9 @@ if (!empty($action)) {
     case 'update-import':
       $id = $nv_Request->get_int('id', 'post');
       $data = $nv_Request->get_array('data', 'post');
-      $time = $nv_Request->get_string('time', 'post');
-      $time = totime($time);
 
       // trừ số lượng cũ
-      $sql = "update pet_manage_material_import set time = $time where id = $id";
-      $db->query($sql);
-
-      $sql = 'select a.id as ipid, a.number as sub, b.* from pet_manage_material_import_detail a inner join pet_manage_material_detail b on a.detailid = b.id where a.importid = '. $id;
+      $sql = 'select a.id as ipid, a.number as sub, b.* from pet_manage_material_import a inner join pet_manage_material_detail b on a.detailid = b.id where a.id = '. $id;
       $query = $db->query($sql);
       $list = array();
       $change = array();
@@ -351,8 +394,8 @@ if (!empty($action)) {
         }
         // cật nhật số lượng phiếu
 
-        $xtra = "remain = remain ". ($change[$item['itemid']] >= 0 ? '+' : '0') . " ". $change[$item['itemid']];
-        $sql = "update pet_manage_material_import_detail set detailid = $detail[id], number = $item[number], $xtra, note = '$item[note]' where id = $row[ipid]";
+        $xtra = "remain = remain ". ($change[$item['itemid']] >= 0 ? '+' : '') . " ". $change[$item['itemid']];
+        $sql = "update pet_manage_material_import set detailid = $detail[id], number = $item[number], $xtra, note = '$item[note]' where id = $row[ipid]";
         $db->query($sql);
       }
 
@@ -364,37 +407,41 @@ if (!empty($action)) {
     case 'update-export':
       $id = $nv_Request->get_int('id', 'post');
       $data = $nv_Request->get_array('data', 'post');
-      $time = $nv_Request->get_string('time', 'post');
-      $time = totime($time);
 
-      $sql = "update pet_manage_material_import set time = $time where id = $id";
+      $item = $data[0];
+      $sql = 'select a.id as ipid, a.number as sub, b.* from pet_manage_material_export a inner join pet_manage_material_detail b on a.detailid = b.id where a.id = '. $id;
+      $row = fetch($sql);
+      $change = $row['sub'] - $item['number'];
+      
+      $xtra = "number = number ". ($change >= 0 ? '+' : '') . " ". $change;
+      // cập nhập số lượng mới
+      $sql = 'update pet_manage_material_detail set '. $xtra .' where id = '. $row['id'];
       $db->query($sql);
 
-      // trừ số lượng cũ
-      $sql = 'select a.id as ipid, a.number as sub, b.* from pet_manage_material_export_detail a inner join pet_manage_material_detail b on a.detailid = b.id where a.exportid = '. $id;
-      $query = $db->query($sql);
-      $list = array();
-      $change = array();
-      while ($row = $query->fetch()) {
-        $list []= $row;
-        $sql = 'update pet_manage_material_detail set number = number + '. $row['sub'] .' where id = '. $row['id'];
-        $db->query($sql);
-        $change[$row['materialid']] = $row['sub'];
-      }
+      // cập nhật chênh lệch tồn
+      $xtra = "remain = remain ". ($change >= 0 ? '+' : '') . " ". $change;
+      $sql = "update pet_manage_material_export set number = $item[number], $xtra, note = '$item[note]' where id = $row[ipid]";
 
-      $index = 0;
-      foreach ($list as $row) {
-        $item = $data[$index ++];
-        if (empty($change[$row['materialid']])) $change[$item['materialid']] = 0;
-        $change[$item['materialid']] -= $item['number'];
+      // $query = $db->query($sql);
+      // $change = array();
+      // $list = array();
+      // while ($row = $query->fetch()) {
+      //   $list []= $row;
+      //   $sql = 'update pet_manage_material_detail set number = number + '. $row['sub'] .' where id = '. $row['id'];
+      //   $db->query($sql);
+      //   $change[$row['materialid']] = $row['sub'];
+      // }
 
-        $sql = "update pet_manage_material_detail set number = number - $item[number] where id = ". $item['id'];
-        $db->query($sql);
-        // cật nhật số lượng phiếu
-        $xtra = "remain = remain ". ($change[$item['itemid']] >= 0 ? '+' : '0') . " ". $change[$item['itemid']];
-        $sql = "update pet_manage_material_export_detail set number = $item[number], $xtra,  note = '$item[note]' where id = $row[ipid]";
-        $db->query($sql);
-      }
+      // $index = 0;
+      // foreach ($list as $row) {
+      //   $item = $data[$index ++];
+      //   if (empty($change[$row['materialid']])) $change[$row['materialid']] = 0;
+      //   $change[$row['materialid']] -= $item['number'];
+
+      //   // cật nhật số lượng phiếu
+
+      //   $db->query($sql);
+      // }
 
       $result['status'] = 1;
       $result['material'] = json_encode(getMaterialDataList(), JSON_UNESCAPED_UNICODE);
@@ -404,7 +451,7 @@ if (!empty($action)) {
     case 'get-detail':
       $id = $nv_Request->get_string('id', 'post');
 
-      $sql = 'select id, source, number, expire from pet_manage_material_detail where number > 0 and materialid = '. $id;
+      $sql = 'select id, source, number, expire from pet_manage_material_detail where number <> 0 and materialid = '. $id;
       $query = $db->query($sql);
       $list = array();
       $name = getItemId($id);
@@ -469,19 +516,12 @@ if (!empty($action)) {
     break;
     case 'insert-export':
       $data = $nv_Request->get_array('data', 'post');
-      $time = $nv_Request->get_string('time', 'post');
-      $time = totime($time);
 
       // b1: thêm phiếu xuất
       // b2: nếu number > 0, thêm import_detail, cập nhật số lượng detail
 
-      // b1
-      $sql = 'insert into `pet_manage_material_export` (time) values (' . $time . ')';
-      $db->query($sql);
-      $exportid = $db->lastInsertId();
-
       foreach ($data as $row) {
-        if ($row['number'] > 0) {
+        if ($row['number'] !== 0) {
           // b2
           $sql = "select * from pet_manage_material_detail where id = $row[id]";
           $query = $db->query($sql);
@@ -491,7 +531,7 @@ if (!empty($action)) {
           $sql = 'update `pet_manage_material_detail` set number = number - ' . $row['number'] . ' where id = ' . $row['id'];
           $db->query($sql);
 
-          $sql = "insert into `pet_manage_material_export_detail` (exportid, detailid, number, remain, note, date) values ($exportid, $row[id], $row[number], ". materialRemain($detail['materialid']) .", '$row[note]', $row[date])";
+          $sql = "insert into `pet_manage_material_export` (detailid, number, remain, note, date) values ($row[id], $row[number], ". materialRemain($detail['materialid']) .", '$row[note]', $row[date])";
           $db->query($sql);
         }
       }
@@ -503,15 +543,12 @@ if (!empty($action)) {
     case 'remove-export':
       $id = $nv_Request->get_int('id', 'post');
 
-      $sql = 'select * from pet_manage_material_export_detail where exportid = '. $id;
-      $query = $db->query($sql);
+      $sql = 'select * from pet_manage_material_export where id = '. $id;
+      $row = fetch($sql);
 
-      while ($row = $query->fetch()) {
-        $sql = 'update pet_manage_material_detail set number = number + '. $row['number'] . ' where id = '. $row['detailid'];
-        $db->query($sql);
-      }
-      $sql = 'delete from pet_manage_material_export_detail where exportid = '. $id;
+      $sql = 'update pet_manage_material_detail set number = number + '. $row['number'] . ' where id = '. $row['detailid'];
       $db->query($sql);
+
       $sql = 'delete from pet_manage_material_export where id = '. $id;
       $db->query($sql);
       $result['status'] = 1;
@@ -521,15 +558,12 @@ if (!empty($action)) {
     case 'remove-import':
       $id = $nv_Request->get_int('id', 'post');
 
-      $sql = 'select * from pet_manage_material_import_detail where importid = '. $id;
-      $query = $db->query($sql);
+      $sql = 'select * from pet_manage_material_import where id = '. $id;
+      $row = fetch($sql);
 
-      while ($row = $query->fetch()) {
-        $sql = 'update pet_manage_material_detail set number = number - '. $row['number'] . ' where id = '. $row['detailid'];
-        $db->query($sql);
-      }
-      $sql = 'delete from pet_manage_material_import_detail where importid = '. $id;
+      $sql = 'update pet_manage_material_detail set number = number - '. $row['number'] . ' where id = '. $row['detailid'];
       $db->query($sql);
+
       $sql = 'delete from pet_manage_material_import where id = '. $id;
       $db->query($sql);
       $result['status'] = 1;
@@ -645,6 +679,30 @@ if (!empty($action)) {
       $result['status'] = 1;
       $result['html'] = $xtpl->text();
       break;
+    case 'detail':
+      $id = $nv_Request->get_string('id', 'post');
+
+      $xtpl = new XTemplate("material-detail.tpl", PATH);
+      $sql = "select * from `pet_manage_material` where id = $id";
+      $item = fetch($sql);
+
+      $sql = "select * from `pet_manage_material_detail` where number <> 0 and materialid = $id order by expire asc";
+      $query = $db->query($sql);
+
+      $index = 1;
+
+      $xtpl->assign('material', $item['name']);
+      while ($item = $query->fetch()) {
+        $xtpl->assign('index', $index++);
+        $xtpl->assign('number', $item['number']);
+        $xtpl->assign('source', getSourceId($item['source']));
+        $xtpl->assign('expire', date('d/m/Y', $item['expire']));
+        $xtpl->parse('main.row');
+      }
+      $xtpl->parse('main');
+      $result['status'] = 1;
+      $result['html'] = $xtpl->text();
+    break;
     case 'report_limit':
       $data = $nv_Request->get_array('data', 'post');
 
@@ -678,25 +736,19 @@ if (!empty($action)) {
       $expire = totime($data['expire']);
 
       $xtpl = new XTemplate("report-expire-list.tpl", PATH);
-      $sql = 'select * from `pet_manage_material` where name like "%' . $data['keyword'] . '%" order by name';
+      $sql = "select a.name, b.number, b.source, b.expire from `pet_manage_material` a inner join pet_manage_material_detail b on a.id = b.materialid where b.number > 0 and a.name like '%$data[keyword]%' and expire < $expire order by b.expire asc, a.name asc";
       $query = $db->query($sql);
       $index = 1;
 
       $source = sourceDataList2();
 
       while ($item = $query->fetch()) {
-        $sql = 'select * from `pet_manage_material_detail` where number > 0 and materialid = ' . $item['id'] . ' and expire < ' . $expire;
-        $detailquery = $db->query($sql);
         $xtpl->assign('name', $item['name']);
-        while ($detail = $detailquery->fetch()) {
-          if ($detail['number'] > 0) {
-            $xtpl->assign('index', $index++);
-            $xtpl->assign('number', $detail['number']);
-            $xtpl->assign('source', $source[$detail['source']]);
-            $xtpl->assign('expire', date('d/m/Y', $detail['expire']));
-            $xtpl->parse('main.row');
-          }
-        }
+        $xtpl->assign('index', $index++);
+        $xtpl->assign('number', $item['number']);
+        $xtpl->assign('source', $source[$item['source']]);
+        $xtpl->assign('expire', date('d/m/Y', $item['expire']));
+        $xtpl->parse('main.row');
       }
       $xtpl->parse('main');
       $result['status'] = 1;

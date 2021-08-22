@@ -10,15 +10,23 @@ if (!defined('NV_MAINFILE')) { die('Stop!!!'); }
 define('PREFIX', $db_config['prefix'] . '_' . $module_name . '_');
 define('PATH2', NV_ROOTDIR . "/modules/". $module_file ."/template");
 
-function all($db, $sql) {
+function all($sql) {
+  global $db;
   $list = array();
   $query = $db->query($sql);
   while ($row = $query->fetch()) $list []= $row;
   return $list;
 }
 
+function fetch($sql) {
+  global $db;
+
+  $query = $db->query($sql);
+  return $query->fetch();
+}
+
 function cmp($a, $b) {
-  return $a['time'] > $b['time'];
+  return $a['date'] > $b['date'];
 }
 
 function loadModal($name) {
