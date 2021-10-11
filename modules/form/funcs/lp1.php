@@ -111,10 +111,10 @@ if (!empty($action)) {
   function getPrice($name) {
     global $db;
     if (empty($name)) {
-      $sql = 'select * from pet_formt_notires_row where match(name) against("'. $name .'" in boolean mode) limit 1';
+      $sql = 'select * from pet_form_notires_row where match(name) against("'. $name .'" in boolean mode) limit 1';
     }
     else {
-      $sql = 'select * from pet_formt_notires_row where match(name) against(\''. $name .'\' in boolean mode) limit 1';
+      $sql = 'select * from pet_form_notires_row where match(name) against(\''. $name .'\' in boolean mode) limit 1';
     }
     $query = $db->query($sql);
     if ($row = $query->fetch()) {
@@ -125,7 +125,7 @@ if (!empty($action)) {
 
   function getPrice2($name) {
     global $db;
-    $sql = 'select * from pet_formt_notires_cash where code = "'. $name .'" limit 1';
+    $sql = 'select * from pet_form_notires_cash where code = "'. $name .'" limit 1';
     // die($sql);
     $query = $db->query($sql);
     if ($row = $query->fetch()) {
@@ -136,6 +136,25 @@ if (!empty($action)) {
   
 	$result = array("status" => 0);
 	switch ($action) {
+    case 'get-remind':
+      $name = $nv_Request->get_string('name', 'post');
+      $type = $nv_Request->get_string('type', 'post');
+      $key = $nv_Request->get_string('key', 'post');
+
+      $sql = 'select * from `'. PREFIX .'_remindv2` where type = "'. $type .'" and name like "%'. $key .'%" and visible = 1 order by rate desc limit 20';
+      // die($sql);
+      $query = $db->query($sql);
+
+      $html = '';
+      while ($row = $query->fetch()) {
+        $html .= '<div class="suggest_item" onclick="selectRemindv2(\''. $name . '\', \'' . $type . '\', \'' . $row['name'] . '\')">
+          <p class="right-click">'. $row['name'] . '</p>
+          <button class="close right" data-dismiss="modal" onclick="removeRemindv2(\'' . $name . '\', \'' . $type . '\', '. $row['id'] .')">&times;</button></div>';
+      }
+      $result['html'] = $html;
+      $result['status'] = 1;
+    break;
+
     case 'excel':
       $list = $nv_Request->get_array('list', 'post');
 

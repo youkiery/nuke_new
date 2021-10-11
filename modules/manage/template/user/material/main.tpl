@@ -383,7 +383,8 @@
         temp = {
           id: id,
           number: $("#export-number-" + ia).val(),
-          note: $("#export-note-" + ia).val()
+          note: $("#export-note-" + ia).val(),
+          date: $("#export-date-" + ia).val()
         }
         if (temp['number'] == 0) return msg = 'Hãy nhập số lượng`'
         data.push(temp)

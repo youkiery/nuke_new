@@ -930,34 +930,33 @@
     </label>
     <!-- khách hàng, địa chỉ, email, điện thoại, chỉ hộ, nơi lấy mẫu, mục đích, nơi nhận, người phụ trách --> 
     <label style="width: 30%"> <input type="checkbox" class="po" id="index" checked> STT </label>
-    <label style="width: 30%"> <input type="checkbox" class="po" id="xcode" checked> Số ĐKXN </label>
-    <label style="width: 30%"> <input type="checkbox" class="po" id="sender" checked> Tên đơn vị </label>
-    <label style="width: 30%"> <input type="checkbox" class="po" id="receiver" checked> Người lấy mẫu </label>
-    <label style="width: 30%"> <input type="checkbox" class="po" id="samplereceive" checked> Thời gian lấy mẫu </label>
-    <label style="width: 30%"> <input type="checkbox" class="po" id="sampleplace" checked> Nơi lấy mẫu </label>
-    <label style="width: 30%"> <input type="checkbox" class="po" id="number" checked> Số lượng mẫu </label>
-    <label style="width: 30%"> <input type="checkbox" class="po" id="sampletype" checked> Loại mẫu </label>
-    <label style="width: 30%"> <input type="checkbox" class="po" id="senderemploy" checked> Khách hàng </label>
-    <label style="width: 30%"> <input type="checkbox" class="po" id="xaddress" checked> Địa chỉ </label>
-    <label style="width: 30%"> <input type="checkbox" class="po" id="ownermail" checked> Email </label>
-    <label style="width: 30%"> <input type="checkbox" class="po" id="ownerphone" checked> Điện thoại </label>
-    <label style="width: 30%"> <input type="checkbox" class="po" id="owner" checked> Chủ hộ </label>
     <label style="width: 30%"> <input type="checkbox" class="po" id="set" checked> Kết quả xét nghiệm </label>
     <label style="width: 30%"> <input type="checkbox" class="po" id="code"> Số phiếu </label>
+    <label style="width: 30%"> <input type="checkbox" class="po" id="sender"> Tên đơn vị </label>
     <label style="width: 30%"> <input type="checkbox" class="po" id="receive"> Ngày nhận mẫu </label>
     <label style="width: 30%"> <input type="checkbox" class="po" id="resend"> Ngày hẹn trả kết quả </label>
     <label style="width: 30%"> <input type="checkbox" class="po" id="status"> Hình thức nhận </label>
     <label style="width: 30%"> <input type="checkbox" class="po" id="ireceiver"> Người nhận hồ sơ </label>
     <label style="width: 30%"> <input type="checkbox" class="po" id="ireceive"> Ngày nhận hồ sơ </label>
     <label style="width: 30%"> <input type="checkbox" class="po" id="iresend"> Ngay trả hồ sơ </label>
+    <label style="width: 30%"> <input type="checkbox" class="po" id="number"> Số lượng mẫu </label>
+    <label style="width: 30%"> <input type="checkbox" class="po" id="sampletype"> Loại mẫu </label>
     <label style="width: 30%"> <input type="checkbox" class="po" id="sample"> Loài vật lấy mẫu </label>
+    <label style="width: 30%"> <input type="checkbox" class="po" id="xcode"> Số ĐKXN </label>
     <label style="width: 30%"> <input type="checkbox" class="po" id="isenderunit"> Bộ phận giao mẫu </label>
     <label style="width: 30%"> <input type="checkbox" class="po" id="ireceiverunit"> Bộ phận nhận mẫu </label>
     <label style="width: 30%"> <input type="checkbox" class="po" id="examdate"> Ngày phân tích </label>
-    <label style="width: 30%"> <input type="checkbox" class="po" id="xresender"> Người phụ trách bộ phận xét nghiệm
-    </label>
+    <label style="width: 30%"> <input type="checkbox" class="po" id="xresender"> Người phụ trách bộ phận xét nghiệm </label>
     <label style="width: 30%"> <input type="checkbox" class="po" id="xexam"> Bộ phận xét nghiệm </label>
     <label style="width: 30%"> <input type="checkbox" class="po" id="examsample"> Lượng mẫu xét nghiệm </label>
+    <label style="width: 30%"> <input type="checkbox" class="po" id="receiver"> Người lấy mẫu </label>
+    <label style="width: 30%"> <input type="checkbox" class="po" id="samplereceive"> Thời gian lấy mẫu </label>
+    <label style="width: 30%"> <input type="checkbox" class="po" id="senderemploy"> Khách hàng </label>
+    <label style="width: 30%"> <input type="checkbox" class="po" id="xaddress"> Địa chỉ </label>
+    <label style="width: 30%"> <input type="checkbox" class="po" id="ownermail"> Email </label>
+    <label style="width: 30%"> <input type="checkbox" class="po" id="ownerphone"> Điện thoại </label>
+    <label style="width: 30%"> <input type="checkbox" class="po" id="owner"> Chủ hộ </label>
+    <label style="width: 30%"> <input type="checkbox" class="po" id="sampleplace"> Nơi lấy mẫu </label>
     <label style="width: 30%"> <input type="checkbox" class="po" id="target"> Mục đích </label>
     <label style="width: 30%"> <input type="checkbox" class="po" id="receivedis"> Nơi nhận </label>
     <label style="width: 30%"> <input type="checkbox" class="po" id="receiveleader"> Người phụ trách </label>
@@ -1305,7 +1304,6 @@
   var ticked = ['Đạt', 'Không đạt']
   var methodModal = $("#method-modal")
   var formInsert = $('#form-insert')
-  var relation = JSON.parse('{relation}')
   var toggle = 1
   var global_secretary = 0
   var spage = 1
@@ -2480,7 +2478,6 @@
     var min = Math.floor((length - 24) / 30)
     var total = 1 + min + ((length - 24 - min * 30 ) ? 1 : 0)
     var html = `
-    <span style="float: right; width: 100px;"> <i>Trang: 1/`+ total +`</i> </span>
     <p class="text-center" style="clear:both"> <b> Số phiếu kết quả thử nghiệm: `+xcode[0]+`/`+xcode[1]+`/`+xcode[2]+`.CĐXN </b> </p> 
     <table class="table-bordered" border="1">
       <tr>
@@ -2500,10 +2497,10 @@
         // else prv.code = item.code
         html += `
           <tr>
-            <td> `+ item.index +` </td>
-            <td> `+ item.code +` </td>
-            <td> `+ item.method +` </td>
-            <td> `+ item.result +` </td>
+            <td class="text-center"> `+ item.index +` </td>
+            <td class="text-center"> `+ item.code +` </td>
+            <td class="text-center"> `+ item.method +` </td>
+            <td class="text-center"> `+ item.result +` </td>
             <td> `+ item.note +` </td>
           </tr>`
       }      
@@ -2513,7 +2510,6 @@
       html += `
       </table>
       <div class="pagebreak"> </div>
-      <span style="float: right; width: 100px;"> <i>Trang: `+ (page + 1) +`/`+ total +`</i> </span>
       <table class="table-bordered" border="1" style="clear:both">
         <tr>
           <th style="width: 50px"> KHM </th>
@@ -2527,10 +2523,10 @@
       max = 24 + page * 30
       for (let i = 24 + (page - 1) * 30; i < max; i++) {
         if (item = list[i]) {
-          // if (prv.index == item.index) item.index = ''
-          // else prv.index = item.index
-          // if (prv.code == item.code) item.code = ''
-          // else prv.code = item.code
+        // if (prv.index == item.index) item.index = ''
+        // else prv.index = item.index
+        // if (prv.code == item.code) item.code = ''
+        // else prv.code = item.code
           html += `
             <tr>
               <td> `+ item.index +` </td>
@@ -2542,7 +2538,6 @@
         }
       }
       page ++
-      console.log(page * 30 - length);
     }
     
     html += `</table>`
@@ -3886,6 +3881,11 @@
             html = html.replace('(page)', data['page3'])
             html = html.replace(/xexam/g, data['xexam'])
             html = html.replace(/receiveleader/g, data['xresender'])
+            html = html.replace(/xcode-0/g, trim(data['xcode'][0]))
+            html = html.replace(/xcode-1/g, trim(data['xcode'][1]))
+            html = html.replace(/xcode-2/g, trim(data['xcode'][2]))
+            html = html.replace('(page)', trim(data['page']))
+
             html = html.replace('xtable', parseFieldTable2(data['ig'], data.xcode))
             html = html.replace('(vnote)', data['vnote'].replace(/\n/g, '<br>'))
           break;
@@ -3989,7 +3989,7 @@
             }
             var iresend = data['noticetime'].split('/')
             
-            html = html.replace('(receiveleader-signer)', Number(data['signer']) ? '<img src="'+ global['signer'][Number(data['signer'])]['url'] +'">' : '<br><br><br>')
+            html = html.replace('(receiveleader-signer)', Number(data['signer']['receiveleader']) ? '<img src="'+ global['signer'][data['signer']['receiveleader']]['url'] +'">' : '<br><br><br>')
             
             html = html.replace('xcode-0', trim(data['xcode'][0]))
             html = html.replace('xcode-1', trim(data['xcode'][1]))

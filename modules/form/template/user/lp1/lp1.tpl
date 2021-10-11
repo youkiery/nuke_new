@@ -213,6 +213,7 @@
     <div id="secretary"></div>
   </div>
   <!-- END: secretary2 -->
+<script src="/modules/core/js/vhttp.js"></script>
 <script>
   var style = '.table-bordered {border-collapse: collapse;}.table-wider td, .table-wider th {padding: 10px;}table {width: 100%;}table td {padding: 5px;}.no-bordertop {border-top: 1px solid white; }.no-borderleft {border-left: 1px solid white; }.c20, .c25, .c30, .c35, .c40, .c45, .c50, .c80 {display: inline-block;}.c20 {width: 19%;}.c25 {width: 24%;}.c30 {width: 29%;}.c35 {width: 34%;}.c40 {width: 39%;}.c45 {width: 44%;}.c50 {width: 49%;}.c80 {width: 79%;}.p11 {font-size: 11pt}.p12 {font-size: 12pt}.p13 {font-size: 13pt}.p14 {font-size: 14pt}.p15 {font-size: 15pt}.p16 {font-size: 16pt}.text-center, .cell-center {text-align: center;}.cell-center {vertical-align: inherit;} p {margin: 5px 0px;}'
   var profile = ['@page { size: A4 portrait; margin: 20mm 10mm 10mm 25mm; }', '@page { size: A4 landscape; margin: 20mm 10mm 10mm 25mm;}']
@@ -230,7 +231,7 @@
   var sfilterOwner = $("#sfilter-owner")
   var sfilterFrom = $("#sfilter-from")
   var sfilterEnd = $("#sfilter-end")
-  var remindv2 = JSON.parse('{remindv2}')
+  // var remindv2 = JSON.parse('{remindv2}')
   var global = {
     select_data: JSON.parse('{select}'),
     select: false,
@@ -521,16 +522,31 @@
       timeout = setTimeout(() => {
         var key = paintext(input.val())
         var html = ''
-        
-        for (const index in remindv2[type]) {
-          if (remindv2[type].hasOwnProperty(index)) {
-            const element = paintext(remindv2[type][index]['name']);
+
+        vhttp.checkelse('', {
+          action: 'get-remind', 
+          name: name,
+          type: type,
+          key: input.val()
+        }).then(response => {
+          html = response.html
+          check = true
+          suggest.html(html)
+        }, () => {
+          html = 'Không có dữ liệu'
+          check = true
+          suggest.html(html)
+        })
+
+        // for (const index in remindv2[type]) {
+        //   if (remindv2[type].hasOwnProperty(index)) {
+        //     const element = paintext(remindv2[type][index]['name']);
             
-            if (element.search(key) >= 0) {
-              html += '<div class="suggest_item" onclick="selectRemindv2(\'' + name + '\', \'' + type + '\', \'' + remindv2[type][index]['name'] + '\')"><p class="right-click">' + remindv2[type][index]['name'] + '</p><button class="close right" data-dismiss="modal" onclick="removeRemindv2(\'' + name + '\', \'' + type + '\', ' + remindv2[type][index]['id']+')">&times;</button></div>'
-            }
-          }
-        }
+        //     if (element.search(key) >= 0) {
+        //       html += '<div class="suggest_item" onclick="selectRemindv2(\'' + name + '\', \'' + type + '\', \'' + remindv2[type][index]['name'] + '\')"><p class="right-click">' + remindv2[type][index]['name'] + '</p><button class="close right" data-dismiss="modal" onclick="removeRemindv2(\'' + name + '\', \'' + type + '\', ' + remindv2[type][index]['id']+')">&times;</button></div>'
+        //     }
+        //   }
+        // }
         suggest.html(html)
       }, 200);
     })
