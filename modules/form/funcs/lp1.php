@@ -11,6 +11,15 @@ if (!defined('NV_IS_FORM')) {
 	die('Stop!!!');
 }
 
+// $sql = "select * from pet_form_remindv2 where name like '%%'";
+// $query = $db->query($sql);
+
+// while ($row = $query->fetch()) {
+//     $name = str_replace('', '', $row['name']);
+//     $sql = "update pet_form_remindv2 set name = $name where id = $row[id]";
+//     $db->query($sql);
+// }
+
 // cập nhật chủ hộ thư ký
 // $query = $db->query('select * from `'. PREFIX .'_secretary`');
 // while ($row = $query->fetch()) {
@@ -126,7 +135,6 @@ if (!empty($action)) {
   function getPrice2($name) {
     global $db;
     $sql = 'select * from pet_form_notires_cash where code = "'. $name .'" limit 1';
-    // die($sql);
     $query = $db->query($sql);
     if ($row = $query->fetch()) {
       return $row['price'];
@@ -136,6 +144,7 @@ if (!empty($action)) {
   
 	$result = array("status" => 0);
 	switch ($action) {
+	    
     case 'get-remind':
       $name = $nv_Request->get_string('name', 'post');
       $type = $nv_Request->get_string('type', 'post');
@@ -207,6 +216,7 @@ if (!empty($action)) {
           $sql = 'insert into `'. PREFIX .'_notires` (rid, data) values('. $id .', \'' . json_encode($res, JSON_UNESCAPED_UNICODE) . '\')';
         }
         // die($sql);
+        // echo "$sql <br>";
         $db->query($sql);
       }
       $result['status'] = 1;
@@ -215,10 +225,10 @@ if (!empty($action)) {
       $list = $nv_Request->get_array('list', 'post');
 
   		$xtpl = new XTemplate('lp1-print.tpl', PATH2);
-      $sql = 'select * from `'. PREFIX .'_notires` where rid not in ('. implode(', ', $list) .')';
+      $sql = 'select * from `'. PREFIX .'_notires` where rid in ('. implode(', ', $list) .')';
       $query = $db->query($sql);
 
-      if (!empty($query->fetch())) {
+      if (empty($query->fetch())) {
         $result['status'] = 1;
         $result['notify'] = 'Chọn lưu trước khi in';
       }
@@ -229,10 +239,10 @@ if (!empty($action)) {
           $query = $db->query($sql);
           if ($row = $query->fetch()) {
             $ig = json_decode($row['data']);
-            $xtpl->assign('row', count($ig));
+            $xtpl->assign('row', count($ig->{data}));
             $xtpl->assign('index', $index++);
-            // $xtpl->assign('type', 1);
-            $xtpl->assign('datetime', $ig['datetime']);
+            $xtpl->assign('type', 1);
+            $xtpl->assign('datetime', $ig->{datetime});
             $xtpl->parse('main.row.index');
             $xtpl->parse('main.row.datetime');
             foreach ($ig->{data} as $val) {
@@ -246,6 +256,7 @@ if (!empty($action)) {
           }
         }
       }
+
       $xtpl->parse('main');
       $result['status'] = 1;
       $result['html'] = $xtpl->text();
@@ -824,7 +835,7 @@ $xtpl->assign('summaryend', date('d/m/Y', $end));
 $xtpl->assign('today', date('d/m/Y', time()));
 $xtpl->assign("method", json_encode($method));
 $xtpl->assign("remind", json_encode(getRemind()));
-$xtpl->assign("remindv2", json_encode(getRemindv2()));
+$xtpl->assign("remindv2", json_encode(getRemindv2(), JSON_HEX_QUOT));
 $xtpl->assign("relation", json_encode(getRelation()));
 $xtpl->assign("signer", json_encode(getSigner()));
 $xtpl->assign("default", json_encode($defaultData));
@@ -832,6 +843,6 @@ $xtpl->parse("main");
 $contents = $xtpl->text();
 include ( NV_ROOTDIR . "/includes/header.php" );
 echo nv_site_theme($contents);
-die("a");
+die("");
 include ( NV_ROOTDIR . "/includes/footer.php" );
 

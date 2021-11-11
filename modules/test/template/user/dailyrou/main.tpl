@@ -6,11 +6,14 @@
 <div class="msgshow" id="msgshow"></div>
 
 <style>
-  .red, .green, .white, .yellow, .orange, .purple, .blue {
+  .red, .green, .white, .yellow, .orange, .purple, .blue, .gray {
     border: 1px solid #fff;
   }
   .purple {
     background: purple;
+  }
+  .gray {
+    background: #aaa;
   }
 </style>
 
@@ -114,7 +117,7 @@
 
   var admin = {admin}
   var regist = false
-  var color = ["white", "green", "red", "orange"]
+  var color = ["white", "green", "red", "orange", "gray"]
   var panis = []
   var exDate = -1
   var exType = -1
@@ -378,19 +381,24 @@
   function registOn() {
     var table = content[0].children[0].children[1].children
     var i = 0
+    var date = $('#start-date').val().split('/')
+    var time = new Date(date[2], Number(date[1]) - 1, date[0]).getTime()
+    var cdate = new Date(today).getDay()
+    if (!cdate) cdate = 7
+    var lim = today + (8 - cdate) * 60 * 60 * 24 * 1000 - 1
     for (const rowKey in table) {
       if (table.hasOwnProperty(rowKey)) {
         const row = table[rowKey];
         var moi = [0, 0, 1, 1, 1, 1]
+        if (time < lim && !admin) var moi = [0, 0, 4, 4, 1, 1]
         while (i < schedule && (row.children[0].innerText == dbdata[i]["date"])) {
           var thisIndex = Number(dbdata[i]["type"]) + 2
-          // var color = ["white", "green", "red", "orange"]
           
           if (row.children[thisIndex].innerText.search(username) >= 0) {
-            moi[thisIndex] = 3
+            if (moi[thisIndex] !== 4) moi[thisIndex] = 3
           }
           else {
-            moi[thisIndex] = 2
+            if (moi[thisIndex] !== 4) moi[thisIndex] = 2
           }
           i ++
         }
